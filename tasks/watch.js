@@ -34,7 +34,7 @@ module.exports = function(options) {
   }).on('all', function(event) {
     // this tasks will run only if the current event matches the ones in the watchEvents array
     runOnlyOn(event)
-      .then(eslint)
+      // .then(eslint)
       .then(build)
       .catch(e => utils.print(e, 'error'))
   })
