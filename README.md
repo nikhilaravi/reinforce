@@ -1,3 +1,5 @@
+https://github.com/GianlucaGuarini/es6-project-starter-kit
+
 Universal Starter Kit to build any javascript ES6 project/library runnable in nodejs and on any browser
 ====================
 
