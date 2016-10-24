@@ -26,9 +26,9 @@ module.exports = function(options) {
           jsnext: true,
           main: true
         }),
-        commonjs({ 
-          include: './node_modules/**' 
-        })
+        // commonjs({ 
+        //   include: './node_modules/**' 
+        // })
       ]
     }).then( function ( bundle ) {
       // convert to valid es5 code with babel
