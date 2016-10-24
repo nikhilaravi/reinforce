@@ -17,7 +17,6 @@ module.exports = function(options) {
       plugins: [
         babel({
           exclude: './node_modules/**',
-          presets: 'es2015-rollup'
         }),
         nodeResolve({
           jsnext: true,
@@ -28,7 +27,7 @@ module.exports = function(options) {
         // })
       ]
     }).then( function ( bundle ) {
-      var result = bundle.generate({ format: 'cjs' }).code
+      var result = bundle.generate({ format: 'iife' }).code
 
       mkdirp('./dist', function() {
         try {
