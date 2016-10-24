@@ -5,6 +5,7 @@
   "main": "index.js",
   "jsnext:main": "src/index.js",
   "scripts": {
+    "start": "node make serve & node make watch",
     "test": "node make test",
     "serve": "node make serve",
     "eslint": "node make eslint",
@@ -42,18 +43,25 @@
     "karma-phantomjs-launcher": "^1.0.2",
     "karma-sauce-launcher": "^1.0.0",
     "mkdirp": "^0.5.1",
+    "mocha": "^3.0.2",
+    "phantomjs-prebuilt": "^2.1.12",
     "rollup": "^0.36.2",
+    "rollup-plugin-commonjs": "^5.0.5",
+    "rollup-plugin-node-resolve": "^2.0.0",
     "serve": "^1.4.0",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
-    "uglify-js": "^2.7.3",
-    "mocha": "^3.0.2",
-    "phantomjs-prebuilt": "^2.1.12"
+    "uglify-js": "^2.7.3"
   },
   "author": "Gianluca Guarini (http://gianlucaguarini.com/)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/GianlucaGuarini/es6-project-starter-kit/issues"
   },
-  "homepage": "https://github.com/GianlucaGuarini/es6-project-starter-kit"
+  "homepage": "https://github.com/GianlucaGuarini/es6-project-starter-kit",
+  "dependencies": {
+    "d3-scale": "^1.0.3",
+    "d3-selection": "^1.0.2",
+    "underscore": "^1.8.3"
+  }
 }

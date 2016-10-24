@@ -1,4 +1,6 @@
 var utils = require('./_utils'),
+  nodeResolve = require('rollup-plugin-node-resolve'),
+  commonjs = require('rollup-plugin-commonjs'),
   rollup = require( 'rollup' ),
   mkdirp = require('mkdirp'),
   fs = require('fs'),
@@ -14,14 +16,21 @@ module.exports = function(options) {
    */
 
   return new Promise(function(resolve, reject) {
-
     rollup.rollup({
       // The bundle's starting point. This file will be
       // included, along with the minimum necessary code
       // from its dependencies
-      entry: './src/index.js'
+      entry: './src/index.js',
+      plugins: [
+        nodeResolve({
+          jsnext: true,
+          main: true
+        }),
+        commonjs({ 
+          include: './node_modules/**' 
+        })
+      ]
     }).then( function ( bundle ) {
-
       // convert to valid es5 code with babel
       var result = babel.transform(
         // create a single bundle file

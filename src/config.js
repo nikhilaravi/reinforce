@@ -1,0 +1,1 @@
+export const beliefs = ["conservative", "liberal", "green"]
