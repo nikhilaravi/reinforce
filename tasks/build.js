@@ -15,12 +15,13 @@ module.exports = function(options) {
     rollup.rollup({
       entry: './src/index.js',
       plugins: [
+        babel({
+          exclude: './node_modules/**',
+          presets: 'es2015-rollup'
+        }),
         nodeResolve({
           jsnext: true,
           main: true
-        }),
-        babel({
-          exclude: 'node_modules/**'
         })
         // commonjs({ 
         //   include: './node_modules/**' 
