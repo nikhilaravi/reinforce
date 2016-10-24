@@ -36,6 +36,16 @@ let node, link,
 const svg = select("svg").attr("width", width)
   .attr("height", height)
 
+const ticked = () => {
+  link.attr("x1", d => d.source.x)
+    .attr("y1", d => d.source.y)
+    .attr("x2", d => d.target.x)
+    .attr("y2", d => d.target.y)
+
+  node.attr("transform", d =>
+    `translate(${d.x},${d.y})`)
+}
+
 const simulation = forceSimulation()
   .force("link", forceLink().id(d => d.id))
   .force("charge", forceManyBody())
@@ -67,16 +77,6 @@ const click = d => {
   links.push({ source: d, target })
   index++
   update()
-}
-
-const ticked = () => {
-  link.attr("x1", d => d.source.x)
-    .attr("y1", d => d.source.y)
-    .attr("x2", d => d.target.x)
-    .attr("y2", d => d.target.y)
-
-  node.attr("transform", d =>
-    `translate(${d.x},${d.y})`)
 }
 
 const drag = d3drag().on("start", dragStarted)
