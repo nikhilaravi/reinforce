@@ -46,6 +46,7 @@
     "mocha": "^3.0.2",
     "phantomjs-prebuilt": "^2.1.12",
     "rollup": "^0.36.2",
+    "rollup-plugin-babel": "^2.6.1",
     "rollup-plugin-commonjs": "^5.0.5",
     "rollup-plugin-node-resolve": "^2.0.0",
     "serve": "^1.4.0",
