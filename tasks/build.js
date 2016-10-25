@@ -4,7 +4,8 @@ var utils = require('./_utils'),
   rollup = require( 'rollup' ),
   mkdirp = require('mkdirp'),
   fs = require('fs'),
-  babel = require('rollup-plugin-babel')
+  babel = require('rollup-plugin-babel'),
+  sass = require('rollup-plugin-scss')
 
 module.exports = function(options) {
   /**
@@ -15,6 +16,9 @@ module.exports = function(options) {
     rollup.rollup({
       entry: './src/index.js',
       plugins: [
+        sass({
+          output: true
+        }),
         babel({
           exclude: './node_modules/**',
         }),

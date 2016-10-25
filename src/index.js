@@ -5,6 +5,8 @@ import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force
 import { select, selectAll, event } from 'd3-selection'
 import { drag as d3drag } from 'd3-drag'
 
+import "../main.scss"
+
 const nodes = [
   {"id": 1, "name": "1"},
   {"id": 2, "name": "2"},
