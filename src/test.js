@@ -4,9 +4,9 @@
 
 every second, nodes choose to send either political or neutral messages
 
-nodes’ activation functions are such that they change orientation if they hear 2 messages of a certain orientation in a row
-
 nodes retweet things they hear that they agree with (BEWARE infinite loop in implementing - don’t retweet something that you already tweeted (messages need a root id), only one tweet per user per “cycle” (one loop, which is roughly one second))
+
+nodes’ activation functions are such that they change orientation if they hear 2 messages of a certain orientation in a row
 
 nodes follow users who tweeted the thing that got them to change their minds*/
 

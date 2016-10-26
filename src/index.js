@@ -5,6 +5,7 @@ import { scaleOrdinal, schemeCategory10 } from 'd3-scale'
 import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force'
 import { select, selectAll, event } from 'd3-selection'
 import { drag as d3drag } from 'd3-drag'
+import { range } from 'd3-array'
 import env from './test'
 import nodeGenerator from './node'
 
@@ -17,16 +18,29 @@ const nodes = users.map((username, i) =>
     username
   }))
 
-const links = [
-  {source: 1, target: 2},
-  {source: 1, target: 3},
-  {source: 1, target: 4},
-  {source: 2, target: 5},
-  {source: 2, target: 6},
-  {source: 3, target: 7},
-  {source: 5, target: 8},
-  {source: 6, target: 9},
-]
+// let's say everyone starts out with between 1 and 5 connections
+
+const randIndexGenerator = (exclude, length) => {
+  const used = []
+  return function() {
+    let next = 1 + Math.floor(Math.random() * length)
+    while(used.find(d => d === next)) {
+      next = Math.floor(Math.random() * length)
+    }
+    used.push(next)
+    return next
+  }
+}
+
+const links = nodes.map((d) => {
+  const createIndex = randIndexGenerator(d.id, nodes.length)
+  return range(1 + Math.round(Math.random() * 5)).map(() => {
+    return {
+      source: d.id,
+      target: createIndex()
+    }
+  })
+}).reduce(helpers.flatten)
 
 let node, link,
   width = 960,
