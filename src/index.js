@@ -1,23 +1,21 @@
 import helpers from './helpers/helpers'
 import { beliefs } from './config'
+import { users } from './fixedData'
 import { scaleOrdinal, schemeCategory10 } from 'd3-scale'
 import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force'
 import { select, selectAll, event } from 'd3-selection'
 import { drag as d3drag } from 'd3-drag'
+import env from './test'
+import nodeGenerator from './node'
 
 import "../main.scss"
 
-const nodes = [
-  {"id": 1, "name": "1"},
-  {"id": 2, "name": "2"},
-  {"id": 3, "name": "3"},
-  {"id": 4, "name": "4"},
-  {"id": 5, "name": "5"},
-  {"id": 6, "name": "6"},
-  {"id": 7, "name": "7"},
-  {"id": 8, "name": "8"},
-  {"id": 9, "name": "9"}
-]
+const nodes = users.map((username, i) =>
+  nodeGenerator({
+    beliefs: beliefs[Math.random() * (beliefs.length - 1)],
+    id: (i + 1),
+    username
+  }))
 
 const links = [
   {source: 1, target: 2},
@@ -31,7 +29,6 @@ const links = [
 ]
 
 let node, link,
-  index = 10,
   width = 960,
   height = 600
 
@@ -74,10 +71,10 @@ const dragEnded = d => {
 }
 
 const click = d => {
-  const target = { id: index, name: index }
-  nodes.push(target)
-  links.push({ source: d, target })
-  index++
+  // links.push({ 
+  //   source: d, 
+  //   target:  
+  // })
   update()
 }
 
@@ -94,7 +91,7 @@ const update = () => {
   link = linkEnter.merge(link)
 
   node = svg.selectAll(".node")
-    .data(nodes, d => d.id)
+    .data(nodes, (d, i) => i)
 
   const nodeEnter = node.enter().append("g")
     .attr("class", "node")
@@ -108,7 +105,7 @@ const update = () => {
 
   nodeEnter.append("text")
     .attr("dy", 3)
-    .text(d => d.name)
+    .text(d => d.username)
 
   node = nodeEnter.merge(node)
 
