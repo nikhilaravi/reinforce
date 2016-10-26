@@ -70,14 +70,6 @@ const dragEnded = d => {
   d.fy = undefined
 }
 
-const click = d => {
-  // links.push({ 
-  //   source: d, 
-  //   target:  
-  // })
-  update()
-}
-
 const drag = d3drag().on("start", dragStarted)
   .on("drag", dragged)
   .on("end", dragEnded)
@@ -95,7 +87,6 @@ const update = () => {
 
   const nodeEnter = node.enter().append("g")
     .attr("class", "node")
-    .on("click", click)
     .call(drag)
 
   nodeEnter.append("circle").attr("r", 2.5)
