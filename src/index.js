@@ -21,11 +21,11 @@ const nodes = users.map((username, i) =>
 // let's say everyone starts out with between 1 and 5 connections
 
 const randIndexGenerator = (exclude, length) => {
-  const used = [exclude]
-  return function() {
+  const used = [ exclude ]
+  return function() { // index pushed up by 1
     let next = 1 + Math.floor(Math.random() * length)
     while(used.find(d => d === next)) {
-      next = Math.floor(Math.random() * length)
+      next = 1 + Math.floor(Math.random() * length)
     }
     used.push(next)
     return next
