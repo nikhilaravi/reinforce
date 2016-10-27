@@ -8,17 +8,14 @@ import { drag as d3drag } from 'd3-drag'
 import { range } from 'd3-array'
 import env from './test'
 import Node from './node'
-
+import messageState from './messageState'
 import "../main.scss"
 
 const nodes = users.map((username, i) =>
   new Node({
     belief: beliefs[Math.round(Math.random() * (beliefs.length - 1))],
     id: (i + 1),
-    username
-  }))
-
-// let's say everyone starts out with between 1 and 5 connections
+    username }))
 
 const randIndexGenerator = (exclude, length) => {
   const used = [ exclude ]
@@ -32,6 +29,7 @@ const randIndexGenerator = (exclude, length) => {
   }
 }
 
+// let's say everyone starts out with between 1 and 5 connections
 const links = nodes.map(d => {
   const createIndex = randIndexGenerator(d.id, nodes.length)
   return range(1 + Math.round(Math.random() * 5)).map(() => ({
@@ -40,9 +38,13 @@ const links = nodes.map(d => {
   }))
 }).reduce(helpers.flatten)
 
-let node, link,
-  width = 960,
-  height = 600
+links.forEach(l => {
+  const source = nodes.find(n => n.id === l.source)
+  const target = nodes.find(n => n.id === l.target)
+  source.following = source.following.concat(target.id)
+})
+
+let node, link, width = window.innerWidth, height = 600
 
 const svg = select("svg").attr("width", width)
   .attr("height", height)
@@ -53,8 +55,7 @@ const ticked = () => {
     .attr("x2", d => d.target.x)
     .attr("y2", d => d.target.y)
 
-  node.attr("transform", d =>
-    `translate(${d.x},${d.y})`)
+  node.attr("transform", d => `translate(${d.x},${d.y})`)
 }
 
 const simulation = forceSimulation()
@@ -126,6 +127,8 @@ const update = () => {
 update()
 
 nodes.forEach(n => n.init())
+
+messageState.init()
 
 
 
