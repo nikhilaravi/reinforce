@@ -34,7 +34,10 @@ export default class Node {
 			message = ""
 		}
 		
-		return message		
+		return {
+			message,
+			user: this.id
+		}		
 	}
 
 	init() {

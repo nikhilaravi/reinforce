@@ -19,13 +19,14 @@ let SID = null, current = []
 
 export default {
 	init() {
-		helpers.bindAll(this, [ "collectMessages", "cycle" ])
+		helpers.bindAll(this, [ "collectMessages", "emitMessages", "cycle" ])
 
 		SID = setInterval(this.cycle, 2000)
 	},
 
 	cycle() {
 		this.collectMessages()
+		this.emitMessages()
 
 		current.forEach(d => console.log(d))
 
@@ -37,6 +38,11 @@ export default {
 	},
 
 	collectMessages() {
-		nodes.forEach(n => current.push(n.getMessage()))
+		nodes.forEach(n => current.push(Object.assign(
+			n.getMessage(), { id: uuid.v4() })))
+	},
+
+	emitMessages() {
+		// nodes.forEach(n => )
 	}
 }
