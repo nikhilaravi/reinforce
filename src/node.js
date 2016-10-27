@@ -8,7 +8,7 @@ export default class Node {
 		this.belief = opts.belief
 
 		this._following = []
-		this.lastCycle = []
+		this.memory = [[]]
 
 		const env = {
 			getNumStates: () => 1,
@@ -29,22 +29,35 @@ export default class Node {
 	}
 
 	getMessage() {
-		let message = this.belief
-		if(Math.random() < 0.5) {
-			message = ""
+		let orientation = "", retweetID = null
+
+		// this first randomness will be the part that we learn
+		if(Math.random() < 0.5) { 
+			orientation = this.belief 
+			if(Math.random() < 0.5) {
+				const matchingMessages = this.memory.reduce(helpers.flatten)
+					.filter(msg => msg.orientation === this.belief)
+
+				if(matchingMessages.length) {
+					retweetID = matchingMessages[Math.round(Math.random() * (matchingMessages.length - 1))].id
+				}
+			}
 		}
 		
 		return {
-			message,
+			orientation,
+			retweetID,
 			user: this.id
-		}		
+		}	
 	}
 
 	sendMessages(messages) {
-		messages.filter(msg =>
-			this._following.includes(msg.user)).forEach(msg => {
-			console.log(msg)
-		})
+		if(this.memory.length > 3) {
+			this.memory.shift()
+		}
+
+		this.memory.push(messages.filter(msg =>
+			this._following.includes(msg.user)))
 	}
 
 	init() {
