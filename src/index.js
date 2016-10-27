@@ -121,7 +121,7 @@ const update = () => {
 
 update()
 
-
+nodes.forEach(n => n.init())
 
 
 
