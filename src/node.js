@@ -1,4 +1,4 @@
-class Node {
+export default class Node {
 	constructor(opts) {
 		this.id = opts.id
 		this.username = opts.username
@@ -8,5 +8,3 @@ class Node {
 		console.log(this.username)
 	}
 }
-
-export default Node
