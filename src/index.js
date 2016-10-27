@@ -94,7 +94,7 @@ const drag = d3drag().on("start", dragStarted)
   .on("end", dragEnded)
 
 const update = () => {
-  link = svg.selectAll(".link").data(links, d => d.target.id)
+  link = svg.selectAll(".link").data(links) // removed key function...
 
   const linkEnter = link.enter().append("line")
     .attr("class", "link")
