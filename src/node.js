@@ -40,9 +40,16 @@ export default class Node {
 		}		
 	}
 
+	sendMessages(messages) {
+		messages.filter(msg =>
+			this._following.includes(msg.user)).forEach(msg => {
+			console.log(msg)
+		})
+	}
+
 	init() {
 		messageState.subscribe(this)
 
-		helpers.bindAll(this, [ "getMessage" ])
+		helpers.bindAll(this, [ "getMessage", "sendMessages" ])
 	}
 }

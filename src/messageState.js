@@ -10,7 +10,7 @@ let SID = null, current = []
 
 // then it sends these messages out 
 
-// each node subscribes to the message state, passing it an array of ids it is following
+// each node subscribes to the message state
 
 // when a node hears a message from a user it's following, it records it (nodes record 3 cycles deep)
 
@@ -21,14 +21,14 @@ export default {
 	init() {
 		helpers.bindAll(this, [ "collectMessages", "emitMessages", "cycle" ])
 
-		SID = setInterval(this.cycle, 2000)
+		this.cycle()
+
+		SID = setInterval(this.cycle, 5000)
 	},
 
 	cycle() {
 		this.collectMessages()
 		this.emitMessages()
-
-		current.forEach(d => console.log(d))
 
 		current = []
 	},
@@ -43,6 +43,6 @@ export default {
 	},
 
 	emitMessages() {
-		// nodes.forEach(n => )
+		nodes.forEach(n => n.sendMessages(current))
 	}
 }
