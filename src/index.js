@@ -7,12 +7,12 @@ import { select, selectAll, event } from 'd3-selection'
 import { drag as d3drag } from 'd3-drag'
 import { range } from 'd3-array'
 import env from './test'
-import nodeGenerator from './node'
+import NodeGenerator from './node'
 
 import "../main.scss"
 
 const nodes = users.map((username, i) =>
-  nodeGenerator({
+  new NodeGenerator({
     beliefs: beliefs[Math.random() * (beliefs.length - 1)],
     id: (i + 1),
     username
@@ -33,10 +33,10 @@ const randIndexGenerator = (exclude, length) => {
 }
 
 const links = nodes.map((d) => {
-  const createIndex = randIndexGenerator(d.id(), nodes.length)
+  const createIndex = randIndexGenerator(d.id, nodes.length)
   return range(1 + Math.round(Math.random() * 5)).map(() => {
     return {
-      source: d.id(),
+      source: d.id,
       target: createIndex()
     }
   })
@@ -60,7 +60,7 @@ const ticked = () => {
 }
 
 const simulation = forceSimulation()
-  .force("link", forceLink().id(d => d.id()))
+  .force("link", forceLink().id(d => d.id))
   .force("charge", forceManyBody())
   .force("center", forceCenter(width / 2, height / 2))
   .on("tick", ticked)
@@ -84,6 +84,11 @@ const dragEnded = d => {
   d.fy = undefined
 }
 
+const click = d => {
+  links.push({ source: d, target: nodes[10] })
+  update()
+}
+
 const drag = d3drag().on("start", dragStarted)
   .on("drag", dragged)
   .on("end", dragEnded)
@@ -101,16 +106,17 @@ const update = () => {
 
   const nodeEnter = node.enter().append("g")
     .attr("class", "node")
+    .on("click", click)
     .call(drag)
 
   nodeEnter.append("circle").attr("r", 2.5)
 
   nodeEnter.append("title")
-    .text(d => d.id())
+    .text(d => d.id)
 
   nodeEnter.append("text")
     .attr("dy", 3)
-    .text(d => d.username())
+    .text(d => d.username)
 
   node = nodeEnter.merge(node)
 

@@ -1,27 +1,12 @@
-export default opts => {
-	let SID = null
-
-	const config = Object.assign({}, opts)
-
-	const node = () => {
-
+class Node {
+	constructor(opts) {
+		this.id = opts.id
+		this.username = opts.username
 	}
 
-	node.speak = () => {
-		// console.log(config.username)
+	init() {
+		console.log(this.username)
 	}
-
-	node.init = () => {
-		SID = setInterval(node.speak, 1000)
-	}
-
-	Object.keys(config).forEach(k => {
-		node[k] = arg => {
-			if(!arguments.length) { return config[k] }
-			config[k] = arg
-			return node
-		}
-	})
-
-	return node
 }
+
+export default Node
