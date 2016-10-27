@@ -21,7 +21,7 @@ const nodes = users.map((username, i) =>
 // let's say everyone starts out with between 1 and 5 connections
 
 const randIndexGenerator = (exclude, length) => {
-  const used = []
+  const used = [exclude]
   return function() {
     let next = 1 + Math.floor(Math.random() * length)
     while(used.find(d => d === next)) {
@@ -33,10 +33,10 @@ const randIndexGenerator = (exclude, length) => {
 }
 
 const links = nodes.map((d) => {
-  const createIndex = randIndexGenerator(d.id, nodes.length)
+  const createIndex = randIndexGenerator(d.id(), nodes.length)
   return range(1 + Math.round(Math.random() * 5)).map(() => {
     return {
-      source: d.id,
+      source: d.id(),
       target: createIndex()
     }
   })
@@ -60,7 +60,7 @@ const ticked = () => {
 }
 
 const simulation = forceSimulation()
-  .force("link", forceLink().id(d => d.id))
+  .force("link", forceLink().id(d => d.id()))
   .force("charge", forceManyBody())
   .force("center", forceCenter(width / 2, height / 2))
   .on("tick", ticked)
@@ -106,11 +106,11 @@ const update = () => {
   nodeEnter.append("circle").attr("r", 2.5)
 
   nodeEnter.append("title")
-    .text(d => d.id)
+    .text(d => d.id())
 
   nodeEnter.append("text")
     .attr("dy", 3)
-    .text(d => d.username)
+    .text(d => d.username())
 
   node = nodeEnter.merge(node)
 
