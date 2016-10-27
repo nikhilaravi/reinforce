@@ -7,6 +7,7 @@ export default {
   trim: function(string) {
     return string.replace(/^\s+|\s+$/gm, '')
   },
+
   flatten: function(acc, curr) {
   	if(!acc) { return [curr] }
   	if(curr.length) {
@@ -15,5 +16,11 @@ export default {
 	  	acc.push(curr)
   	}
   	return acc
+  },
+  
+  bindAll(ctx, fns) {
+  	fns.forEach(d => {
+  		ctx[d] = ctx[d].bind(ctx)
+  	})
   }
 }

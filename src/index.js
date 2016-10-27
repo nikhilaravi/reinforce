@@ -7,13 +7,13 @@ import { select, selectAll, event } from 'd3-selection'
 import { drag as d3drag } from 'd3-drag'
 import { range } from 'd3-array'
 import env from './test'
-import NodeGenerator from './node'
+import Node from './node'
 
 import "../main.scss"
 
 const nodes = users.map((username, i) =>
-  new NodeGenerator({
-    beliefs: beliefs[Math.random() * (beliefs.length - 1)],
+  new Node({
+    belief: beliefs[Math.round(Math.random() * (beliefs.length - 1))],
     id: (i + 1),
     username
   }))
@@ -32,14 +32,12 @@ const randIndexGenerator = (exclude, length) => {
   }
 }
 
-const links = nodes.map((d) => {
+const links = nodes.map(d => {
   const createIndex = randIndexGenerator(d.id, nodes.length)
-  return range(1 + Math.round(Math.random() * 5)).map(() => {
-    return {
-      source: d.id,
-      target: createIndex()
-    }
-  })
+  return range(1 + Math.round(Math.random() * 5)).map(() => ({
+    source: d.id,
+    target: createIndex()
+  }))
 }).reduce(helpers.flatten)
 
 let node, link,
