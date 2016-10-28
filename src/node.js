@@ -30,16 +30,30 @@ export default class Node {
 
 	getMessage() {
 		let orientation = "", retweetID = null
+		const totalMemory = this.memory.reduce(helpers.flatten)
+
+		const byBeliefs = totalMemory.filter(msg => msg.orientation !== this.belief)
+			.reduce((acc, curr) => {
+				if(!acc[curr.orientation]) { acc[curr.orientation] = [] }
+				acc[curr.orientation].push(curr)
+				return acc
+			}, {})
+
+		// const strongCounterOrientation = values(byBeliefs).find(d => d.length > 3)
+
+		// if(strongCounterOrientation) {
+		// 	this.belief = strongCounterOrientation[0].orientation
+		// }
 
 		// this first randomness will be the part that we learn
 		if(Math.random() < 0.5) { 
 			orientation = this.belief 
 			if(Math.random() < 0.5) {
-				const matchingMessages = this.memory.reduce(helpers.flatten)
+				const matchingMessages = totalMemory
 					.filter(msg => msg.orientation === this.belief)
 
 				if(matchingMessages.length) {
-					retweetID = matchingMessages[Math.round(Math.random() * (matchingMessages.length - 1))].id
+					retweetID = helpers.sampleArray(matchingMessages).id
 				}
 			}
 		}

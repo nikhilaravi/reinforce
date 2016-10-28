@@ -17,6 +17,11 @@ let SID = null, current = []
 // on the next cycle, nodes can retweet out something they agree with from the previous cycle
 // unless they were the originator
 
+// what goes into state?
+// how well their messages performed. 
+// what everyone else has been saying (up to 3 cycles deep)
+// maybe for now return random numbers for state
+
 export default {
 	init() {
 		helpers.bindAll(this, [ "collectMessages", "emitMessages", "cycle" ])

@@ -8,6 +8,10 @@ export default {
     return string.replace(/^\s+|\s+$/gm, '')
   },
 
+  sampleArray: function(arr) {
+  	return arr[Math.round(Math.random() * (arr.length - 1))]
+  },
+
   flatten: function(acc, curr) {
   	if(!acc) { return [curr] }
   	if(curr.length) {
@@ -17,7 +21,7 @@ export default {
   	}
   	return acc
   },
-  
+
   bindAll(ctx, fns) {
   	fns.forEach(d => {
   		ctx[d] = ctx[d].bind(ctx)
