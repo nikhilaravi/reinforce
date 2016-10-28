@@ -78,10 +78,11 @@ export default class Node {
 			this.belief = strongCounterOrientation[0].orientation
 
 			// now follow someone randomly from the strong counter orientation group
-			this._following.push(sampleArray(nodes
-				.filter(n => 
-					n.belief === this.belief &&
-					!this._following.includes(n.id))).id)
+			const availableFollowees = nodes.filter(n =>
+				n.belief === this.belief && !this._following.includes(n.id))
+			if(availableFollowees.length) {
+				this._following.push(sampleArray(availableFollowees).id)
+			}
 		}
 
 		// unfollow anyone who has been political for the last 3 rounds
