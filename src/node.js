@@ -1,6 +1,9 @@
 import helpers from './helpers/helpers'
+const { flatten, sampleArray, createDictByProp, bindAll } = helpers
 import messageState from './messageState'
 import { values } from 'underscore'
+
+const cyclesInMemory = 3
 
 export default class Node {
 	constructor(opts) {
@@ -31,19 +34,36 @@ export default class Node {
 
 	getMessage() {
 		let orientation = "", retweetID = null
-		const totalMemory = this.memory.reduce(helpers.flatten)
+		const totalMemory = this.memory.reduce(flatten)
 
-		const byBeliefs = totalMemory.filter(msg => msg.orientation !== this.belief)
-			.reduce((acc, curr) => {
-				if(!acc[curr.orientation]) { acc[curr.orientation] = [] }
-				acc[curr.orientation].push(curr)
-				return acc
-			}, {})
+		const byBeliefs = createDictByProp(
+			totalMemory.filter(msg => 
+				msg.orientation !== this.belief && !!msg.orientation), 'orientation')
 
 		const strongCounterOrientation = values(byBeliefs).find(d => d.length > 3)
 
 		if(strongCounterOrientation) {
+			// change your belief to match the strong counter orientation
 			this.belief = strongCounterOrientation[0].orientation
+
+			// now follow someone randomly from the strong counter orientation group
+			const newCounterUsers = strongCounterOrientation.map(d => d.user).filter(d => !this._following.includes(d))
+			if(newCounterUsers.length) {
+				this._following.push(sampleArray(newCounterUsers))
+			}
+		}
+
+		// unfollow anyone who has been political for the last 3 rounds
+		if(values(byBeliefs).length) {
+			const messagesByUser = createDictByProp(values(byBeliefs).reduce(flatten), 'user')
+			const overpoliticalUsers = Object.keys(messagesByUser).filter(k =>
+				messagesByUser[k].length === cyclesInMemory)
+
+			if(overpoliticalUsers.length) {
+				this._following.splice(
+					this._following.findIndex(d => 
+						d === sampleArray(overpoliticalUsers)), 1)
+			}
 		}
 
 		// this first randomness will be the part that we learn
@@ -54,7 +74,7 @@ export default class Node {
 					.filter(msg => msg.orientation === this.belief)
 
 				if(matchingMessages.length) {
-					retweetID = helpers.sampleArray(matchingMessages).id
+					retweetID = sampleArray(matchingMessages).id
 				}
 			}
 		}
@@ -67,7 +87,7 @@ export default class Node {
 	}
 
 	sendMessages(messages) {
-		if(this.memory.length > 3) {
+		if(this.memory.length > cyclesInMemory) {
 			this.memory.shift()
 		}
 
@@ -78,6 +98,6 @@ export default class Node {
 	init() {
 		messageState.subscribe(this)
 
-		helpers.bindAll(this, [ "getMessage", "sendMessages" ])
+		bindAll(this, [ "getMessage", "sendMessages" ])
 	}
 }

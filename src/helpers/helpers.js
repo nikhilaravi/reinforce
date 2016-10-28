@@ -22,6 +22,14 @@ export default {
   	return acc
   },
 
+  createDictByProp: function(arr, prop) {
+  	return arr.reduce((acc, curr) => {
+  		if(!acc[curr[prop]]) { acc[curr[prop]] = []}
+  		acc[curr[prop]].push(curr)
+  		return acc
+  	}, {})
+  },
+
   bindAll(ctx, fns) {
   	fns.forEach(d => {
   		ctx[d] = ctx[d].bind(ctx)
