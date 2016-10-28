@@ -1,28 +1,13 @@
-var W = 600, H = 600;
-var d3line = null;
-var d3agent = null;
-var d3target = null;
-var d3target2 = null;
-var d3target2_radius = null;
+var W = 600, H = 600,
+  d3line = null,
+  d3agent = null,
+  d3target = null,
+  d3target2 = null,
+  d3target2_radius = null,
+  action, state;
+
 var initDraw = function() {
-  var d3elt = d3.select('#draw');
-  d3elt.html('');
-
-  var w = 600;
-  var h = 600;
-  svg = d3elt.append('svg').attr('width', w).attr('height', h)
-    .append('g').attr('transform', 'scale(1)');
-
-  // define a marker for drawing arrowheads
-  svg.append("defs").append("marker")
-    .attr("id", "arrowhead")
-    .attr("refX", 3)
-    .attr("refY", 2)
-    .attr("markerWidth", 3)
-    .attr("markerHeight", 4)
-    .attr("orient", "auto")
-    .append("path")
-      .attr("d", "M 0,0 V 4 L3,2 Z");
+  svg = d3.select("#draw svg g");
 
   // draw the puck
   d3agent = svg.append('circle')
@@ -105,35 +90,28 @@ var updateDraw = function(a, s, r) {
 }
 
 var PuckWorld = function() { 
-  this.reset();
-}
-PuckWorld.prototype = {
-  reset: function() {
-    this.ppx = Math.random(); // puck x,y
-    this.ppy = Math.random();
-    this.pvx = Math.random()*0.05 -0.025; // velocity
-    this.pvy = Math.random()*0.05 -0.025;
-    this.tx = Math.random(); // target
-    this.ty = Math.random();
-    this.tx2 = Math.random(); // target
-    this.ty2 = Math.random(); // target
-    this.rad = 0.05;
-    this.t = 0;
+  this.ppx = Math.random(); // puck x,y
+  this.ppy = Math.random();
+  this.pvx = Math.random()*0.05 -0.025; // velocity
+  this.pvy = Math.random()*0.05 -0.025;
+  this.tx = Math.random(); // target
+  this.ty = Math.random();
+  this.tx2 = Math.random(); // target
+  this.ty2 = Math.random(); // target
+  this.rad = 0.05;
+  this.t = 0;
 
-    this.BADRAD = 0.25;
-  },
-  getNumStates: function() {
-    return 8; // x,y,vx,vy, puck dx,dy
-  },
-  getMaxNumActions: function() {
-    return 5; // left, right, up, down, nothing
-  },
+  this.BADRAD = 0.25;
+}
+
+PuckWorld.prototype = {
+  getNumStates: function() { return 8; /* x,y,vx,vy, puck dx,dy */ },
+  getMaxNumActions: function() { return 5; /* left, right, up, down, nothing */ },
   getState: function() {
     var s = [this.ppx - 0.5, this.ppy - 0.5, this.pvx * 10, this.pvy * 10, this.tx-this.ppx, this.ty-this.ppy, this.tx2-this.ppx, this.ty2-this.ppy];
     return s;
   },
   sampleNextState: function(a) {
-
     // world dynamics
     this.ppx += this.pvx; // newton
     this.ppy += this.pvy;
@@ -171,11 +149,6 @@ PuckWorld.prototype = {
       this.ty = Math.random();
     }
 
-    // if(this.t % 73 === 0) {
-    //   this.tx2 = Math.random(); // reset the target location
-    //   this.ty2 = Math.random();
-    // }
-
     // compute distances
     var dx = this.ppx - this.tx;
     var dy = this.ppy - this.ty;
@@ -197,8 +170,6 @@ PuckWorld.prototype = {
       // but if we're too close to red that's bad
       r += 2*(d2 - this.BADRAD)/this.BADRAD;
     }
-    
-    //if(a === 4) r += 0.05; // give bonus for gliding with no force
 
     // evolve state in time
     var ns = this.getState();
@@ -207,182 +178,34 @@ PuckWorld.prototype = {
   }
 }
 
-function gofast() { steps_per_tick = 100; }
-function gonormal() { steps_per_tick = 10; }
-function goslow() { steps_per_tick = 1; }
+function togglelearn() {
+  setInterval(function() {
+    state = env.getState();
+    action = agent.act(state);
+    var obs = env.sampleNextState(action);
+    agent.learn(obs.r);
 
-// flot stuff
-var nflot = 1000;
-function initFlot() {
-  var container = $("#flotreward");
-  var res = getFlotRewards();
-  series = [{
-    data: res,
-    lines: {fill: true}
-  }];
-  var plot = $.plot(container, series, {
-    grid: {
-      borderWidth: 1,
-      minBorderMargin: 20,
-      labelMargin: 10,
-      backgroundColor: {
-        colors: ["#FFF", "#e4f4f4"]
-      },
-      margin: {
-        top: 10,
-        bottom: 10,
-        left: 10,
-      }
-    },
-    xaxis: {
-      min: 0,
-      max: nflot
-    },
-    yaxis: {
-      min: -2,
-      max: 1
-    }
-  });
-  setInterval(function(){
-    series[0].data = getFlotRewards();
-    plot.setData(series);
-    plot.draw();
-  }, 100);
-}
-function getFlotRewards() {
-  // zip rewards into flot data
-  var res = [];
-  for(var i=0,n=smooth_reward_history.length;i<n;i++) {
-    res.push([i, smooth_reward_history[i]]);
-  }
-  return res;
+    updateDraw(action, state, obs.r);
+  }, 20); 
 }
 
-var steps_per_tick = 1;
-var sid = -1;
-var action, state;
-var smooth_reward_history = [];
-var smooth_reward = null;
-var flott = 0;
-function togglelearn() { 
-  if(sid === -1) {
-    sid = setInterval(function() {
-
-      for(var k=0;k<steps_per_tick;k++) {
-        state = env.getState();
-        action = agent.act(state);
-        var obs = env.sampleNextState(action);
-        agent.learn(obs.r);
-        if(smooth_reward == null) { smooth_reward = obs.r; }
-        smooth_reward = smooth_reward * 0.999 + obs.r * 0.001;
-        flott += 1;
-        if(flott === 200) {
-          // record smooth reward
-          if(smooth_reward_history.length >= nflot) {
-            smooth_reward_history = smooth_reward_history.slice(1);
-          }
-          smooth_reward_history.push(smooth_reward);
-          flott = 0;
-        }
-      }
-
-      updateDraw(action, state, obs.r);
-      if(typeof agent.expi !== 'undefined') {
-        $("#expi").html(agent.expi);
-      }
-      if(typeof agent.tderror !== 'undefined') {
-        $("#tde").html(agent.tderror.toFixed(3));
-      }
-      //$("#tdest").html('tderror: ' + agent.tderror_estimator.getMean().toFixed(4) + ' +/- ' + agent.tderror_estimator.getStd().toFixed(4));
-
-    }, 20);
-  } else {
-    clearInterval(sid);
-    sid = -1;
-  }
-}
-
-function saveAgent() {
-  $("#mysterybox").fadeIn();
-  $("#mysterybox").val(JSON.stringify(agent.toJSON()));
-}
-
-function loadAgent() {
-  $.getJSON( "agentzoo/puckagent.json", function( data ) {
-    agent.fromJSON(data); // corss your fingers...
-    // set epsilon to be much lower for more optimal behavior
-    agent.epsilon = 0.05;
-    $("#slider").slider('value', agent.epsilon);
-    $("#eps").html(agent.epsilon.toFixed(2));
-    // kill learning rate to not learn
-    agent.alpha = 0;
-  });
-}
-
-function resetAgent() {
-  eval($("#agentspec").val())
-  agent = new RL.DQNAgent(env, spec);
-}
-
-var w; // global world object
-var current_interval_id;
-var skipdraw = false;
 function start() {
-
   env = new PuckWorld();
 
   initDraw();      
 
-  eval($("#agentspec").val())
+  var spec = {}
+  spec.update = 'qlearn'; // qlearn | sarsa
+  spec.gamma = 0.9; // discount factor, [0, 1)
+  spec.epsilon = 0.2; // initial epsilon for epsilon-greedy policy, [0, 1)
+  spec.alpha = 0.01; // value function learning rate
+  spec.experience_add_every = 10; // number of time steps before we add another experience to replay memory
+  spec.experience_size = 5000; // size of experience replay memory
+  spec.learning_steps_per_iteration = 20;
+  spec.tderror_clamp = 1.0; // for robustness
+  spec.num_hidden_units = 100 // number of neurons in hidden layer
 
-  //agent = new RL.ActorCritic(env, spec);
   agent = new RL.DQNAgent(env, spec);
-  //agent = new RL.RecurrentReinforceAgent(env, {});
-  initFlot();
-
-  // slider sets agent epsilon
-  $("#slider").slider({
-    min: 0,
-    max: 1,
-    value: agent.epsilon,
-    step: 0.01,
-    slide: function(event, ui) {
-      agent.epsilon = ui.value;
-      $("#eps").html(ui.value.toFixed(2));
-    }
-  });
-  $("#eps").html(agent.epsilon.toFixed(2));
 
   togglelearn(); // start
-
-  // render markdown
-  $(".md").each(function(){
-    $(this).html(marked($(this).html()));
-  });
-  renderJax();
-
 }
-
-var jaxrendered = false;
-function renderJax() {
-  if(jaxrendered) { return; }
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src  = "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-    document.getElementsByTagName("head")[0].appendChild(script);
-    jaxrendered = true;
-  })();
-}
-
-// agent parameter spec to play with (this gets eval()'d on Agent reset)
-var spec = {}
-spec.update = 'qlearn'; // qlearn | sarsa
-spec.gamma = 0.9; // discount factor, [0, 1)
-spec.epsilon = 0.2; // initial epsilon for epsilon-greedy policy, [0, 1)
-spec.alpha = 0.01; // value function learning rate
-spec.experience_add_every = 10; // number of time steps before we add another experience to replay memory
-spec.experience_size = 5000; // size of experience replay memory
-spec.learning_steps_per_iteration = 20;
-spec.tderror_clamp = 1.0; // for robustness
-spec.num_hidden_units = 100 // number of neurons in hidden layer
