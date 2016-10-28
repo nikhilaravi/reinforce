@@ -67,11 +67,13 @@ export default class Node {
 	}
 
 	adjustFollowing() {
-		const byBeliefs = createDictByProp(
-			this.memory.reduce(flatten).filter(msg => 
-				msg.orientation !== this.belief && !!msg.orientation), 'orientation')
+		const byBeliefs = createDictByProp(this.memory.reduce(flatten), 'orientation')
+		const agreementCount = byBeliefs[this.belief] ? byBeliefs[this.belief].length : 0.0001 // prevent div by 0
 
-		const strongCounterOrientation = values(byBeliefs).find(d => d.length > 3)
+		const strongCounterOrientation = Object.keys(byBeliefs)
+			.filter(d => d !== this.belief && !!d)
+			.map(k => byBeliefs[k] )
+			.find(d => d.length / agreementCount > 1.5)
 
 		if(strongCounterOrientation) {
 			// change your belief to match the strong counter orientation
