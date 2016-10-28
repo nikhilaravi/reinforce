@@ -1,6 +1,7 @@
 import helpers from './helpers/helpers'
 const { flatten, sampleArray, createDictByProp, bindAll } = helpers
 import { values } from 'underscore'
+import nodes from '.nodes'
 
 const cyclesInMemory = 3
 
@@ -77,11 +78,10 @@ export default class Node {
 			this.belief = strongCounterOrientation[0].orientation
 
 			// now follow someone randomly from the strong counter orientation group
-			const newCounterUsers = strongCounterOrientation.map(d => d.user)
-				.filter(d => !this._following.includes(d))
-			if(newCounterUsers.length) {
-				this._following.push(sampleArray(newCounterUsers))
-			}
+			this._following.push(sampleArray(nodes
+				.filter(n => 
+					n.belief === this.belief &&
+					!this._following.includes(n.id))).id)
 		}
 
 		// unfollow anyone who has been political for the last 3 rounds
