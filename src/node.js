@@ -1,5 +1,6 @@
 import helpers from './helpers/helpers'
 import messageState from './messageState'
+import { values } from 'underscore'
 
 export default class Node {
 	constructor(opts) {
@@ -39,11 +40,11 @@ export default class Node {
 				return acc
 			}, {})
 
-		// const strongCounterOrientation = values(byBeliefs).find(d => d.length > 3)
+		const strongCounterOrientation = values(byBeliefs).find(d => d.length > 3)
 
-		// if(strongCounterOrientation) {
-		// 	this.belief = strongCounterOrientation[0].orientation
-		// }
+		if(strongCounterOrientation) {
+			this.belief = strongCounterOrientation[0].orientation
+		}
 
 		// this first randomness will be the part that we learn
 		if(Math.random() < 0.5) { 

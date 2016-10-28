@@ -25,10 +25,13 @@ module.exports = function(options) {
         nodeResolve({
           jsnext: true,
           main: true
+        }),
+        commonjs({ 
+          include: './node_modules/**',
+          namedExports: { 
+            './node_modules/underscore/underscore.js': ['values']
+          }
         })
-        // commonjs({ 
-        //   include: './node_modules/**' 
-        // })
       ]
     }).then( function ( bundle ) {
       var result = bundle.generate({ format: 'iife' }).code
