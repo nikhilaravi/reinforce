@@ -1,25 +1,16 @@
 import helpers from './helpers/helpers'
 const { flatten, sampleArray } = helpers
-import { beliefs } from './config'
-import { users } from './fixedData'
 import { scaleOrdinal, schemeCategory10 } from 'd3-scale'
 import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force'
 import { select, selectAll, event } from 'd3-selection'
 import { drag as d3drag } from 'd3-drag'
 import { range } from 'd3-array'
 import env from './test'
-import Node from './node'
 import messageState from './messageState'
 import "../main.scss"
+import nodes from './nodes'
 
 let SID = null
-
-const nodes = users.map((username, i) =>
-  new Node({
-    belief: sampleArray(beliefs),
-    id: (i + 1),
-    username 
-  }))
 
 const randIndexGenerator = (exclude, length) => {
   const used = [ exclude ]
@@ -138,6 +129,8 @@ const cycle = () => {
     }))).reduce(flatten)
 
   update()
+  
+  simulation.alphaTarget(0.3).restart()
 }
 
 cycle()
