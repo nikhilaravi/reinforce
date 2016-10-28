@@ -2,7 +2,7 @@ import helpers from './helpers/helpers'
 
 const nodes = []
 
-let SID = null, current = []
+let current = []
 
 // messages each have an id, an orientation, and a user id associated, and a retweet id (if it is a retweet)
 
@@ -25,10 +25,6 @@ let SID = null, current = []
 export default {
 	init() {
 		helpers.bindAll(this, [ "collectMessages", "emitMessages", "cycle" ])
-
-		this.cycle()
-
-		SID = setInterval(this.cycle, 5000)
 	},
 
 	cycle() {

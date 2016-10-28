@@ -1,4 +1,5 @@
 import helpers from './helpers/helpers'
+const { flatten, sampleArray } = helpers
 import { beliefs } from './config'
 import { users } from './fixedData'
 import { scaleOrdinal, schemeCategory10 } from 'd3-scale'
@@ -11,9 +12,11 @@ import Node from './node'
 import messageState from './messageState'
 import "../main.scss"
 
+let SID = null
+
 const nodes = users.map((username, i) =>
   new Node({
-    belief: helpers.sampleArray(beliefs),
+    belief: sampleArray(beliefs),
     id: (i + 1),
     username 
   }))
@@ -37,7 +40,7 @@ const links = nodes.map(d => {
     source: d.id,
     target: createIndex()
   }))
-}).reduce(helpers.flatten)
+}).reduce(flatten)
 
 links.forEach(l => {
   const source = nodes.find(n => n.id === l.source)
@@ -130,6 +133,21 @@ update()
 nodes.forEach(n => n.init())
 
 messageState.init()
+
+const cycle = () => {
+  messageState.cycle()
+
+  links = nodes.map(n => n.following.map(t => ({
+    source: n,
+    target: nodes.find(d => d.id === t)
+  }))).reduce(flatten)
+
+  update()
+}
+
+cycle()
+
+SID = setInterval(cycle, 5000)
 
 
 

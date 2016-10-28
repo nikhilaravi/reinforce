@@ -78,7 +78,8 @@ export default class Node {
 			this.belief = strongCounterOrientation[0].orientation
 
 			// now follow someone randomly from the strong counter orientation group
-			const newCounterUsers = strongCounterOrientation.map(d => d.user).filter(d => !this._following.includes(d))
+			const newCounterUsers = strongCounterOrientation.map(d => d.user)
+				.filter(d => !this._following.includes(d))
 			if(newCounterUsers.length) {
 				this._following.push(sampleArray(newCounterUsers))
 			}
@@ -87,8 +88,8 @@ export default class Node {
 		// unfollow anyone who has been political for the last 3 rounds
 		if(values(byBeliefs).length) {
 			const messagesByUser = createDictByProp(values(byBeliefs).reduce(flatten), 'user')
-			const overpoliticalUsers = Object.keys(messagesByUser).filter(k =>
-				messagesByUser[k].length === cyclesInMemory)
+			const overpoliticalUsers = Object.keys(messagesByUser)
+				.filter(k => messagesByUser[k].length === cyclesInMemory)
 
 			if(overpoliticalUsers.length) {
 				this._following.splice(
