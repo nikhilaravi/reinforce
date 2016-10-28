@@ -13,9 +13,10 @@ import "../main.scss"
 
 const nodes = users.map((username, i) =>
   new Node({
-    belief: beliefs[Math.round(Math.random() * (beliefs.length - 1))],
+    belief: helpers.sampleArray(beliefs),
     id: (i + 1),
-    username }))
+    username 
+  }))
 
 const randIndexGenerator = (exclude, length) => {
   const used = [ exclude ]
