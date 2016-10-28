@@ -1,7 +1,7 @@
 import helpers from './helpers/helpers'
 const { flatten, sampleArray, createDictByProp, bindAll } = helpers
 import { values } from 'underscore'
-import nodes from '.nodes'
+import nodes from './nodes'
 
 const cyclesInMemory = 3
 

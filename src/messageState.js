@@ -1,5 +1,5 @@
 import helpers from './helpers/helpers'
-import nodes from '.nodes'
+import nodes from './nodes'
 
 let current = []
 
