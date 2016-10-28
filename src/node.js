@@ -1,6 +1,5 @@
 import helpers from './helpers/helpers'
 const { flatten, sampleArray, createDictByProp, bindAll } = helpers
-import messageState from './messageState'
 import { values } from 'underscore'
 
 const cyclesInMemory = 3
@@ -100,8 +99,6 @@ export default class Node {
 	}
 
 	init() {
-		messageState.subscribe(this)
-
 		bindAll(this, [ "getMessage", "sendMessages", "adjustFollowing" ])
 	}
 }

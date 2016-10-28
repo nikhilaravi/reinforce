@@ -1,6 +1,5 @@
 import helpers from './helpers/helpers'
-
-const nodes = []
+import nodes from '.nodes'
 
 let current = []
 
@@ -34,10 +33,6 @@ export default {
 		current.forEach(d => console.log(d))
 
 		current = []
-	},
-
-	subscribe(node) {
-		nodes.push(node)
 	},
 
 	collectMessages() {
