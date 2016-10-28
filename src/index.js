@@ -34,7 +34,7 @@ const randIndexGenerator = (exclude, length) => {
 }
 
 // let's say everyone starts out with between 1 and 5 connections
-const links = nodes.map(d => {
+let links = nodes.map(d => {
   const createIndex = randIndexGenerator(d.id, nodes.length)
   return range(1 + Math.round(Math.random() * 5)).map(() => ({
     source: d.id,
