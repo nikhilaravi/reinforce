@@ -34,10 +34,41 @@ export default class Node {
 
 	getMessage() {
 		let orientation = "", retweetID = null
-		const totalMemory = this.memory.reduce(flatten)
 
+		// this first randomness will be the part that we learn
+		if(Math.random() < 0.5) { 
+			orientation = this.belief 
+			if(Math.random() < 0.5) {
+				const matchingMessages = this.memory.reduce(flatten)
+					.filter(msg => msg.orientation === this.belief)
+
+				if(matchingMessages.length) {
+					retweetID = sampleArray(matchingMessages).id
+				}
+			}
+		}
+		
+		return {
+			orientation,
+			retweetID,
+			user: this.id
+		}	
+	}
+
+	sendMessages(messages) {
+		if(this.memory.length > cyclesInMemory) {
+			this.memory.shift()
+		}
+
+		this.memory.push(messages.filter(msg =>
+			this._following.includes(msg.user)))
+
+		this.adjustFollowing()
+	}
+
+	adjustFollowing() {
 		const byBeliefs = createDictByProp(
-			totalMemory.filter(msg => 
+			this.memory.reduce(flatten).filter(msg => 
 				msg.orientation !== this.belief && !!msg.orientation), 'orientation')
 
 		const strongCounterOrientation = values(byBeliefs).find(d => d.length > 3)
@@ -65,39 +96,11 @@ export default class Node {
 						d === sampleArray(overpoliticalUsers)), 1)
 			}
 		}
-
-		// this first randomness will be the part that we learn
-		if(Math.random() < 0.5) { 
-			orientation = this.belief 
-			if(Math.random() < 0.5) {
-				const matchingMessages = totalMemory
-					.filter(msg => msg.orientation === this.belief)
-
-				if(matchingMessages.length) {
-					retweetID = sampleArray(matchingMessages).id
-				}
-			}
-		}
-		
-		return {
-			orientation,
-			retweetID,
-			user: this.id
-		}	
-	}
-
-	sendMessages(messages) {
-		if(this.memory.length > cyclesInMemory) {
-			this.memory.shift()
-		}
-
-		this.memory.push(messages.filter(msg =>
-			this._following.includes(msg.user)))
 	}
 
 	init() {
 		messageState.subscribe(this)
 
-		bindAll(this, [ "getMessage", "sendMessages" ])
+		bindAll(this, [ "getMessage", "sendMessages", "adjustFollowing" ])
 	}
 }
