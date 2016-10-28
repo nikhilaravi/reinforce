@@ -102,6 +102,8 @@ const update = () => {
   const linkEnter = link.enter().append("line")
     .attr("class", "link")
 
+  link.exit().remove()
+
   link = linkEnter.merge(link)
 
   node = svg.selectAll(".node")
@@ -128,8 +130,6 @@ const update = () => {
   simulation.force("link").links(links)
 }
 
-update()
-
 nodes.forEach(n => n.init())
 
 messageState.init()
@@ -137,10 +137,11 @@ messageState.init()
 const cycle = () => {
   messageState.cycle()
 
-  links = nodes.map(n => n.following.map(t => ({
-    source: n,
-    target: nodes.find(d => d.id === t)
-  }))).reduce(flatten)
+  links = nodes.filter(n => n.following.length).map(n =>
+    n.following.map(t => ({
+      source: n,
+      target: nodes.find(d => d.id === t)
+    }))).reduce(flatten)
 
   update()
 }
