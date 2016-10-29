@@ -6,6 +6,9 @@ import nodes from './nodes'
 const cyclesInMemory = 3
 
 export default class Node {
+	static getNumStates() { return 1 }
+	static getMaxNumActions() { return 3 }
+
 	constructor(opts) {
 		this.id = opts.id
 		this.username = opts.username
@@ -35,14 +38,6 @@ export default class Node {
 		return this._following
 	}
 
-	getNumStates() { 
-		return 1
-	}
-
-	getMaxNumActions() {
-		return 3
-	}
-
 	getState() {
 		return [ Math.random() ]
 	}
@@ -57,9 +52,10 @@ export default class Node {
 	getMessage() {
 		let orientation = "", retweetID = null
 
-		const state = this.getState()
-		const action = this.agent.act(state)
-		const { r } = this.sampleNextState(action)
+		const state = this.getState(),
+			action = this.agent.act(state),
+			{ r } = this.sampleNextState(action)
+			
 		this.agent.learn(r)
 
 		// this first randomness will be the part that we learn
@@ -94,13 +90,12 @@ export default class Node {
 	}
 
 	adjustFollowing() {
-		const byBeliefs = createDictByProp(this.memory.reduce(flatten), 'orientation')
-		const agreementCount = byBeliefs[this.belief] ? byBeliefs[this.belief].length : 0.0001 // prevent div by 0
-
-		const strongCounterOrientation = Object.keys(byBeliefs)
-			.filter(d => d !== this.belief && !!d)
-			.map(k => byBeliefs[k] )
-			.find(d => d.length / agreementCount > 1.5)
+		const byBeliefs = createDictByProp(this.memory.reduce(flatten), 'orientation'),
+			agreementCount = byBeliefs[this.belief] ? byBeliefs[this.belief].length : 0.0001,
+			strongCounterOrientation = Object.keys(byBeliefs)
+				.filter(d => d !== this.belief && !!d)
+				.map(k => byBeliefs[k] )
+				.find(d => d.length / agreementCount > 1.5)
 
 		if(strongCounterOrientation) {
 			// change your belief to match the strong counter orientation
@@ -116,9 +111,9 @@ export default class Node {
 
 		// unfollow anyone who has been political for the last 3 rounds
 		if(values(byBeliefs).length) {
-			const messagesByUser = createDictByProp(values(byBeliefs).reduce(flatten), 'user')
-			const overpoliticalUsers = Object.keys(messagesByUser)
-				.filter(k => messagesByUser[k].length === cyclesInMemory)
+			const messagesByUser = createDictByProp(values(byBeliefs).reduce(flatten), 'user'),
+				overpoliticalUsers = Object.keys(messagesByUser)
+					.filter(k => messagesByUser[k].length === cyclesInMemory)
 
 			if(overpoliticalUsers.length) {
 				this._following.splice(
