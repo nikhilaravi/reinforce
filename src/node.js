@@ -43,7 +43,7 @@ export default class Node {
 		return [ Math.random() ]
 	}
 
-	sampleNextState() {
+	getReward() {
 		return Math.random()
 	}
 

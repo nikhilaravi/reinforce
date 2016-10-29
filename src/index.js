@@ -5,7 +5,6 @@ import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force
 import { select, selectAll, event } from 'd3-selection'
 import { drag as d3drag } from 'd3-drag'
 import { range } from 'd3-array'
-import env from './test'
 import messageState from './messageState'
 import "../main.scss"
 import nodes from './nodes'
