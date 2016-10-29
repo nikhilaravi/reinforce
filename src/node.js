@@ -1,9 +1,9 @@
 import helpers from './helpers/helpers'
 const { flatten, sampleArray, createDictByProp, bindAll } = helpers
 import { values } from 'underscore'
-import nodes from './nodes'
+import { Nodes, getReach } from './nodes'
 
-const cyclesInMemory = 3
+const cyclesInMemory = 3, rewardMin = -2, rewardMax = 1
 
 export default class Node {
 	constructor(opts) {
@@ -39,8 +39,8 @@ export default class Node {
 		return [ Math.random() ]
 	}
 
-	getReward() {
-		return Math.random()
+	getReward() { // total reach
+		return getReach(this)
 	}
 
 	getMessage() {
@@ -90,7 +90,7 @@ export default class Node {
 			this.belief = strongCounterOrientation[0].orientation
 
 			// now follow someone randomly from the strong counter orientation group
-			const availableFollowees = nodes.filter(n =>
+			const availableFollowees = Nodes.filter(n =>
 				n.belief === this.belief && !this._following.includes(n.id))
 			if(availableFollowees.length) {
 				this._following.push(sampleArray(availableFollowees).id)

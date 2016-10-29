@@ -1,5 +1,5 @@
 import helpers from './helpers/helpers'
-import nodes from './nodes'
+import { Nodes } from './nodes'
 
 let current = []
 
@@ -29,11 +29,11 @@ export default {
 	},
 
 	collectMessages() {
-		nodes.forEach(n => current.push(Object.assign(
+		Nodes.forEach(n => current.push(Object.assign(
 			n.getMessage(), { id: uuid.v4() })))
 	},
 
 	emitMessages() {
-		nodes.forEach(n => n.sendMessages(current))
+		Nodes.forEach(n => n.sendMessages(current))
 	}
 }

@@ -7,7 +7,7 @@ import { drag as d3drag } from 'd3-drag'
 import { range } from 'd3-array'
 import messageState from './messageState'
 import "../main.scss"
-import nodes from './nodes'
+import { Nodes } from './nodes'
 
 let SID = null
 
@@ -24,8 +24,8 @@ const randIndexGenerator = (exclude, length) => {
 }
 
 // let's say everyone starts out with between 1 and 5 connections
-let links = nodes.map(d => {
-  const createIndex = randIndexGenerator(d.id, nodes.length)
+let links = Nodes.map(d => {
+  const createIndex = randIndexGenerator(d.id, Nodes.length)
   return range(1 + Math.round(Math.random() * 5)).map(() => ({
     source: d.id,
     target: createIndex()
@@ -33,8 +33,8 @@ let links = nodes.map(d => {
 }).reduce(flatten)
 
 links.forEach(l => {
-  const source = nodes.find(n => n.id === l.source)
-  const target = nodes.find(n => n.id === l.target)
+  const source = Nodes.find(n => n.id === l.source)
+  const target = Nodes.find(n => n.id === l.target)
   source.following = source.following.concat(target.id)
 })
 
@@ -92,7 +92,7 @@ const update = () => {
   link = linkEnter.merge(link)
 
   node = svg.selectAll(".node")
-    .data(nodes, (d, i) => i)
+    .data(Nodes, (d, i) => i)
 
   const nodeEnter = node.enter().append("g")
     .attr("class", "node")
@@ -109,22 +109,22 @@ const update = () => {
 
   node = nodeEnter.merge(node)
 
-  simulation.nodes(nodes)
+  simulation.nodes(Nodes)
 
   simulation.force("link").links(links)
 }
 
-nodes.forEach(n => n.init())
+Nodes.forEach(n => n.init())
 
 messageState.init()
 
 const cycle = () => {
   messageState.cycle()
 
-  links = nodes.filter(n => n.following.length).map(n =>
+  links = Nodes.filter(n => n.following.length).map(n =>
     n.following.map(t => ({
       source: n,
-      target: nodes.find(d => d.id === t)
+      target: Nodes.find(d => d.id === t)
     }))).reduce(flatten)
 
   update()
