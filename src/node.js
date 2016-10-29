@@ -6,9 +6,6 @@ import nodes from './nodes'
 const cyclesInMemory = 3
 
 export default class Node {
-	static getNumStates() { return 1 }
-	static getMaxNumActions() { return 3 }
-
 	constructor(opts) {
 		this.id = opts.id
 		this.username = opts.username
@@ -38,6 +35,10 @@ export default class Node {
 		return this._following
 	}
 
+	getNumStates() { return 1 }
+
+	getMaxNumActions() { return 3 }
+
 	getState() {
 		return [ Math.random() ]
 	}
@@ -55,7 +56,7 @@ export default class Node {
 		const state = this.getState(),
 			action = this.agent.act(state),
 			{ r } = this.sampleNextState(action)
-			
+
 		this.agent.learn(r)
 
 		// this first randomness will be the part that we learn
