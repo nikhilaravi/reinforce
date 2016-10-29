@@ -27,13 +27,9 @@ export default class Node {
 	  })
 	}
 
-	set following(newFollowing) {
-		this._following = newFollowing
-	}
+	set following(newFollowing) { this._following = newFollowing }
 
-	get following() {
-		return this._following
-	}
+	get following() { return this._following }
 
 	getNumStates() { return 1 }
 
@@ -69,19 +65,14 @@ export default class Node {
 		}
 		
 		return {
-			orientation,
-			retweetID,
-			user: this.id
+			orientation, retweetID, user: this.id
 		}	
 	}
 
 	sendMessages(messages) {
-		if(this.memory.length > cyclesInMemory) {
-			this.memory.shift()
-		}
+		if(this.memory.length > cyclesInMemory) { this.memory.shift() }
 
-		this.memory.push(messages.filter(msg =>
-			this._following.includes(msg.user)))
+		this.memory.push(messages.filter(msg => this._following.includes(msg.user)))
 
 		this.adjustFollowing()
 	}
@@ -114,8 +105,7 @@ export default class Node {
 
 			if(overpoliticalUsers.length) {
 				this._following.splice(
-					this._following.findIndex(d => 
-						d === sampleArray(overpoliticalUsers)), 1)
+					this._following.findIndex(d => d === sampleArray(overpoliticalUsers)), 1)
 			}
 		}
 	}
