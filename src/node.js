@@ -39,15 +39,12 @@ export default class Node {
 
 	getMaxNumActions() { return 2 }
 
-	getState() {
+	getState() { // evolve state here
 		return [ Math.random() ]
 	}
 
 	sampleNextState() {
-		return {
-			s: [],
-			r: Math.random()
-		}
+		return Math.random()
 	}
 
 	getMessage() {
@@ -55,7 +52,7 @@ export default class Node {
 
 		const state = this.getState(),
 			action = this.agent.act(state),
-			{ r } = this.sampleNextState(action)
+			r = this.getReward()
 
 		this.agent.learn(r)
 

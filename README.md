@@ -20,3 +20,15 @@ Learn loop
 - get the sampled next state based on the action
 - call learn on the agent based on the reward
 - have the UI reflect: action, state
+
+FOR OUR PURPOSES
+----------------
+
+- Nodes define an agent in their constructor
+- Nodes serve as the environment
+
+Learn loop
+- in getMessage on a node, sample the next state
+- get the learned action from the agent
+- get the reward from the node environment
+- call learn on the agent based on that reward
