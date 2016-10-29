@@ -37,7 +37,7 @@ export default class Node {
 
 	getNumStates() { return 1 }
 
-	getMaxNumActions() { return 3 }
+	getMaxNumActions() { return 2 }
 
 	getState() {
 		return [ Math.random() ]
@@ -59,8 +59,7 @@ export default class Node {
 
 		this.agent.learn(r)
 
-		// this first randomness will be the part that we learn
-		if(Math.random() < 0.5) { 
+		if(action === 1) { 
 			orientation = this.belief 
 			if(Math.random() < 0.5) {
 				const matchingMessages = this.memory.reduce(flatten)
