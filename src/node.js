@@ -14,14 +14,17 @@ export default class Node {
 		this._following = []
 		this.memory = [[]]
 
-		const env = {
-			getNumStates: () => 1,
-			getMaxNumActions: () => 3 // political, neural, nothing
-		}
-
-		const spec = { alpha: 0.01 }
-
-		this.agent = new RL.DQNAgent(env, spec)
+		this.agent = new RL.DQNAgent(this, {
+	    update: 'qlearn', 
+	    gamma: 0.9, // discount factor, [0, 1)
+	    epsilon: 0.2, // initial epsilon for epsilon-greedy policy, [0, 1)
+	    alpha: 0.01, // value function learning rate
+	    experience_add_every: 10, // number of time steps before we add another experience to replay memory
+	    experience_size: 5000, // size of experience replay memory
+	    learning_steps_per_iteration: 20,
+	    tderror_clamp: 1.0, // for robustness
+	    num_hidden_units: 100 // number of neurons in hidden layer
+	  })
 	}
 
 	set following(newFollowing) {
@@ -32,8 +35,32 @@ export default class Node {
 		return this._following
 	}
 
+	getNumStates() { 
+		return 1
+	}
+
+	getMaxNumActions() {
+		return 3
+	}
+
+	getState() {
+		return [ Math.random() ]
+	}
+
+	sampleNextState() {
+		return {
+			s: [],
+			r: Math.random()
+		}
+	}
+
 	getMessage() {
 		let orientation = "", retweetID = null
+
+		const state = this.getState()
+		const action = this.agent.act(state)
+		const { r } = this.sampleNextState(action)
+		this.agent.learn(r)
 
 		// this first randomness will be the part that we learn
 		if(Math.random() < 0.5) { 

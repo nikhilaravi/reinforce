@@ -184,7 +184,6 @@ function togglelearn() {
     action = agent.act(state);
     var obs = env.sampleNextState(action);
     agent.learn(obs.r);
-
     updateDraw(action, state, obs.r);
   }, 20); 
 }
@@ -194,18 +193,17 @@ function start() {
 
   initDraw();      
 
-  var spec = {}
-  spec.update = 'qlearn'; // qlearn | sarsa
-  spec.gamma = 0.9; // discount factor, [0, 1)
-  spec.epsilon = 0.2; // initial epsilon for epsilon-greedy policy, [0, 1)
-  spec.alpha = 0.01; // value function learning rate
-  spec.experience_add_every = 10; // number of time steps before we add another experience to replay memory
-  spec.experience_size = 5000; // size of experience replay memory
-  spec.learning_steps_per_iteration = 20;
-  spec.tderror_clamp = 1.0; // for robustness
-  spec.num_hidden_units = 100 // number of neurons in hidden layer
-
-  agent = new RL.DQNAgent(env, spec);
+  agent = new RL.DQNAgent(env, {
+    update: 'qlearn', 
+    gamma: 0.9, // discount factor, [0, 1)
+    epsilon: 0.2, // initial epsilon for epsilon-greedy policy, [0, 1)
+    alpha: 0.01, // value function learning rate
+    experience_add_every: 10, // number of time steps before we add another experience to replay memory
+    experience_size: 5000, // size of experience replay memory
+    learning_steps_per_iteration: 20,
+    tderror_clamp: 1.0, // for robustness
+    num_hidden_units: 100 // number of neurons in hidden layer
+  });
 
   togglelearn(); // start
 }
