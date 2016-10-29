@@ -11,6 +11,6 @@ export const Nodes = users.map((username, i) =>
     username 
   }))
 
-export const getReach = (node) => {
+export const getReach = node => {
 	return Math.random()
 }
