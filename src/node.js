@@ -3,7 +3,7 @@ const { flatten, sampleArray, createDictByProp, bindAll } = helpers
 import { values } from 'underscore'
 import { Nodes, getReach } from './nodes'
 
-const cyclesInMemory = 3, rewardMin = -2, rewardMax = 1
+const cyclesInMemory = 3
 
 export default class Node {
 	constructor(opts) {

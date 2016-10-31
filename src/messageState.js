@@ -1,5 +1,6 @@
 import helpers from './helpers/helpers'
 import { Nodes } from './nodes'
+import mediator from './mediator'
 
 let current = []
 
@@ -34,6 +35,8 @@ export default {
 	},
 
 	emitMessages() {
+		mediator.publish("newMessages", current)
+
 		Nodes.forEach(n => n.sendMessages(current))
 	}
 }

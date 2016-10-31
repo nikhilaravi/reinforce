@@ -14,9 +14,9 @@ let SID = null
 const randIndexGenerator = (exclude, length) => {
   const used = [ exclude ]
   return function() { // index pushed up by 1
-    let next = 1 + Math.floor(Math.random() * length)
+    let next = Math.floor(Math.random() * length)
     while(used.find(d => d === next)) {
-      next = 1 + Math.floor(Math.random() * length)
+      next = Math.floor(Math.random() * length)
     }
     used.push(next)
     return next
