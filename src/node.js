@@ -73,8 +73,6 @@ export default class Node {
 		if(this.memory.length > cyclesInMemory) { this.memory.shift() }
 
 		this.memory.push(messages.filter(msg => this._following.includes(msg.user)))
-
-		this.adjustFollowing()
 	}
 
 	adjustFollowing() {

@@ -9,8 +9,6 @@ import messageState from './messageState'
 import "../main.scss"
 import { Nodes } from './nodes'
 
-let SID = null
-
 const randIndexGenerator = (exclude, length) => {
   const used = [ exclude ]
   return function() { // index pushed up by 1
@@ -118,8 +116,18 @@ Nodes.forEach(n => n.init())
 
 messageState.init()
 
-const cycle = () => {
-  messageState.cycle()
+let cycleSID = null
+
+const cycleDur = 5000
+
+messageState.cycle()
+
+cycleSID = setInterval(messageState.cycle, cycleDur)
+
+let updateLinksSID = null, updateLinksNodeIndex = 0
+
+const updateLinks = () => {
+  Nodes[updateLinksNodeIndex].adjustFollowing()
 
   links = Nodes.filter(n => n.following.length).map(n =>
     n.following.map(t => ({
@@ -129,12 +137,18 @@ const cycle = () => {
 
   update()
   
-  simulation.alphaTarget(0.3).restart()
+  simulation.alphaTarget(0.3).restart() 
+
+  updateLinksNodeIndex = (updateLinksNodeIndex + 1) % Nodes.length 
 }
 
-cycle()
+updateLinks()
 
-SID = setInterval(cycle, 5000)
+updateLinksSID = setInterval(updateLinks, cycleDur / Nodes.length)
+
+
+
+
 
 
 
