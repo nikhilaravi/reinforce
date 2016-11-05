@@ -24,7 +24,7 @@ export default {
 		this.collectMessages()
 		this.emitMessages()
 
-		current.forEach(d => console.log(d))
+		// current.forEach(d => console.log(d))
 
 		current = []
 	},

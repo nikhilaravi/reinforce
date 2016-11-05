@@ -8,9 +8,53 @@
   <link href="bundle.css" rel="stylesheet">
 </head>
 <body>
-  <div id="root" style="height: 100%">
-    <svg></svg>
-  </div>
+  <div id="root" style="height: 100%"></div>
+  <script type="x-shader/x-vertex" id="node-vertexshader">
+    attribute float size;
+    uniform float pointSize;
+    uniform vec3 color;
+    uniform float alpha;
+    varying vec4 vColor;
+    varying float mySize;
+
+    void main() {
+      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+      gl_PointSize = size;
+      mySize = size;
+      gl_Position = projectionMatrix * mvPosition;
+      vColor = vec4(color, alpha);
+    }
+  </script>
+  <script type="x-shader/x-fragment" id="node-fragmentshader">
+    varying vec4 vColor;
+    varying float mySize;
+
+    void main() {
+      float f = 0.5;
+      float d = abs(distance(gl_PointCoord - f, vec2(0.0, 0.0)));
+      float pixelD = (d + 0.5) * mySize;
+      if(pixelD + 0.5 < mySize) {
+        gl_FragColor = vec4(vColor.xyz, 0.9);
+      } else if(pixelD < mySize) {
+        gl_FragColor = vec4(vColor.xyz, 0.1);
+      } else {
+        discard;
+      }
+    }
+  </script>
+  <script type="x-shader/x-vertex" id="edge-vertexshader">
+    void main() {
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  </script>
+  <script type="x-shader/x-fragment" id="edge-fragmentshader">
+    uniform vec3 color;
+
+    void main() {
+      gl_FragColor = vec4(color, 1.0);
+    }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/node-uuid/1.4.7/uuid.min.js"></script>
   <script src="/vendor/rl.js"></script>
   <script src="/dist/main.js"></script>
