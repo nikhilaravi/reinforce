@@ -11,13 +11,11 @@ import "../main.scss"
 import { Nodes } from './nodes'
 
 let renderer = new THREE.WebGLRenderer({ alpha: true }), 
-  width = window.innerWidth, 
-  height = 600,
-  particles = Nodes.length,
+  width = window.innerWidth, height = 600,
   scene = new THREE.Scene(),
   camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 10000),
-  nodePositions = new Float32Array(particles * 2),
-  sizes = new Float32Array(particles),
+  nodePositions = new Float32Array(Nodes.length * 2),
+  nodeSizes = new Float32Array(Nodes.length),
   edgeGeometry = new THREE.BufferGeometry(),
   nodeGeometry = new THREE.BufferGeometry(),
   edgeVertices = new Float32Array(3 * Nodes.length * Nodes.length * 2), // not sure how to preallocate here...
@@ -26,8 +24,8 @@ let renderer = new THREE.WebGLRenderer({ alpha: true }),
 scene.add(camera)
 camera.position.z = 1000
 
-for(let i=0; i < particles; i++) { // todo: use meaningful size here
-  sizes[i] = Math.random() * 10 + 3
+for(let i=0; i < Nodes.length; i++) { // todo: use meaningful size here
+  nodeSizes[i] = Math.random() * 10 + 3
 }
 
 const nodeMaterial = new THREE.ShaderMaterial({
@@ -59,7 +57,7 @@ const edgeMaterial = new THREE.ShaderMaterial({
 const nodePositionBuffer = new THREE.BufferAttribute(nodePositions, 2)
 
 nodeGeometry.addAttribute("position", nodePositionBuffer)
-nodeGeometry.addAttribute("size", new THREE.BufferAttribute(sizes, 1))
+nodeGeometry.addAttribute("size", new THREE.BufferAttribute(nodeSizes, 1))
 
 const edgeVerticesBuffer = new THREE.BufferAttribute(edgeVertices, 3)
 
