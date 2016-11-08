@@ -25,11 +25,11 @@ mediator.subscribe("newMessages", data => {
 	})
 })
 
-export const Nodes = users.map((username, i) =>
+export const Nodes = users.map(n =>
   new Node({
-    belief: sampleArray(beliefs),
-    id: i,
-    username 
+    belief: n.trumporhillary,
+    id: n.node_id,
+    username: n.twitterhandle 
   }))
 
 export const getReach = node => {

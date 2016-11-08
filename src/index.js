@@ -9,6 +9,25 @@ import { timer } from 'd3-timer'
 import messageState from './messageState'
 import "../main.scss"
 import { Nodes } from './nodes'
+import { edges } from './fixedData'
+
+console.log(JSON.stringify(Nodes[0]));
+
+// populate edges
+let links = edges.map(e => {
+  return ({
+    source: parseInt(e.source, 10),
+    target: parseInt(e.target, 10)
+  })
+})
+
+links.forEach(l => {
+  const source = Nodes.find(n => n.id === l.source)
+  const target = Nodes.find(n => n.id === l.target)
+  source.following = source.following.concat(target.id)
+})
+
+Nodes.forEach(n => n.init())
 
 let renderer = new THREE.WebGLRenderer({ alpha: true }), 
   width = window.innerWidth, height = 600,
@@ -122,32 +141,15 @@ const randIndexGenerator = (exclude, length) => {
   }
 }
 
-// let's say everyone starts out with between 1 and 5 connections
-let links = Nodes.map(d => {
-  const createIndex = randIndexGenerator(d.id, Nodes.length)
-  return range(1 + Math.round(Math.random() * 5)).map(() => ({
-    source: d.id,
-    target: createIndex()
-  }))
-}).reduce(flatten)
+// messageState.init()
 
-links.forEach(l => {
-  const source = Nodes.find(n => n.id === l.source)
-  const target = Nodes.find(n => n.id === l.target)
-  source.following = source.following.concat(target.id)
-})
+// let cycleSID = null
 
-Nodes.forEach(n => n.init())
+// const cycleDur = 5000
 
-messageState.init()
+// messageState.cycle()
 
-let cycleSID = null
-
-const cycleDur = 5000
-
-messageState.cycle()
-
-cycleSID = setInterval(messageState.cycle, cycleDur)
+// cycleSID = setInterval(messageState.cycle, cycleDur)
 
 let updateLinksSID = null, updateLinksNodeIndex = 0
 
@@ -169,7 +171,7 @@ const updateLinks = () => {
 
 updateLinks()
 
-updateLinksSID = setInterval(updateLinks, cycleDur / Nodes.length)
+// updateLinksSID = setInterval(updateLinks, cycleDur / Nodes.length)
 
 
 
