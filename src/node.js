@@ -9,9 +9,10 @@ export default class Node {
 	constructor(opts) {
 		this.id = opts.id
 		this.username = opts.username
-		this.belief = opts.belief
+		this.belief = opts.byBeliefs
 
 		this._following = []
+		this._trustScores = []
 		this.memory = [[]]
 
 		this.agent = new RL.DQNAgent(this, {
@@ -31,12 +32,17 @@ export default class Node {
 
 	get following() { return this._following }
 
-	getNumStates() { return 1 }
+	getNumStates() { return this._following.length}
 
-	getMaxNumActions() { return 2 }
+	getMaxNumActions() { return 4 }
 
 	getState() { // evolve state here
-		return [ Math.random() ]
+		var neighborIdeologies = []
+		this._following.forEach(n => {
+			neighborIdeologies.push(n.belief)
+		})
+
+		return neighborIdeologies
 	}
 
 	getReward() { // total reach
@@ -121,5 +127,30 @@ export default class Node {
 
 	init() {
 		bindAll(this, [ "getMessage", "sendMessages", "adjustFollowing" ])
+	}
+
+	// Randomly assign trust scores for each node
+	initializeTrustScores() {
+
+		var totalTrust = 0;
+		var trustVals = [];
+		// console.log("num following: " + this._following.length)
+		this._following.forEach(n => {
+			var thisTrustScore = Math.random() * this._following.length
+			trustVals.push({"node":n, "score":thisTrustScore})
+			totalTrust += thisTrustScore
+		})
+
+		totalTrust = parseFloat(totalTrust)
+
+		if (totalTrust == 0)
+			totalTrust = 1
+
+		trustVals.forEach(trustData => {
+			// console.log('non-normalized trust score: ' + trustData.score)
+			this._trustScores.push({"node":trustData.node, "score":trustData.score/totalTrust})
+			// console.log(JSON.stringify({"node":trustData.node, "score":trustData.score/totalTrust}))
+		})
+
 	}
 }

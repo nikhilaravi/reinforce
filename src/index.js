@@ -35,7 +35,7 @@ const nodeMaterial = new THREE.ShaderMaterial({
   uniforms: {
     color: {
       type: 'c',
-      value: new THREE.Color(0x3498db)
+      value: new THREE.Color(0xff0000)
     },
     alpha: { type: 'f', value: 0.7 },
     pointSize: { type: 'f', value: 10 }
@@ -49,7 +49,7 @@ const edgeMaterial = new THREE.ShaderMaterial({
   uniforms: {
     color: {
       type: 'c',
-      value: new THREE.Color(0x3498db)
+      value: new THREE.Color(0x000000)
     }
   },
   vertexShader: document.getElementById("edge-vertexshader").textContent,
@@ -154,7 +154,10 @@ const initialize = () => {
     source.following = source.following.concat(target.id)
   })
 
-  Nodes.forEach(n => n.init())
+  Nodes.forEach(n => {
+    n.init()
+    n.initializeTrustScores()
+  })
 
   messageState.init()
 

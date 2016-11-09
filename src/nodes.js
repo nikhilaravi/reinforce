@@ -9,7 +9,7 @@ import mediator from './mediator'
 export const initializeNodes = seedData => {
 	Nodes = seedData.map((d, i) =>
 		new Node({
-			belief: sampleArray(beliefs),
+			belief: d.trumporhillary,
 			id: i,
 			username: i
 		}))
