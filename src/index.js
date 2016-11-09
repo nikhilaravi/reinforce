@@ -118,7 +118,7 @@ const initialize = () => {
       let node = Nodes[i]
       nodePositions[i * 2] = node.x - width / 2
       nodePositions[i * 2 + 1] = -(node.y - height / 2)
-      nodeSizes[i] = nodeSizeScale(node.following.length)
+      nodeSizes[i] = nodeSizeScale(0.5)
     }
 
     for(let i=0; i < Math.max(lastOccupiedEdgeVertexIndex, links.length); i++) {
