@@ -117,6 +117,8 @@ export default class Node {
 					this._following.findIndex(d => d === sampleArray(overpoliticalUsers)), 1)
 			}
 		}
+
+		this.setNextAction()
 	}
 
 	init() {
