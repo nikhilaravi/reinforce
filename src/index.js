@@ -1,6 +1,6 @@
 import helpers from './helpers/helpers'
 const { flatten, sampleArray, roundDown } = helpers
-import { scaleOrdinal, schemeCategory10 } from 'd3-scale'
+import { scaleOrdinal, schemeCategory10, scaleLinear } from 'd3-scale'
 import { forceSimulation, forceLink, forceManyBody, forceCenter, forceX, forceY } from 'd3-force'
 import { select, selectAll, event } from 'd3-selection'
 import { drag as d3drag } from 'd3-drag'
@@ -25,7 +25,8 @@ let renderer = new THREE.WebGLRenderer({ alpha: true }),
   links, 
   nodeData, edgeData,
   cycleSID = null, cycleDur = 5000,
-  updateLinksSID = null, updateLinksNodeIndex = 0
+  updateLinksSID = null, updateLinksNodeIndex = 0,
+  nodeSizeScale = scaleLinear().range([1, 10]).clamp(true)
 
 scene.add(camera)
 camera.position.z = 1000
@@ -93,10 +94,6 @@ const initialize = () => {
   nodePositions = new Float32Array(Nodes.length * 2)
   nodeSizes = new Float32Array(Nodes.length)
   edgeVertices = new Float32Array(edgeData.length * 6)
-  
-  for(let i=0; i < Nodes.length; i++) { // todo: use meaningful size here
-    nodeSizes[i] = Math.random() * 10 + 3
-  }
  
   nodePositionBuffer = new THREE.BufferAttribute(nodePositions, 2)
   nodeGeometry.addAttribute("position", nodePositionBuffer)
@@ -118,8 +115,10 @@ const initialize = () => {
   
   timer(d => {
     for(let i=0; i < Nodes.length; i++) {
-      nodePositions[i * 2] = Nodes[i].x - width / 2
-      nodePositions[i * 2 + 1] = -(Nodes[i].y - height / 2)
+      let node = Nodes[i]
+      nodePositions[i * 2] = node.x - width / 2
+      nodePositions[i * 2 + 1] = -(node.y - height / 2)
+      nodeSizes[i] = nodeSizeScale(node.following.length)
     }
 
     for(let i=0; i < Math.max(lastOccupiedEdgeVertexIndex, links.length); i++) {
