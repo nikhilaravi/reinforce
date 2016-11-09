@@ -46,13 +46,7 @@ export default class Node {
 	getMessage() {
 		let orientation = "", retweetID = null
 
-		const state = this.getState(),
-			action = this.agent.act(state),
-			r = this.getReward()
-
-		this.agent.learn(r)
-
-		if(action === 1) { 
+		if(this.nextAction === 1) { 
 			orientation = this.belief 
 			if(Math.random() < 0.5) {
 				const matchingMessages = this.memory.reduce(flatten)
@@ -72,7 +66,24 @@ export default class Node {
 	sendMessages(messages) {
 		if(this.memory.length > cyclesInMemory) { this.memory.shift() }
 
-		this.memory.push(messages.filter(msg => this._following.includes(msg.user)))
+		const filteredMessages = []
+		for(let i=0; i<messages.length; i++) {
+			if(this._following.indexOf(messages[i].user) > -1) {
+				filteredMessages.push(messages[i])
+			}
+		}
+
+		this.memory.push(filteredMessages)
+	}
+
+	setNextAction() {
+		const state = this.getState(),
+			action = this.agent.act(state),
+			r = this.getReward()
+
+		this.agent.learn(r)
+
+		this.nextAction = action
 	}
 
 	adjustFollowing() {

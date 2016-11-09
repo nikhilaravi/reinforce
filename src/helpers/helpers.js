@@ -12,6 +12,10 @@ export default {
   	return arr[Math.round(Math.random() * (arr.length - 1))]
   },
 
+  roundDown: function(num, nearestInt) {
+    return Math.floor(num / nearestInt) * nearestInt
+  },
+
   flatten: function(acc, curr) {
   	if(!acc) { return [curr] }
   	if(curr.length) {

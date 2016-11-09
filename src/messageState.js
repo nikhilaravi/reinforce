@@ -30,13 +30,19 @@ export default {
 	},
 
 	collectMessages() {
-		Nodes.forEach(n => current.push(Object.assign(
-			n.getMessage(), { id: uuid.v4() })))
+		for(let i=0; i<Nodes.length; i++) {
+			current.push(Object.assign(
+				Nodes[i].getMessage(), {
+					id: uuid.v4()
+				}))
+		}
 	},
 
 	emitMessages() {
 		mediator.publish("newMessages", current)
 
-		Nodes.forEach(n => n.sendMessages(current))
+		for(let i=0; i<Nodes.length; i++) {
+			Nodes[i].sendMessages(current)
+		}
 	}
 }
