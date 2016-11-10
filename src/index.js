@@ -127,7 +127,7 @@ const initialize = () => {
       } else if(node.trumporhillary === 1 || node.trumporhillary === 2 || node.trumporhillary === 5) { // blue
         nodeSizesColors[i * 2 + 1] = decodeFloat(18, 168, 224, 254)
       } else { // purple
-        nodeSizesColors[i * 2 + 1] = decodeFloat(80, 88, 139, 254)
+        nodeSizesColors[i * 2 + 1] = decodeFloat(202, 176, 254, 254)
       }
       quadtree.add([node.x, node.y, node])
     }
