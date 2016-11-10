@@ -99,7 +99,7 @@ const updateLinks = () => {
 const initialize = () => {
   nodePositions = new Float32Array(Nodes.length * 2)
   nodeSizes = new Float32Array(Nodes.length)
-  edgeVertices = new Float32Array(edgeData.length * 6)
+  edgeVertices = new Float32Array(edgeData.length * 2 * 6)
  
   nodePositionBuffer = new THREE.BufferAttribute(nodePositions, 2)
   nodeGeometry.addAttribute("position", nodePositionBuffer)
