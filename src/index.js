@@ -190,7 +190,7 @@ document.addEventListener("mousemove", e => {
   if(match) {
     popoverElement.style.display = 'block'
     popoverID.innerHTML = match[2].id
-    popoverBelief.innerHTML = match[2].belief
+    popoverBelief.innerHTML = 'trumporhillary: ' + match[2].trumporhillary
   } else {
     popoverElement.style.display = 'none'
   }
