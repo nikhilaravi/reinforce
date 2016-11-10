@@ -31,6 +31,11 @@ export const initializeFollowings = () => {
 
 	for(let i=0; i<Nodes.length; i++) {
 		let node = Nodes[i]
+
+		if(typeof record[node.id] === 'undefined') {
+			record[node.id] = []
+		}
+		
 		for(let j=0; j<node.following.length; j++) {
 			let target = node.following[j]
 			if(typeof record[target] === 'undefined') {
