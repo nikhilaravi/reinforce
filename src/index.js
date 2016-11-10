@@ -14,6 +14,7 @@ import { Nodes, initializeNodes } from './nodes'
 let renderer = new THREE.WebGLRenderer({ alpha: true }), 
   width = window.innerWidth, height = window.innerHeight,
   scene = new THREE.Scene(),
+  mouse = new THREE.Vector2(),
   camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 10000),
   nodePositions, nodeSizes,
   edgeGeometry = new THREE.BufferGeometry(),
@@ -169,6 +170,12 @@ const initialize = () => {
 
   updateLinksSID = setInterval(updateLinks, cycleDur / Nodes.length)
 }
+
+document.addEventListener("mousemove", e => {
+  e.preventDefault()
+  mouse.x = (e.pageX / width) * 2 - 1
+  mouse.y = -(e.pageY / height) * 2 + 1
+})
 
 Promise.all(['nodes', 'edges'].map(getData))
   .then(data => {
