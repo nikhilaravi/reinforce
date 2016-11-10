@@ -12,7 +12,8 @@ import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings, minFollowedByLength, maxFollowedByLength } from './nodes'
 
-let popoverElement = document.querySelector("#popover"),
+let start, lastCycleTime = 0,
+  popoverElement = document.querySelector("#popover"),
   popoverID = popoverElement.querySelector(".node_id"),
   popoverBelief = popoverElement.querySelector('.node_belief'),
   quadtree = d3quadtree(),
@@ -59,35 +60,6 @@ renderer.setPixelRatio(window.devicePixelRatio)
 
 document.body.appendChild(renderer.domElement)
 
-const updateLinks = () => {
-  Nodes[updateLinksNodeIndex].adjustFollowing()
-  setFollowedBy(Nodes[updateLinksNodeIndex])
-  nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
-
-  links = []
-
-  for(let i=0; i<Nodes.length; i++) {
-    let n = Nodes[i]
-    if(n.following.length) {
-      for(let j=0; j<n.following.length; j++) {
-        let target
-        for(let k=0; k<Nodes.length; k++) {
-          if(Nodes[k].id === n.following[j]) {
-            target = Nodes[k]
-            break
-          }
-        }
-        links.push({ source: n, target })
-      }
-    }
-  }
-
-  force.force("link").links(links)
-  force.alphaTarget(0.3).restart()
-  
-  updateLinksNodeIndex = (updateLinksNodeIndex + 1) % Nodes.length 
-}
-
 const initialize = () => {
   nodePositions = new Float32Array(Nodes.length * 2)
   nodeSizesColors = new Float32Array(Nodes.length * 2)
@@ -113,7 +85,67 @@ const initialize = () => {
     .force("horizontal", forceX().strength(0.1))
     .velocityDecay(0.6)
   
+  links = edgeData
+
+  links.forEach(l => {
+    const source = Nodes.find(n => n.id === +l.source)
+    const target = Nodes.find(n => n.id === +l.target)
+    source.following = source.following.concat(target.id)
+  })
+
+  initializeFollowings()
+
+  Nodes.forEach(n => n.init())
+
+  messageState.init()
+
+  start = Date.now()
+  messageState.cycle()
+
+  cycleSID = setInterval(() => {
+    lastCycleTime = Date.now() - start
+    messageState.cycle()
+  }, cycleDur)
+
   timer(d => {
+    const diff = d - lastCycleTime
+    const targetIndex = Math.max(0, Math.min(Math.round((diff / cycleDur) * Nodes.length), Nodes.length))
+
+    // update links
+    if(targetIndex < updateLinksNodeIndex) { // wrap around
+      updateLinksNodeIndex = 0
+    }
+
+    for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
+      Nodes[i].adjustFollowing()
+      setFollowedBy(Nodes[i])
+    }
+
+    updateLinksNodeIndex = targetIndex
+
+    links = []
+    for(let i=0; i<Nodes.length; i++) {
+      let n = Nodes[i]
+      if(n.following.length) {
+        for(let j=0; j<n.following.length; j++) {
+          let target
+          for(let k=0; k<Nodes.length; k++) {
+            if(Nodes[k].id === n.following[j]) {
+              target = Nodes[k]
+              break
+            }
+          }
+          links.push({ source: n, target })
+        }
+      }
+    }
+
+    force.force("link").links(links)
+    force.alphaTarget(0.3).restart()
+    // end update links
+
+    nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
+
     quadtree = d3quadtree().extent([[-1, -1], [width, height]])
 
     for(let i=0; i < Nodes.length; i++) {
@@ -134,7 +166,6 @@ const initialize = () => {
 
     for(let i=0; i < Math.max(lastOccupiedEdgeVertexIndex, links.length); i++) {
       const link = links[i]
-
       let source, target
       if(link) {
         source = link.source
@@ -157,28 +188,6 @@ const initialize = () => {
     nodeSizesColorsBuffer.needsUpdate = true
     renderer.render(scene, camera)
   })
-  
-  links = edgeData
-
-  links.forEach(l => {
-    const source = Nodes.find(n => n.id === +l.source)
-    const target = Nodes.find(n => n.id === +l.target)
-    source.following = source.following.concat(target.id)
-  })
-
-  initializeFollowings()
-
-  Nodes.forEach(n => n.init())
-
-  messageState.init()
-
-  messageState.cycle()
-
-  cycleSID = setInterval(messageState.cycle, cycleDur)
-
-  updateLinks()
-
-  updateLinksSID = setInterval(updateLinks, cycleDur / Nodes.length)
 }
 
 document.addEventListener("mousemove", e => {
