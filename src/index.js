@@ -2,6 +2,7 @@ import helpers from './helpers/helpers'
 const { flatten, sampleArray, roundDown } = helpers
 import { scaleOrdinal, schemeCategory10, scaleLinear } from 'd3-scale'
 import { forceSimulation, forceLink, forceManyBody, forceCenter, forceX, forceY } from 'd3-force'
+import { quadtree as d3quadtree } from 'd3-quadtree'
 import { select, selectAll, event } from 'd3-selection'
 import { drag as d3drag } from 'd3-drag'
 import { range } from 'd3-array'
@@ -11,7 +12,8 @@ import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes } from './nodes'
 
-let renderer = new THREE.WebGLRenderer({ alpha: true }), 
+let quadtree = d3quadtree(),
+  renderer = new THREE.WebGLRenderer({ alpha: true }), 
   width = window.innerWidth, height = window.innerHeight,
   scene = new THREE.Scene(),
   mouse = new THREE.Vector2(),
@@ -115,11 +117,15 @@ const initialize = () => {
     .force("horizontal", forceX().strength(0.1))
   
   timer(d => {
+    quadtree = d3quadtree().extent([[-1, -1], [width, height]])
+
     for(let i=0; i < Nodes.length; i++) {
       let node = Nodes[i]
+
       nodePositions[i * 2] = node.x - width / 2
       nodePositions[i * 2 + 1] = -(node.y - height / 2)
       nodeSizes[i] = nodeSizeScale(0.5)
+      quadtree.add([node.x, node.y, node])
     }
 
     for(let i=0; i < Math.max(lastOccupiedEdgeVertexIndex, links.length); i++) {
@@ -170,8 +176,21 @@ const initialize = () => {
 
 document.addEventListener("mousemove", e => {
   e.preventDefault()
-  mouse.x = (e.pageX / width) * 2 - 1
-  mouse.y = -(e.pageY / height) * 2 + 1
+  mouse.x = e.pageX
+  mouse.y = e.pageY
+
+  let found = false,
+    x0 = mouse.x - 3,
+    y0 = mouse.y - 3,
+    x3 = mouse.x + 3,
+    y3 = mouse.y + 3
+
+  quadtree.visit((node, x1, y1, x2, y2) => {
+    const p = node
+    if(x1 >= x0 && y1 >= y0 && x2 <= x3 && y2 <= y3) {
+      found = true
+    }
+  })
 })
 
 Promise.all(['nodes', 'edges'].map(getData))
