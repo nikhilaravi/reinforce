@@ -10,7 +10,7 @@ import { timer } from 'd3-timer'
 import messageState from './messageState'
 import { getData } from './api'
 import "../main.scss"
-import { Nodes, initializeNodes } from './nodes'
+import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './nodes'
 
 let popoverElement = document.querySelector("#popover"),
   popoverID = popoverElement.querySelector(".node_id"),
@@ -19,7 +19,6 @@ let popoverElement = document.querySelector("#popover"),
   renderer = new THREE.WebGLRenderer({ alpha: true }), 
   width = window.innerWidth, height = window.innerHeight,
   scene = new THREE.Scene(),
-  mouse = new THREE.Vector2(),
   camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 10000),
   nodePositions, nodeSizes,
   edgeGeometry = new THREE.BufferGeometry(),
@@ -70,6 +69,7 @@ document.body.appendChild(renderer.domElement)
 
 const updateLinks = () => {
   Nodes[updateLinksNodeIndex].adjustFollowing()
+  setFollowedBy(Nodes[updateLinksNodeIndex])
 
   links = []
 
@@ -90,7 +90,6 @@ const updateLinks = () => {
   }
 
   force.force("link").links(links)
-
   force.alphaTarget(0.3).restart()
   
   updateLinksNodeIndex = (updateLinksNodeIndex + 1) % Nodes.length 
@@ -165,6 +164,8 @@ const initialize = () => {
     source.following = source.following.concat(target.id)
   })
 
+  initializeFollowings()
+
   Nodes.forEach(n => n.init())
 
   messageState.init()
@@ -180,13 +181,10 @@ const initialize = () => {
 
 document.addEventListener("mousemove", e => {
   e.preventDefault()
-  mouse.x = e.pageX
-  mouse.y = e.pageY
-
   popoverElement.style.left = e.pageX + 'px'
   popoverElement.style.top = e.pageY + 'px'
 
-  const match = quadtree.find(mouse.x, mouse.y, 3)
+  const match = quadtree.find(e.pageX, e.pageY, 3)
   if(match) {
     popoverElement.style.display = 'block'
     popoverID.innerHTML = match[2].id
@@ -210,22 +208,3 @@ Promise.all(['nodes', 'edges'].map(getData))
     initializeNodes(nodeData)
     initialize()
   })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -12,6 +12,8 @@ export default class Node {
 		this.belief = opts.belief
 
 		this._following = []
+		this._lastFollowing = []
+		this._followedBy = []
 		this.memory = [[]]
 
 		this.agent = new RL.DQNAgent(this, {
@@ -27,9 +29,17 @@ export default class Node {
 	  })
 	}
 
+	set followedBy(newFollowedBy) { this._followedBy = newFollowedBy }
+
+	get followedBy() { return this._followedBy }
+
 	set following(newFollowing) { this._following = newFollowing }
 
 	get following() { return this._following }
+
+	set lastFollowing(newLastFollowing) { this._lastFollowing = newLastFollowing }
+
+	get lastFollowing() { return this._lastFollowing }
 
 	getNumStates() { return 1 }
 
@@ -93,6 +103,8 @@ export default class Node {
 				.filter(d => d !== this.belief && !!d)
 				.map(k => byBeliefs[k] )
 				.find(d => d.length / agreementCount > 1.5)
+
+		this._lastFollowing = this._following.slice()
 
 		if(strongCounterOrientation) {
 			// change your belief to match the strong counter orientation
