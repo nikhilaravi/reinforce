@@ -115,6 +115,7 @@ const initialize = () => {
     .force("center", forceCenter(width / 2, height / 2))
     .force("vertical", forceY().strength(0.1))
     .force("horizontal", forceX().strength(0.1))
+    .velocityDecay(0.6)
   
   timer(d => {
     quadtree = d3quadtree().extent([[-1, -1], [width, height]])
@@ -179,18 +180,10 @@ document.addEventListener("mousemove", e => {
   mouse.x = e.pageX
   mouse.y = e.pageY
 
-  let found = false,
-    x0 = mouse.x - 3,
-    y0 = mouse.y - 3,
-    x3 = mouse.x + 3,
-    y3 = mouse.y + 3
-
-  quadtree.visit((node, x1, y1, x2, y2) => {
-    const p = node
-    if(x1 >= x0 && y1 >= y0 && x2 <= x3 && y2 <= y3) {
-      found = true
-    }
-  })
+  const match = quadtree.find(mouse.x, mouse.y, 3)
+  if(match) {
+    console.log(match[2])
+  }
 })
 
 Promise.all(['nodes', 'edges'].map(getData))
