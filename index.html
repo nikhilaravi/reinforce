@@ -58,17 +58,17 @@
       return c / 255.0;
     }
 
-    attribute vec2 size;
+    attribute vec2 sizeColor;
     uniform float alpha;
     varying vec4 vColor;
     varying float mySize;
 
     void main() {
       vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-      gl_PointSize = size.x;
-      mySize = size.x;
+      gl_PointSize = sizeColor.x;
+      mySize = sizeColor.x;
       gl_Position = projectionMatrix * mvPosition;
-      vColor = encode_float(size.y);
+      vColor = encode_float(sizeColor.y);
     }
   </script>
   <script type="x-shader/x-fragment" id="node-fragmentshader">

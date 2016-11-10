@@ -96,7 +96,7 @@ const initialize = () => {
   nodePositionBuffer = new THREE.BufferAttribute(nodePositions, 2)
   nodeGeometry.addAttribute("position", nodePositionBuffer)
   nodeSizesColorsBuffer = new THREE.BufferAttribute(nodeSizesColors, 2)
-  nodeGeometry.addAttribute("size", nodeSizesColorsBuffer)
+  nodeGeometry.addAttribute("sizeColor", nodeSizesColorsBuffer)
   
   edgeVerticesBuffer = new THREE.BufferAttribute(edgeVertices, 3)
 
