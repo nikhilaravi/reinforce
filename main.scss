@@ -1,7 +1,22 @@
+$dove-gray: #707070;
+
 body {
 	margin: 0;
-	color: red;
+	color: $dove-gray;
 	.link {
 		stroke: #ccc;
 	}
+}
+
+body, html {
+	font-size: 10px;
+	font-family: Helvetica;
+}
+
+#popover {
+	padding: 1.5rem;
+	box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.2);
+	border-radius: 2px;
+	background: white;
+	position: absolute;
 }

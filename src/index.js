@@ -12,7 +12,10 @@ import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes } from './nodes'
 
-let quadtree = d3quadtree(),
+let popoverElement = document.querySelector("#popover"),
+  popoverID = popoverElement.querySelector(".node_id"),
+  popoverBelief = popoverElement.querySelector('.node_belief'),
+  quadtree = d3quadtree(),
   renderer = new THREE.WebGLRenderer({ alpha: true }), 
   width = window.innerWidth, height = window.innerHeight,
   scene = new THREE.Scene(),
@@ -180,9 +183,16 @@ document.addEventListener("mousemove", e => {
   mouse.x = e.pageX
   mouse.y = e.pageY
 
+  popoverElement.style.left = e.pageX + 'px'
+  popoverElement.style.top = e.pageY + 'px'
+
   const match = quadtree.find(mouse.x, mouse.y, 3)
   if(match) {
-    console.log(match[2])
+    popoverElement.style.display = 'block'
+    popoverID.innerHTML = match[2].id
+    popoverBelief.innerHTML = match[2].belief
+  } else {
+    popoverElement.style.display = 'none'
   }
 })
 
