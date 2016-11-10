@@ -22,7 +22,8 @@ export const initializeNodes = seedData => {
 		new Node({
 			belief: sampleArray(beliefs),
 			id: d.node_id,
-			username: i
+			username: i,
+			trumporhillary: d.trumporhillary
 		}))
 }
 
@@ -65,13 +66,14 @@ export const setFollowedBy = node => {
 		toAdd = difference(node.following, node.lastFollowing)
 
 	for(let i=0; i<toRemove.length; i++) {
-		let match = Nodes[toRemove[i]]
-		match.followedBy = match.followedBy.splice(match.followedBy.indexOf(node.id), 1)
+		let match = Nodes.find(d => d.id === toRemove[i])
+		let index = match.followedBy.indexOf(node.id)
+		match.followedBy = match.followedBy.slice(0, index).concat(match.followedBy.slice(index + 1))
 		updateMinMaxFollowedBy(match.followedBy.length)
 	}
 
 	for(let i=0; i<toAdd.length; i++) {
-		let match = Nodes[toAdd[i]]
+		let match = Nodes.find(d => d.id === toAdd[i])
 		match.followedBy = match.followedBy.concat(node.id)
 		updateMinMaxFollowedBy(match.followedBy.length)
 	}

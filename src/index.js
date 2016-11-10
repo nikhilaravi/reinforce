@@ -1,5 +1,5 @@
 import helpers from './helpers/helpers'
-const { flatten, sampleArray, roundDown } = helpers
+const { flatten, sampleArray, roundDown, decodeFloat } = helpers
 import { scaleOrdinal, schemeCategory10, scaleLinear } from 'd3-scale'
 import { forceSimulation, forceLink, forceManyBody, forceCenter, forceX, forceY } from 'd3-force'
 import { quadtree as d3quadtree } from 'd3-quadtree'
@@ -20,11 +20,11 @@ let popoverElement = document.querySelector("#popover"),
   width = window.innerWidth, height = window.innerHeight,
   scene = new THREE.Scene(),
   camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 10000),
-  nodePositions, nodeSizes,
+  nodePositions, nodeSizesColors,
   edgeGeometry = new THREE.BufferGeometry(),
   nodeGeometry = new THREE.BufferGeometry(),
   edgeVertices, lastOccupiedEdgeVertexIndex,
-  nodePositionBuffer, edgeVerticesBuffer,
+  nodePositionBuffer, edgeVerticesBuffer, nodeSizesColorsBuffer,
   force = forceSimulation(),
   emptyNode = new THREE.Vector2(),
   links, 
@@ -37,14 +37,6 @@ scene.add(camera)
 camera.position.z = 1000
 
 const nodeMaterial = new THREE.ShaderMaterial({
-  uniforms: {
-    color: {
-      type: 'c',
-      value: new THREE.Color(0x3498db)
-    },
-    alpha: { type: 'f', value: 0.7 },
-    pointSize: { type: 'f', value: 10 }
-  },
   vertexShader: document.getElementById("node-vertexshader").textContent,
   fragmentShader: document.getElementById("node-fragmentshader").textContent,
   transparent: true
@@ -54,7 +46,7 @@ const edgeMaterial = new THREE.ShaderMaterial({
   uniforms: {
     color: {
       type: 'c',
-      value: new THREE.Color(0x3498db)
+      value: new THREE.Color(0xCCE1F1)
     }
   },
   vertexShader: document.getElementById("edge-vertexshader").textContent,
@@ -98,19 +90,20 @@ const updateLinks = () => {
 
 const initialize = () => {
   nodePositions = new Float32Array(Nodes.length * 2)
-  nodeSizes = new Float32Array(Nodes.length)
+  nodeSizesColors = new Float32Array(Nodes.length * 2)
   edgeVertices = new Float32Array(edgeData.length * 2 * 6)
  
   nodePositionBuffer = new THREE.BufferAttribute(nodePositions, 2)
   nodeGeometry.addAttribute("position", nodePositionBuffer)
-  nodeGeometry.addAttribute("size", new THREE.BufferAttribute(nodeSizes, 1))
+  nodeSizesColorsBuffer = new THREE.BufferAttribute(nodeSizesColors, 2)
+  nodeGeometry.addAttribute("size", nodeSizesColorsBuffer)
   
   edgeVerticesBuffer = new THREE.BufferAttribute(edgeVertices, 3)
 
   edgeGeometry.addAttribute("position", edgeVerticesBuffer)
 
-  scene.add(new THREE.Points(nodeGeometry, nodeMaterial))
   scene.add(new THREE.LineSegments(edgeGeometry, edgeMaterial))
+  scene.add(new THREE.Points(nodeGeometry, nodeMaterial))
   
   force.nodes(Nodes)
     .force("link", forceLink().id(d => d.id))
@@ -128,7 +121,14 @@ const initialize = () => {
 
       nodePositions[i * 2] = node.x - width / 2
       nodePositions[i * 2 + 1] = -(node.y - height / 2)
-      nodeSizes[i] = nodeSizeScale(node.followedBy.length)
+      nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
+      if(node.trumporhillary === 0) { // red
+        nodeSizesColors[i * 2 + 1] = decodeFloat(229, 29, 46, 254)
+      } else if(node.trumporhillary === 1 || node.trumporhillary === 2 || node.trumporhillary === 5) { // blue
+        nodeSizesColors[i * 2 + 1] = decodeFloat(18, 168, 224, 254)
+      } else { // purple
+        nodeSizesColors[i * 2 + 1] = decodeFloat(80, 88, 139, 254)
+      }
       quadtree.add([node.x, node.y, node])
     }
 
@@ -144,16 +144,17 @@ const initialize = () => {
         target = emptyNode
       }
 
-      edgeVertices[(i * 2) * 3] = source.x - width / 2
-      edgeVertices[(i * 2) * 3 + 1] = -(source.y - height / 2)
-      edgeVertices[(i * 2) * 3 + 3] = target.x - width / 2
-      edgeVertices[(i * 2) * 3 + 4] = -(target.y - height / 2)
+      edgeVertices[i * 2 * 3] = source.x - width / 2
+      edgeVertices[i * 2 * 3 + 1] = -(source.y - height / 2)
+      edgeVertices[i * 2 * 3 + 3] = target.x - width / 2
+      edgeVertices[i * 2 * 3 + 4] = -(target.y - height / 2)
     }
 
     lastOccupiedEdgeVertexIndex = links.length
 
     edgeVerticesBuffer.needsUpdate = true
     nodePositionBuffer.needsUpdate = true
+    nodeSizesColorsBuffer.needsUpdate = true
     renderer.render(scene, camera)
   })
   

@@ -10,6 +10,7 @@ export default class Node {
 		this.id = opts.id
 		this.username = opts.username
 		this.belief = opts.belief
+		this.trumporhillary = opts.trumporhillary
 
 		this._following = []
 		this._lastFollowing = []
