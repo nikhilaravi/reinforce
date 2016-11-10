@@ -22,7 +22,7 @@ export default {
 
 	cycle() {
 		this.collectMessages()
-		this.emitMessages()
+		// this.emitMessages()
 
 		// current.forEach(d => console.log(d))
 
@@ -31,10 +31,11 @@ export default {
 
 	collectMessages() {
 		for(let i=0; i<Nodes.length; i++) {
-			current.push(Object.assign(
-				Nodes[i].getMessage(), {
-					id: uuid.v4()
-				}))
+			Nodes[i].getMessage()
+			// current.push(Object.assign(
+			// 	Nodes[i].getMessage(), {
+			// 		id: uuid.v4()
+			// 	}))
 		}
 	},
 

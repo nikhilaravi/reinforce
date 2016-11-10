@@ -13,7 +13,7 @@ export default class Node {
 
 		this._following = []
 		this._trustScores = []
-		this.memory = [[]]
+		this.lastTweet = null
 
 		this.agent = new RL.DQNAgent(this, {
 	    update: 'qlearn', 
@@ -37,36 +37,120 @@ export default class Node {
 	getMaxNumActions() { return 4 }
 
 	getState() { // evolve state here
-		var neighborIdeologies = []
+		let neighborIdeologies = []
 		this._following.forEach(n => {
-			neighborIdeologies.push(n.belief)
+			neighborIdeologies.push(n.lastTweet.orientation)
 		})
 
 		return neighborIdeologies
 	}
 
-	getReward() { // total reach
-		return getReach(this)
+	getReward() {
+		// Cycle through neighbors and compute trusted retweet score
+		let trustRetweetScore = 0
+		this._trustScores.forEach(d => {
+			if(d.node.lastTweet.retweet && d.node.lastTweet.retweet.id == this.id){
+				trustRetweetScore += d.score
+			}
+		})
+		return trustRetweetScore
+	}
+
+	sampleMention(probs) {
+		let ind = helpers.sampleArrayWeighted(probs)
+		return this._trustScores[ind].node
+	}
+
+	getProbsArray() {
+		let probs = []
+		let cumSum = 0
+		this._trustScores.forEach(d => {
+			cumSum += d.score
+			probs.push(cumSum)
+		})
+
+		return probs
+	}
+
+	getOrientation(selectedNeighbor) {
+
+		let orientation = ""
+
+		if (selectedNeighbor.lastTweet)
+			orientation = selectedNeighbor.lastTweet.orientation
+		else
+			orientation = this.belief
+
+		return orientation
 	}
 
 	getMessage() {
-		let orientation = "", retweetID = null
 
-		if(this.nextAction === 1) { 
-			orientation = this.belief 
-			if(Math.random() < 0.5) {
-				const matchingMessages = this.memory.reduce(flatten)
-					.filter(msg => msg.orientation === this.belief)
+		// Sample the orientation of this tweet from the beliefs of neighbors, weighted by trust
 
-				if(matchingMessages.length) {
-					retweetID = sampleArray(matchingMessages).id
+		let probs = this.getProbsArray()
+
+		let ind = helpers.sampleArrayWeighted(probs)
+		let selectedNeighbor = this._trustScores[ind].node
+
+		// console.log(JSON.stringify(selectedNeighbor))
+
+		let orientation = this.getOrientation(selectedNeighbor)
+
+		this.lastTweet = {"retweet":null, "orientation": orientation, "mention":null}
+
+		// Actions:
+		// 0 => New tweet and mention
+		// 1 => New tweet and no mention
+		// 2 => Retweet and mention
+		// 3 => Retweet and no mention
+		if(this.nextAction === 0) {
+
+			// With 50% probability, mention the same person that the person you are retweeting mentioned
+			// With the other 50% probability,
+			if (selectedNeighbor.lastTweet.mention){
+				if(Math.random() < 0.5) {
+					this.lastTweet.mention = selectedNeighbor.lastTweet.mention
 				}
+				else{
+					this.lastTweet.mention = this.sampleMention(probs)
+				}
+			}
+
+			else{
+					this.lastTweet.mention = this.sampleMention(probs)
 			}
 		}
 		
-		return {
-			orientation, retweetID, user: this.id
-		}	
+		else if(this.nextAction === 1) { 
+			// Do nothing - lastTweet is already configured to handle this
+		}
+
+		else if(this.nextAction === 2) { 
+
+			this.lastTweet.retweet = selectedNeighbor
+			this.lastTweet.orientation = this.getOrientation(selectedNeighbor)
+
+			// With 50% probability, mention the same person that the person you are retweeting mentioned
+			// With the other 50% probability,
+			if (selectedNeighbor.lastTweet.mention){
+				if(Math.random() < 0.5) {
+					this.lastTweet.mention = selectedNeighbor.lastTweet.mention
+				}
+				else{
+					this.lastTweet.mention = this.sampleMention(probs)
+				}
+			}
+
+			else{
+					this.lastTweet.mention = this.sampleMention(probs)
+			}
+		}
+
+		else {
+			this.lastTweet.retweet = selectedNeighbor
+			this.lastTweet.orientation = this.getOrientation(selectedNeighbor)
+		}
 	}
 
 	sendMessages(messages) {
@@ -93,35 +177,57 @@ export default class Node {
 	}
 
 	adjustFollowing() {
-		const byBeliefs = createDictByProp(this.memory.reduce(flatten), 'orientation'),
-			agreementCount = byBeliefs[this.belief] ? byBeliefs[this.belief].length : 0.0001,
-			strongCounterOrientation = Object.keys(byBeliefs)
-				.filter(d => d !== this.belief && !!d)
-				.map(k => byBeliefs[k] )
-				.find(d => d.length / agreementCount > 1.5)
+		
+		// Randomly sample a new person to follow based on one of the mentions 
 
-		if(strongCounterOrientation) {
-			// change your belief to match the strong counter orientation
-			this.belief = strongCounterOrientation[0].orientation
+		let probs = this.getProbsArray()
 
-			// now follow someone randomly from the strong counter orientation group
-			const availableFollowees = Nodes.filter(n =>
-				n.belief === this.belief && !this._following.includes(n.id))
-			if(availableFollowees.length) {
-				this._following.push(sampleArray(availableFollowees).id)
+		let ind = helpers.sampleArrayWeighted(probs)
+		let selectedNeighbor = this._trustScores[ind]
+
+		let lastMentionedByNeighbor = selectedNeighbor.node.lastTweet.mention
+
+		if (lastMentionedByNeighbor) {
+
+			// Sort array so we know which node to stop following
+			this._trustScores.sort(function (a, b) {
+			  if (a.score > b.score) {
+			    return 1;
+			  }
+			  if (a.score < b.score) {
+			    return -1;
+			  }
+			  return 0;
+			});
+
+			// Compute a new trust score - i.e., average of trust for sampled neighbor and lowest-trusted person
+			let newScore = (this._trustScores[0].score + selectedNeighbor.score) / 2.0
+			
+			// Stop following the person you currently trust the least and start following new person
+			for(let i = 0; i < this._trustScores.length; i++){
+				if (this._following[i].id === this._trustScores[i].node.id) {
+					this._following.splice(i, 1)
+					break
+				}
 			}
-		}
+			this._following.push(lastMentionedByNeighbor)
 
-		// unfollow anyone who has been political for the last 3 rounds
-		if(values(byBeliefs).length) {
-			const messagesByUser = createDictByProp(values(byBeliefs).reduce(flatten), 'user'),
-				overpoliticalUsers = Object.keys(messagesByUser)
-					.filter(k => messagesByUser[k].length === cyclesInMemory)
+			this._trustScores.shift()
+			this._trustScores.push({"node":lastMentionedByNeighbor, "score":newScore})
 
-			if(overpoliticalUsers.length) {
-				this._following.splice(
-					this._following.findIndex(d => d === sampleArray(overpoliticalUsers)), 1)
-			}
+			// Re-normalize trust scores
+			let totalTrust = 0
+			this._trustScores.forEach(d => {
+				totalTrust += d.score
+			})
+
+			totalTrust = parseFloat(totalTrust)
+			let updatedTrustScores = []
+			this._trustScores.forEach(d => {
+				updatedTrustScores.push({"node": d.node, "score": d.score / totalTrust})
+			})
+
+			this._trustScores = updatedTrustScores
 		}
 
 		this.setNextAction()
@@ -132,11 +238,11 @@ export default class Node {
 	}
 
 	// Randomly assign trust scores for each node
+	// TODO(nabeel): initialize trust based on number of shared connections 
 	initializeTrustScores() {
 
-		var totalTrust = 0;
-		var trustVals = [];
-		// console.log("num following: " + this._following.length)
+		let totalTrust = 0;
+		let trustVals = [];
 		this._following.forEach(n => {
 			var thisTrustScore = Math.random() * this._following.length
 			trustVals.push({"node":n, "score":thisTrustScore})
@@ -149,9 +255,7 @@ export default class Node {
 			totalTrust = 1
 
 		trustVals.forEach(trustData => {
-			// console.log('non-normalized trust score: ' + trustData.score)
 			this._trustScores.push({"node":trustData.node, "score":trustData.score/totalTrust})
-			// console.log(JSON.stringify({"node":trustData.node, "score":trustData.score/totalTrust}))
 		})
 
 	}

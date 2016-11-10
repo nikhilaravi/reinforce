@@ -12,6 +12,16 @@ export default {
   	return arr[Math.round(Math.random() * (arr.length - 1))]
   },
 
+  sampleArrayWeighted: function(cumSumArray) {
+    var randVal = Math.random()
+    for(var i = 0; i < cumSumArray.length; i++){
+      if(randVal <= cumSumArray[i])
+        return i
+    }
+
+    return cumSumArray.length - 1
+  },
+
   roundDown: function(num, nearestInt) {
     return Math.floor(num / nearestInt) * nearestInt
   },
