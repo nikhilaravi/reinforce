@@ -20,3 +20,10 @@ export let Nodes
 export const getReach = node => {
 	return Math.random()
 }
+
+export const getNodeForId = nodeId => {
+	for(let i = 0; i < Nodes.length; i++){
+		if(nodeId == Nodes[i].id)
+			return Nodes[i]
+	}
+}

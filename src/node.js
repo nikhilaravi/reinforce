@@ -1,7 +1,7 @@
 import helpers from './helpers/helpers'
 const { flatten, sampleArray, createDictByProp, bindAll } = helpers
 import { values } from 'underscore'
-import { Nodes, getReach } from './nodes'
+import { Nodes, getReach, getNodeForId } from './nodes'
 
 const cyclesInMemory = 3
 
@@ -39,7 +39,13 @@ export default class Node {
 	getState() { // evolve state here
 		let neighborIdeologies = []
 		this._following.forEach(n => {
-			neighborIdeologies.push(n.lastTweet.orientation)
+			let currIdeology
+			if(n.lastTweet)
+				currIdeology = n.lastTweet.orientation
+			else
+				currIdeology = n.belief
+
+			neighborIdeologies.push(currIdeology)
 		})
 
 		return neighborIdeologies
@@ -53,6 +59,7 @@ export default class Node {
 				trustRetweetScore += d.score
 			}
 		})
+		console.log(trustRetweetScore)
 		return trustRetweetScore
 	}
 
@@ -237,6 +244,16 @@ export default class Node {
 		bindAll(this, [ "getMessage", "sendMessages", "adjustFollowing" ])
 	}
 
+	initFollowerNodes() {
+
+		let followingNodes = []
+		this._following.forEach(n => {
+			let node = getNodeForId(n)
+			followingNodes.push(node)
+		})
+		this._following = followingNodes
+	}
+
 	// Randomly assign trust scores for each node
 	// TODO(nabeel): initialize trust based on number of shared connections 
 	initializeTrustScores() {
@@ -244,8 +261,8 @@ export default class Node {
 		let totalTrust = 0;
 		let trustVals = [];
 		this._following.forEach(n => {
-			var thisTrustScore = Math.random() * this._following.length
-			trustVals.push({"node":n, "score":thisTrustScore})
+			let thisTrustScore = Math.random() * this._following.length
+			trustVals.push({"nodeId":n, "score":thisTrustScore})
 			totalTrust += thisTrustScore
 		})
 
@@ -255,7 +272,7 @@ export default class Node {
 			totalTrust = 1
 
 		trustVals.forEach(trustData => {
-			this._trustScores.push({"node":trustData.node, "score":trustData.score/totalTrust})
+			this._trustScores.push({"node":trustData.nodeId, "score":trustData.score/totalTrust})
 		})
 
 	}

@@ -74,7 +74,7 @@ const updateLinks = () => {
       for(let j=0; j<n.following.length; j++) {
         let target
         for(let k=0; k<Nodes.length; k++) {
-          if(Nodes[k].id === n.following[j]) {
+          if(Nodes[k].id === n.following[j].id) {
             target = Nodes[k]
             break
           }
@@ -152,11 +152,12 @@ const initialize = () => {
   links.forEach(l => {
     const source = Nodes.find(n => n.id === +l.source)
     const target = Nodes.find(n => n.id === +l.target)
-    source.following = source.following.push(target)
+    source.following = source.following.concat(target.id)
   })
 
   Nodes.forEach(n => {
     n.init()
+    n.initFollowerNodes()
     n.initializeTrustScores()
   })
 
