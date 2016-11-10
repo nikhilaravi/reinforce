@@ -141,7 +141,7 @@ const initialize = () => {
     }
 
     force.force("link").links(links)
-    force.alphaTarget(0.3).restart()
+    force.alphaTarget(0.1).restart()
     // end update links
 
     nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
@@ -207,7 +207,7 @@ document.addEventListener("mousemove", e => {
 
 Promise.all(['nodes', 'edges'].map(getData))
   .then(data => {
-    nodeData = data[0].filter((d, i) => i < 600) 
+    nodeData = data[0].filter((d, i) => i < 700) 
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
