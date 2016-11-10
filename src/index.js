@@ -10,7 +10,7 @@ import { timer } from 'd3-timer'
 import messageState from './messageState'
 import { getData } from './api'
 import "../main.scss"
-import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './nodes'
+import { Nodes, initializeNodes, setFollowedBy, initializeFollowings, minFollowedByLength, maxFollowedByLength } from './nodes'
 
 let popoverElement = document.querySelector("#popover"),
   popoverID = popoverElement.querySelector(".node_id"),
@@ -31,7 +31,7 @@ let popoverElement = document.querySelector("#popover"),
   nodeData, edgeData,
   cycleSID = null, cycleDur = 5000,
   updateLinksSID = null, updateLinksNodeIndex = 0,
-  nodeSizeScale = scaleLinear().range([1, 10]).clamp(true)
+  nodeSizeScale = scaleLinear().range([4, 20]).clamp(true)
 
 scene.add(camera)
 camera.position.z = 1000
@@ -70,6 +70,7 @@ document.body.appendChild(renderer.domElement)
 const updateLinks = () => {
   Nodes[updateLinksNodeIndex].adjustFollowing()
   setFollowedBy(Nodes[updateLinksNodeIndex])
+  nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
 
   links = []
 
@@ -127,7 +128,7 @@ const initialize = () => {
 
       nodePositions[i * 2] = node.x - width / 2
       nodePositions[i * 2 + 1] = -(node.y - height / 2)
-      nodeSizes[i] = nodeSizeScale(0.5)
+      nodeSizes[i] = nodeSizeScale(node.followedBy.length)
       quadtree.add([node.x, node.y, node])
     }
 
