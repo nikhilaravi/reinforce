@@ -9,10 +9,6 @@ import { difference } from 'underscore'
 
 export let Nodes
 
-export let maxFollowedByLength = 0
-
-export let minFollowedByLength = Infinity
-
 export const getReach = node => {
 	return Math.random()
 }
@@ -48,16 +44,6 @@ export const initializeFollowings = () => {
 
 	for(let i=0; i<Nodes.length; i++) {
 		Nodes[i].followedBy = record[Nodes[i].id]
-		updateMinMaxFollowedBy(Nodes[i].followedBy.length)
-	}
-}
-
-const updateMinMaxFollowedBy = length => {
-	if(length > maxFollowedByLength) {
-		maxFollowedByLength = length
-	}
-	if(length < minFollowedByLength) {
-		minFollowedByLength = length
 	}
 }
 
@@ -69,12 +55,10 @@ export const setFollowedBy = node => {
 		let match = Nodes.find(d => d.id === toRemove[i])
 		let index = match.followedBy.indexOf(node.id)
 		match.followedBy = match.followedBy.slice(0, index).concat(match.followedBy.slice(index + 1))
-		updateMinMaxFollowedBy(match.followedBy.length)
 	}
 
 	for(let i=0; i<toAdd.length; i++) {
 		let match = Nodes.find(d => d.id === toAdd[i])
 		match.followedBy = match.followedBy.concat(node.id)
-		updateMinMaxFollowedBy(match.followedBy.length)
 	}
 }

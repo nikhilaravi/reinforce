@@ -10,7 +10,7 @@ import { timer } from 'd3-timer'
 import messageState from './messageState'
 import { getData } from './api'
 import "../main.scss"
-import { Nodes, initializeNodes, setFollowedBy, initializeFollowings, minFollowedByLength, maxFollowedByLength } from './nodes'
+import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './nodes'
 
 let start, lastCycleTime = 0,
   popoverElement = document.querySelector("#popover"),
@@ -32,6 +32,7 @@ let start, lastCycleTime = 0,
   nodeData, edgeData,
   cycleSID = null, cycleDur = 5000,
   updateLinksSID = null, updateLinksNodeIndex = 0,
+  maxFollowedByLength = 0, minFollowedByLength = Infinity,
   nodeSizeScale = scaleLinear().range([4, 20]).clamp(true)
 
 scene.add(camera)
@@ -59,6 +60,15 @@ renderer.setSize(width, height)
 renderer.setPixelRatio(window.devicePixelRatio)
 
 document.body.appendChild(renderer.domElement)
+
+const updateMinMaxFollowedBy = length => {
+  if(length > maxFollowedByLength) {
+    maxFollowedByLength = length
+  }
+  if(length < minFollowedByLength) {
+    minFollowedByLength = length
+  }
+}
 
 const initialize = () => {
   nodePositions = new Float32Array(Nodes.length * 2)
@@ -144,7 +154,8 @@ const initialize = () => {
     force.alphaTarget(0.1).restart()
     // end update links
 
-    nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
+    minFollowedByLength = Infinity
+    maxFollowedByLength = 0
 
     quadtree = d3quadtree().extent([[-1, -1], [width, height]])
 
@@ -162,7 +173,10 @@ const initialize = () => {
         nodeSizesColors[i * 2 + 1] = decodeFloat(202, 176, 254, 254)
       }
       quadtree.add([node.x, node.y, node])
+      updateMinMaxFollowedBy(node.followedBy.length)
     }
+
+    nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
 
     for(let i=0; i < Math.max(lastOccupiedEdgeVertexIndex, links.length); i++) {
       const link = links[i]
