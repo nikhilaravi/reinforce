@@ -17,20 +17,8 @@
   <script type="x-shader/x-vertex" id="node-vertexshader">
     precision highp float;
 
-    #define FLOAT_MAX 1.70141184e38
-    #define FLOAT_MIN 1.17549435e-38
-
     lowp vec4 encode_float(highp float v) {
       highp float av = abs(v);
-
-      //Handle special cases
-      if(av < FLOAT_MIN) {
-        return vec4(0.0, 0.0, 0.0, 0.0);
-      } else if(v > FLOAT_MAX) {
-        return vec4(127.0, 128.0, 0.0, 0.0) / 255.0;
-      } else if(v < -FLOAT_MAX) {
-        return vec4(255.0, 128.0, 0.0, 0.0) / 255.0;
-      }
 
       highp vec4 c = vec4(0,0,0,0);
 
