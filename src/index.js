@@ -12,6 +12,8 @@ import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './nodes'
 
+const worker = new Worker("src/workers/layout.js")
+
 let start, lastCycleTime = 0,
   popoverElement = document.querySelector("#popover"),
   popoverID = popoverElement.querySelector(".node_id"),
@@ -150,34 +152,12 @@ const initialize = () => {
       }
     }
 
-    force.force("link").links(links)
-    force.alphaTarget(0.1).restart()
+    // force.force("link").links(links)
+    // force.alphaTarget(0.1).restart()
     // end update links
 
-    minFollowedByLength = Infinity
-    maxFollowedByLength = 0
-
-    quadtree = d3quadtree().extent([[-1, -1], [width, height]])
-
-    for(let i=0; i < Nodes.length; i++) {
-      let node = Nodes[i]
-
-      nodePositions[i * 2] = node.x - width / 2
-      nodePositions[i * 2 + 1] = -(node.y - height / 2)
-      nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
-      if(node.trumporhillary === 0) { // red
-        nodeSizesColors[i * 2 + 1] = decodeFloat(229, 29, 46, 254)
-      } else if(node.trumporhillary === 1 || node.trumporhillary === 2 || node.trumporhillary === 5) { // blue
-        nodeSizesColors[i * 2 + 1] = decodeFloat(18, 168, 224, 254)
-      } else { // purple
-        nodeSizesColors[i * 2 + 1] = decodeFloat(202, 176, 254, 254)
-      }
-      quadtree.add([node.x, node.y, node])
-      updateMinMaxFollowedBy(node.followedBy.length)
-    }
-
-    nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
-
+    worker.postMessage({ links: JSON.stringify(links) })
+    
     for(let i=0; i < Math.max(lastOccupiedEdgeVertexIndex, links.length); i++) {
       const link = links[i]
       let source, target
@@ -219,9 +199,38 @@ document.addEventListener("mousemove", e => {
   }
 })
 
+worker.onmessage = function(event) {
+  minFollowedByLength = Infinity
+  maxFollowedByLength = 0
+  quadtree = d3quadtree().extent([[-1, -1], [width, height]])
+
+  console.log("hii")
+  console.log(Nodes[10].x)
+  console.log(event.data.nodes[10].x)
+
+  for(let i=0; i < Nodes.length; i++) {
+    let node = Nodes[i]
+
+    nodePositions[i * 2] = event.data.nodes[i].x - width / 2
+    nodePositions[i * 2 + 1] = -(event.data.nodes[i].y - height / 2)
+    nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
+    if(node.trumporhillary === 0) { // red
+      nodeSizesColors[i * 2 + 1] = decodeFloat(229, 29, 46, 254)
+    } else if(node.trumporhillary === 1 || node.trumporhillary === 2 || node.trumporhillary === 5) { // blue
+      nodeSizesColors[i * 2 + 1] = decodeFloat(18, 168, 224, 254)
+    } else { // purple
+      nodeSizesColors[i * 2 + 1] = decodeFloat(202, 176, 254, 254)
+    }
+    quadtree.add([event.data.nodes[i].x, event.data.nodes[i].y, node])
+    updateMinMaxFollowedBy(node.followedBy.length)
+  }
+
+  nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
+}
+
 Promise.all(['nodes', 'edges'].map(getData))
   .then(data => {
-    nodeData = data[0].filter((d, i) => i < 600) 
+    nodeData = data[0].filter((d, i) => i < 60) 
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
@@ -229,6 +238,13 @@ Promise.all(['nodes', 'edges'].map(getData))
       [+d.source, +d.target].every(id => nodeData.find(n => n.node_id === id))) 
 
     edgeData.splice(roundDown(edgeData.length, 3))
+
+    worker.postMessage({
+      type: "initialize",
+      width, height,
+      nodes: nodeData,
+      links: edgeData
+    })
 
     initializeNodes(nodeData)
     initialize()
