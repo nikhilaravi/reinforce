@@ -151,7 +151,9 @@ const initialize = () => {
     }
 
     force.force("link").links(links)
-    force.alphaTarget(0.1).restart()
+    if(Math.random() < 0.5) { // perf
+      force.alphaTarget(0.1).restart()
+    }
     // end update links
 
     minFollowedByLength = Infinity
