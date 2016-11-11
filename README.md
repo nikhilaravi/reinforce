@@ -20,3 +20,8 @@ Learn loop
 - get the learned action from the agent
 - get the reward from the node environment
 - call learn on the agent based on that reward
+
+
+## Visualisation metrics
+
+- the ratio of agreementCount to disagreementCount of the messages recieved by a particular node 

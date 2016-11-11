@@ -18,7 +18,7 @@ export default class Node {
 		this.memory = [[]]
 
 		this.agent = new RL.DQNAgent(this, {
-	    update: 'qlearn', 
+	    update: 'qlearn',
 	    gamma: 0.9, // discount factor, [0, 1)
 	    epsilon: 0.2, // initial epsilon for epsilon-greedy policy, [0, 1)
 	    alpha: 0.01, // value function learning rate
@@ -54,61 +54,89 @@ export default class Node {
 		return getReach(this)
 	}
 
+	// in each cycle a node will either remain silent or retweet a message
 	getMessage() {
+    // if not retweet action then no message is sent
 		let orientation = "", retweetID = null
 
-		if(this.nextAction === 1) { 
-			orientation = this.belief 
+		if(this.nextAction === 1) {
+			orientation = this.belief
+
+      // with 0.5 probability randomly select a tweet from one of the people the node is following with the same orientation as the node
+      // retweet the message
+
 			if(Math.random() < 0.5) {
 				const matchingMessages = this.memory.reduce(flatten)
 					.filter(msg => msg.orientation === this.belief)
 
+        // if a message of the correct orientation is found retweet it
 				if(matchingMessages.length) {
 					retweetID = sampleArray(matchingMessages).id
 				}
 			}
 		}
-		
+
 		return {
 			orientation, retweetID, user: this.id
-		}	
+		}
 	}
 
+	// invoked with the messages of all the modes in the network in the current cycle
 	sendMessages(messages) {
+
+    // update the memory
 		if(this.memory.length > cyclesInMemory) { this.memory.shift() }
 
 		const filteredMessages = []
+
+    // iterate through all the messages from all the nodes in the network
 		for(let i=0; i<messages.length; i++) {
+      // filter the messages for the messages of all the nodes followed by the current node
 			if(this._following.indexOf(messages[i].user) > -1) {
 				filteredMessages.push(messages[i])
 			}
 		}
 
+    // save the array of messages of the nodes followed by the current node in the current cycle
 		this.memory.push(filteredMessages)
 	}
 
 	setNextAction() {
+
+    // the state is a random number between 0 and 1
+    // the action is a number in the range(getMaxNumActions())
 		const state = this.getState(),
 			action = this.agent.act(state),
 			r = this.getReward()
 
+    // instruct the agent to learn based on the current reward
 		this.agent.learn(r)
 
 		this.nextAction = action
 	}
 
+  // update followers of a node
 	adjustFollowing() {
+
+    // create a dictionary of the beliefs of all the nodes followed by the current node
+    // the belief is determined from the messages from the past three cycles
+
+    // the number of messages in agreement with this node and the n
 		const byBeliefs = createDictByProp(this.memory.reduce(flatten), 'orientation'),
 			agreementCount = byBeliefs[this.belief] ? byBeliefs[this.belief].length : 0.0001,
 			strongCounterOrientation = Object.keys(byBeliefs)
-				.filter(d => d !== this.belief && !!d)
-				.map(k => byBeliefs[k] )
-				.find(d => d.length / agreementCount > 1.5)
+				.filter(d => d !== this.belief && !!d) // filter for counter beliefs (but don't count undeclared beliefs (i.e. empty string))
+				.map(k => byBeliefs[k] ) // return arrays of messages with the counter belief
+				.find(d => d.length / agreementCount > 1.5) // check the ratio of agreement to disagreement in the node's immediate following connections
 
+    // the ratio of agreementCount to disagreementCount could be interesting to plot
+    console.log('beliefs', byBeliefs, agreementCount, strongCounterOrientation)
+
+    // update lastFollowing to the current following list
 		this._lastFollowing = this._following.slice()
 
 		if(strongCounterOrientation) {
-			// change your belief to match the strong counter orientation
+			// if enough people disaggree - change your belief to match the strong counter orientation
 			this.belief = strongCounterOrientation[0].orientation
 
 			// now follow someone randomly from the strong counter orientation group
@@ -131,6 +159,7 @@ export default class Node {
 			}
 		}
 
+    // initiate the next cycle of the agent's behaviour
 		this.setNextAction()
 	}
 

@@ -12,12 +12,14 @@ import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings, minFollowedByLength, maxFollowedByLength } from './nodes'
 
+
+// intialise constants
 let start, lastCycleTime = 0,
   popoverElement = document.querySelector("#popover"),
   popoverID = popoverElement.querySelector(".node_id"),
   popoverBelief = popoverElement.querySelector('.node_belief'),
   quadtree = d3quadtree(),
-  renderer = new THREE.WebGLRenderer({ alpha: true }), 
+  renderer = new THREE.WebGLRenderer({ alpha: true }),
   width = window.innerWidth, height = window.innerHeight,
   scene = new THREE.Scene(),
   camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 10000),
@@ -28,7 +30,7 @@ let start, lastCycleTime = 0,
   nodePositionBuffer, edgeVerticesBuffer, nodeSizesColorsBuffer,
   force = forceSimulation(),
   emptyNode = new THREE.Vector2(),
-  links, 
+  links,
   nodeData, edgeData,
   cycleSID = null, cycleDur = 5000,
   updateLinksSID = null, updateLinksNodeIndex = 0,
@@ -60,23 +62,25 @@ renderer.setPixelRatio(window.devicePixelRatio)
 
 document.body.appendChild(renderer.domElement)
 
+
+// initialize force layout after the data has been obtained
 const initialize = () => {
   nodePositions = new Float32Array(Nodes.length * 2)
   nodeSizesColors = new Float32Array(Nodes.length * 2)
   edgeVertices = new Float32Array(edgeData.length * 2 * 6)
- 
+
   nodePositionBuffer = new THREE.BufferAttribute(nodePositions, 2)
   nodeGeometry.addAttribute("position", nodePositionBuffer)
   nodeSizesColorsBuffer = new THREE.BufferAttribute(nodeSizesColors, 2)
   nodeGeometry.addAttribute("sizeColor", nodeSizesColorsBuffer)
-  
+
   edgeVerticesBuffer = new THREE.BufferAttribute(edgeVertices, 3)
 
   edgeGeometry.addAttribute("position", edgeVerticesBuffer)
 
   scene.add(new THREE.LineSegments(edgeGeometry, edgeMaterial))
   scene.add(new THREE.Points(nodeGeometry, nodeMaterial))
-  
+
   force.nodes(Nodes)
     .force("link", forceLink().id(d => d.id))
     .force("charge", forceManyBody().strength(-10).distanceMax(300))
@@ -84,24 +88,30 @@ const initialize = () => {
     .force("vertical", forceY().strength(0.1))
     .force("horizontal", forceX().strength(0.1))
     .velocityDecay(0.6)
-  
+
+  // edgeData is loaded from the node data json file
   links = edgeData
 
+  // create link objects for each link with source and target node ids
   links.forEach(l => {
     const source = Nodes.find(n => n.id === +l.source)
     const target = Nodes.find(n => n.id === +l.target)
     source.following = source.following.concat(target.id)
   })
 
+  // initialize the followedBy property of each node
   initializeFollowings()
 
+  // bind the message receiving and sending methods for each node
   Nodes.forEach(n => n.init())
 
+  // bind message cycle methods to collect and send messages
   messageState.init()
 
   start = Date.now()
   messageState.cycle()
 
+  // continue cyclying through the messages for 5000 cycles
   cycleSID = setInterval(() => {
     lastCycleTime = Date.now() - start
     messageState.cycle()
@@ -116,13 +126,16 @@ const initialize = () => {
       updateLinksNodeIndex = 0
     }
 
+    // iterate through the nodes
     for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
+      // update follower and follwedBy
       Nodes[i].adjustFollowing()
       setFollowedBy(Nodes[i])
     }
 
     updateLinksNodeIndex = targetIndex
 
+    // update the links due to changes in follower followeBy
     links = []
     for(let i=0; i<Nodes.length; i++) {
       let n = Nodes[i]
@@ -140,6 +153,7 @@ const initialize = () => {
       }
     }
 
+    // update links in the force layout
     force.force("link").links(links)
     force.alphaTarget(0.1).restart()
     // end update links
@@ -148,6 +162,7 @@ const initialize = () => {
 
     quadtree = d3quadtree().extent([[-1, -1], [width, height]])
 
+    // colour the node according to the belief 
     for(let i=0; i < Nodes.length; i++) {
       let node = Nodes[i]
 
@@ -207,15 +222,20 @@ document.addEventListener("mousemove", e => {
 
 Promise.all(['nodes', 'edges'].map(getData))
   .then(data => {
-    nodeData = data[0].filter((d, i) => i < 700) 
+
+    // fetch node and edge data from the json data file
+    nodeData = data[0].filter((d, i) => i < 700)
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
     edgeData = data[1].filter(d =>
-      [+d.source, +d.target].every(id => nodeData.find(n => n.node_id === id))) 
+      [+d.source, +d.target].every(id => nodeData.find(n => n.node_id === id)))
 
     edgeData.splice(roundDown(edgeData.length, 3))
 
+    // initialise the nodes
     initializeNodes(nodeData)
+
+    //initialize force layout with node and edge data
     initialize()
   })
