@@ -221,7 +221,7 @@ document.addEventListener("mousemove", e => {
 
 Promise.all(['nodes', 'edges'].map(getData))
   .then(data => {
-    nodeData = data[0].filter((d, i) => i < 700) 
+    nodeData = data[0].filter((d, i) => i < 600) 
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
