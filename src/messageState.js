@@ -44,9 +44,9 @@ export default {
 	emitMessages() {
 		mediator.publish("newMessages", current)
 
-		// send all the messages to each node 
+		// send all the messages to each node
 		for(let i=0; i<Nodes.length; i++) {
-			Nodes[i].sendMessages(current)
+			Nodes[i].recieveMessages(current)
 		}
 	}
 }

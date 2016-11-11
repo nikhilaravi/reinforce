@@ -82,7 +82,7 @@ export default class Node {
 	}
 
 	// invoked with the messages of all the modes in the network in the current cycle
-	sendMessages(messages) {
+	recieveMessages(messages) {
 
     // update the memory
 		if(this.memory.length > cyclesInMemory) { this.memory.shift() }
