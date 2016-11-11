@@ -22,17 +22,9 @@ onmessage = function(event) {
       .force("vertical", d3.forceY().strength(0.01))
       .force("horizontal", d3.forceX().strength(0.01))
       .velocityDecay(0.6)
-
-    links.forEach(function(l) {
-      var source = nodes.find(function(n) {
-        return n.id === +l.source
-      })
-      var target = nodes.find(function(n) {
-        return n.id === +l.target
-      })
-    })
   } else {
-    force.force("link").links(JSON.parse(event.data.links))
+    links = JSON.parse(event.data.links)
+    force.force("link").links(links)
     force.alphaTarget(0.1).restart()
     postMessage({ nodes: nodes, links: links })
   }

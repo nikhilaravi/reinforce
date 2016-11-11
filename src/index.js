@@ -151,31 +151,9 @@ const initialize = () => {
         }
       }
     }
-
-    // force.force("link").links(links)
-    // force.alphaTarget(0.1).restart()
     // end update links
-
-    worker.postMessage({ links: JSON.stringify(links) })
     
-    for(let i=0; i < Math.max(lastOccupiedEdgeVertexIndex, links.length); i++) {
-      const link = links[i]
-      let source, target
-      if(link) {
-        source = link.source
-        target = link.target
-      } else {
-        source = emptyNode
-        target = emptyNode
-      }
-
-      edgeVertices[i * 2 * 3] = source.x - width / 2
-      edgeVertices[i * 2 * 3 + 1] = -(source.y - height / 2)
-      edgeVertices[i * 2 * 3 + 3] = target.x - width / 2
-      edgeVertices[i * 2 * 3 + 4] = -(target.y - height / 2)
-    }
-
-    lastOccupiedEdgeVertexIndex = links.length
+    worker.postMessage({ links: JSON.stringify(links) })
 
     edgeVerticesBuffer.needsUpdate = true
     nodePositionBuffer.needsUpdate = true
@@ -204,9 +182,9 @@ worker.onmessage = function(event) {
   maxFollowedByLength = 0
   quadtree = d3quadtree().extent([[-1, -1], [width, height]])
 
-  console.log("hii")
-  console.log(Nodes[10].x)
-  console.log(event.data.nodes[10].x)
+  // console.log("hii")
+  // console.log(Nodes[10].x)
+  // console.log(event.data.nodes[10].x)
 
   for(let i=0; i < Nodes.length; i++) {
     let node = Nodes[i]
@@ -226,11 +204,30 @@ worker.onmessage = function(event) {
   }
 
   nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
+
+  for(let i=0; i < Math.max(lastOccupiedEdgeVertexIndex, links.length); i++) {
+    const link = event.data.links[i]
+    let source, target
+    if(link) {
+      source = link.source
+      target = link.target
+    } else {
+      source = emptyNode
+      target = emptyNode
+    }
+
+    edgeVertices[i * 2 * 3] = source.x - width / 2
+    edgeVertices[i * 2 * 3 + 1] = -(source.y - height / 2)
+    edgeVertices[i * 2 * 3 + 3] = target.x - width / 2
+    edgeVertices[i * 2 * 3 + 4] = -(target.y - height / 2)
+  }
+
+  lastOccupiedEdgeVertexIndex = links.length
 }
 
 Promise.all(['nodes', 'edges'].map(getData))
   .then(data => {
-    nodeData = data[0].filter((d, i) => i < 60) 
+    nodeData = data[0].filter((d, i) => i < 25) 
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
