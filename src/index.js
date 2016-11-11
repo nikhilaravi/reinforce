@@ -79,10 +79,10 @@ const initialize = () => {
   
   force.nodes(Nodes)
     .force("link", forceLink().id(d => d.id))
-    .force("charge", forceManyBody().strength(-10).distanceMax(300))
+    .force("charge", forceManyBody().strength(-10).distanceMax(200))
     .force("center", forceCenter(width / 2, height / 2))
-    .force("vertical", forceY().strength(0.1))
-    .force("horizontal", forceX().strength(0.1))
+    .force("vertical", forceY().strength(0.01))
+    .force("horizontal", forceX().strength(0.01))
     .velocityDecay(0.6)
   
   links = edgeData
