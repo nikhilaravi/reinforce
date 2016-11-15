@@ -15,6 +15,7 @@ page rank. (how well their messages performed)
 for puckworld, state was where all the pieces were on the board, and reward was how good that state was.
 */
 
+
 export default {
 	init() {
 		helpers.bindAll(this, [ "collectMessages", "emitMessages", "cycle" ])

@@ -10,10 +10,6 @@ import { difference } from 'underscore'
 // array of node objects
 export let Nodes
 
-export let maxFollowedByLength = 0
-
-export let minFollowedByLength = Infinity
-
 export const getReach = node => {
 	return Math.random()
 }
@@ -25,6 +21,7 @@ export const initializeNodes = seedData => {
 		new Node({
 			belief: sampleArray(beliefs),
 			id: d.node_id,
+			index: i,
 			username: i,
 			trumporhillary: d.trumporhillary
 		}))
@@ -34,6 +31,9 @@ export const initializeNodes = seedData => {
 // the dictionary is used to update each node's followedBy property
 
 export const initializeFollowings = () => {
+	// each object references another object
+	// key: node.id
+	// value: array of objects
 	const record = {}
 
 	for(let i=0; i<Nodes.length; i++) {
@@ -48,7 +48,9 @@ export const initializeFollowings = () => {
 			if(typeof record[target] === 'undefined') {
 				record[target] = []
 			}
-			record[target].push(node.id)
+			// belief is one of conservative, liberal, green,
+			var nodeObj = {id: node.id, belief: node.belief}
+			record[target].push(nodeObj)
 		}
 	}
 
@@ -57,8 +59,6 @@ export const initializeFollowings = () => {
 		Nodes[i].followedBy = record[Nodes[i].id]
 		// updateMinMaxFollowedBy(Nodes[i].followedBy.length)
 	}
-	maxFollowedByLength = Math.max.apply(null, Nodes.map(n => n.followedBy.length))
-	minFollowedByLength = Math.min.apply(null, Nodes.map(n => n.followedBy.length))
 }
 
 // keep track of the min/max follower lengths when updating
@@ -68,6 +68,7 @@ const updateMinMaxFollowedBy = length => {
 	}
 	if(length < minFollowedByLength) {
 		minFollowedByLength = length
+
 	}
 }
 
@@ -84,13 +85,14 @@ export const setFollowedBy = node => {
 		let match = Nodes.find(d => d.id === toRemove[i])
 
 		// find the index of the given node from the node to unfollow's followedBy list
-		let index = match.followedBy.indexOf(node.id)
+		let index = match.followedBy.map(n => n.id).indexOf(node.id)
 
 		// update the followedBy list of the node to unfollow to remove the given node
 		match.followedBy = match.followedBy.slice(0, index).concat(match.followedBy.slice(index + 1))
 
 		// update the minimum and maximum lengths
 		updateMinMaxFollowedBy(match.followedBy.length)
+
 	}
 
 	// iterate through the new nodes to follow
@@ -100,9 +102,11 @@ export const setFollowedBy = node => {
 		let match = Nodes.find(d => d.id === toAdd[i])
 
 		// add the given node to the list of followers of the new node
-		match.followedBy = match.followedBy.concat(node.id)
+		var newFollower = {id: node.id, belief: node.belief}
+		match.followedBy = match.followedBy.concat(newFollower)
 
 		//update the min max follower length
 		updateMinMaxFollowedBy(match.followedBy.length)
+
 	}
 }

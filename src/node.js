@@ -3,11 +3,41 @@ const { flatten, sampleArray, createDictByProp, bindAll } = helpers
 import { values } from 'underscore'
 import { Nodes, getReach } from './nodes'
 
+// optimising for knowlegde in the network
+// STATE -> state of the wrold, its local topology, the distribution of messages of each orientation intis followers and followees, the nodes current propensity to be exposed to new content
+// state - space - local network (array of nodes and beliefs of all followers and another array of followees) - so the state dimension is 2 (2, 2 dim arrays)
+// ACTION - function of state - one of {retweet something against own belief, retweet something with the same belief, follow someone with a different belief, follow someone with the same belief, change propensity to be exposed to new ideas}
+// each action affects one of the elements of the state either either directly or through the reward function i.e. following a new person changes the newtork topolgy,
+// retweeting someone changes their page rank, changing propensity to new ideas changes the probabiity of retweeting/following someime with the new
+
+
+// reward - distribution of beliefs in the newtork.
+
+// add epsilon for action selection - avoid greedy q learning - select action with some element of randomness in initial learning period
+// decay epsilon over time to reduce exploration
+
+// questions
+// do nodes converge to the same policy
+// how long does it take to converge to an optimum polict
+
+
+// ideas
+// update the global state representation - to record the path of a message over time.
+
+// how to model how deep a message travels in the network
+
+// network routing - the q value of each state action pair is the value of the 	time taken to transmit a packet bound for node d by way of the curren't node's neighbour y (time spent in queue)
+// - i.e. time reaminig for packet to reach destination
+
+//
+
+
 const cyclesInMemory = 3
 
 export default class Node {
 	constructor(opts) {
 		this.id = opts.id
+		this.index = opts.index
 		this.username = opts.username
 		this.belief = opts.belief
 		this.trumporhillary = opts.trumporhillary
@@ -44,18 +74,42 @@ export default class Node {
 
 	getNumStates() { return 1 }
 
-	getMaxNumActions() { return 2 }
+	getMaxNumActions() {
+		// 6 different actions
+		// follow same belief, follow different belief, retweet same belief, retweet different belief, increase propensity, decrease propensity, do nothing
+		// maybe start by not including propensity and then introducing this later.
+		return 2
+	}
 
 	getState() { // evolve state here
 		return [ Math.random() ]
+
+		// var followed_nodes = this.followedBy().map(n => {
+		//
+		// })
+		// update this to two arrays of objects of this.following and this.follwed_by and their corresponding beliefs and a number between 0 and 1 which is the node's current propensity for diverse info
 	}
 
 	getReward() { // total reach
+
+		// reward based distribution of beliefs in the list of people you are following
+		// - change in the distribution of people in the network - if equal to unequal, negative reward
+		// unequal to more equal, more positive reward.
+
 		return getReach(this)
 	}
 
 	// in each cycle a node will either remain silent or retweet a message
+
+
+	// rename this to sample next state - figure out how the state will change based on the selected action - update this.following/this.followers
+	// the effect of the action is also affected by the propensity to be exposed to new ideas.
+	// if action is to update propensity increase by random amount? or proportional to current propensity
+
 	getMessage() {
+
+			console.log('FOLLOWED BY', this._followedBy)
+
     // if not retweet action then no message is sent
 		let orientation = "", retweetID = null
 
@@ -105,9 +159,16 @@ export default class Node {
 
     // the state is a random number between 0 and 1
     // the action is a number in the range(getMaxNumActions())
+
 		const state = this.getState(),
 			action = this.agent.act(state),
 			r = this.getReward()
+
+			//state = env.getState();
+			// action = agent.act(state);
+			// var obs = env.sampleNextState(action); // sampleNextState updates the object state representation - i.e. update this.following and this.follwed_by
+			// agent.learn(obs.r);
+			// save the reward to the reward history of the agent - so can be plotted for each agent.
 
     // instruct the agent to learn based on the current reward
 		this.agent.learn(r)
@@ -164,6 +225,6 @@ export default class Node {
 	}
 
 	init() {
-		bindAll(this, [ "getMessage", "sendMessages", "adjustFollowing" ])
+		bindAll(this, [ "getMessage", "recieveMessages", "adjustFollowing" ])
 	}
 }
