@@ -44,7 +44,7 @@ export const initializeFollowings = () => {
 		}
 
 		for(let j=0; j<node.following.length; j++) {
-			let target = node.following[j]
+			let target = node.following[j].id
 			if(typeof record[target] === 'undefined') {
 				record[target] = []
 			}
@@ -61,16 +61,16 @@ export const initializeFollowings = () => {
 	}
 }
 
-// keep track of the min/max follower lengths when updating
-const updateMinMaxFollowedBy = length => {
-	if(length > maxFollowedByLength) {
-		maxFollowedByLength = length
-	}
-	if(length < minFollowedByLength) {
-		minFollowedByLength = length
-
-	}
-}
+// // keep track of the min/max follower lengths when updating
+// const updateMinMaxFollowedBy = length => {
+// 	if(length > maxFollowedByLength) {
+// 		maxFollowedByLength = length
+// 	}
+// 	if(length < minFollowedByLength) {
+// 		minFollowedByLength = length
+//
+// 	}
+// }
 
 //
 export const setFollowedBy = node => {
@@ -91,7 +91,7 @@ export const setFollowedBy = node => {
 		match.followedBy = match.followedBy.slice(0, index).concat(match.followedBy.slice(index + 1))
 
 		// update the minimum and maximum lengths
-		updateMinMaxFollowedBy(match.followedBy.length)
+		// updateMinMaxFollowedBy(match.followedBy.length)
 
 	}
 
@@ -106,7 +106,17 @@ export const setFollowedBy = node => {
 		match.followedBy = match.followedBy.concat(newFollower)
 
 		//update the min max follower length
-		updateMinMaxFollowedBy(match.followedBy.length)
-
+		// updateMinMaxFollowedBy(match.followedBy.length)
 	}
+
+	// update the beliefs of all nodes - some nodes might have changed their belief state in the iteration
+	for(let i=0; i<node.following.length; i++) {
+		var followings = node.followedBy.map(n => {
+			let match = Nodes.find(d => d.id === n.id)
+			// console.log('Node updated belief state', n.id, 'old belief', n.belief,  'new belief', match.belief)
+			n.belief = match.belief
+			return n;
+		});
+	}
+
 }

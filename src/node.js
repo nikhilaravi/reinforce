@@ -78,15 +78,11 @@ export default class Node {
 		// 6 different actions
 		// follow same belief, follow different belief, retweet same belief, retweet different belief, increase propensity, decrease propensity, do nothing
 		// maybe start by not including propensity and then introducing this later.
-		return 2
+		return 5
 	}
 
 	getState() { // evolve state here
-		return [ Math.random() ]
-
-		// var followed_nodes = this.followedBy().map(n => {
-		//
-		// })
+		return [this._followedBy, this._following, this.belief]
 		// update this to two arrays of objects of this.following and this.follwed_by and their corresponding beliefs and a number between 0 and 1 which is the node's current propensity for diverse info
 	}
 
@@ -107,8 +103,6 @@ export default class Node {
 	// if action is to update propensity increase by random amount? or proportional to current propensity
 
 	getMessage() {
-
-			console.log('FOLLOWED BY', this._followedBy)
 
     // if not retweet action then no message is sent
 		let orientation = "", retweetID = null
@@ -191,7 +185,7 @@ export default class Node {
 				.find(d => d.length / agreementCount > 1.5) // check the ratio of agreement to disagreement in the node's immediate following connections
 
     // the ratio of agreementCount to disagreementCount could be interesting to plot
-    console.log('beliefs', byBeliefs, agreementCount, strongCounterOrientation)
+    // console.log('beliefs', byBeliefs, agreementCount, strongCounterOrientation)
 
     // update lastFollowing to the current following list
 		this._lastFollowing = this._following.slice()
