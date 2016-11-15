@@ -24,16 +24,17 @@ let start, lastCycleTime = 0,
   nodePositions, nodeSizesColors,
   edgeGeometry = new THREE.BufferGeometry(),
   nodeGeometry = new THREE.BufferGeometry(),
+  edgeColorsStartTimes, edgeColorsStartTimesBuffer,
   edgeVertices, lastOccupiedEdgeVertexIndex,
   nodePositionBuffer, edgeVerticesBuffer, nodeSizesColorsBuffer,
   force = forceSimulation(),
   emptyNode = new THREE.Vector2(),
-  links, 
-  nodeData, edgeData,
-  cycleSID = null, cycleDur = 5000,
+  links, nodeData, edgeData,
+  cycleSID = null, cycleDur = 6000,
   updateLinksSID = null, updateLinksNodeIndex = 0,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
-  nodeSizeScale = scaleLinear().range([4, 20]).clamp(true)
+  nodeSizeScale = scaleLinear().range([4, 25]).clamp(true),
+  peakTime = 250.0
 
 scene.add(camera)
 camera.position.z = 1000
@@ -46,9 +47,13 @@ const nodeMaterial = new THREE.ShaderMaterial({
 
 const edgeMaterial = new THREE.ShaderMaterial({
   uniforms: {
+    uTime: { value: 0.0 },
+    peakTime: { value: peakTime },
+    totalTime: { value: 350.0 },
+    defaultOpacity: { value: 0.05 },
     color: {
       type: 'c',
-      value: new THREE.Color(0xCCE1F1)
+      value: new THREE.Color(0xB3BDDB)
     }
   },
   vertexShader: document.getElementById("edge-vertexshader").textContent,
@@ -62,18 +67,15 @@ renderer.setPixelRatio(window.devicePixelRatio)
 document.body.appendChild(renderer.domElement)
 
 const updateMinMaxFollowedBy = length => {
-  if(length > maxFollowedByLength) {
-    maxFollowedByLength = length
-  }
-  if(length < minFollowedByLength) {
-    minFollowedByLength = length
-  }
+  if(length > maxFollowedByLength) maxFollowedByLength = length
+  if(length < minFollowedByLength) minFollowedByLength = length
 }
 
 const initialize = () => {
   nodePositions = new Float32Array(Nodes.length * 2)
   nodeSizesColors = new Float32Array(Nodes.length * 2)
   edgeVertices = new Float32Array(edgeData.length * 2 * 6)
+  edgeColorsStartTimes = new Float32Array(edgeData.length * 2 * 4)
  
   nodePositionBuffer = new THREE.BufferAttribute(nodePositions, 2)
   nodeGeometry.addAttribute("position", nodePositionBuffer)
@@ -81,8 +83,10 @@ const initialize = () => {
   nodeGeometry.addAttribute("sizeColor", nodeSizesColorsBuffer)
   
   edgeVerticesBuffer = new THREE.BufferAttribute(edgeVertices, 3)
+  edgeColorsStartTimesBuffer = new THREE.BufferAttribute(edgeColorsStartTimes, 2)
 
   edgeGeometry.addAttribute("position", edgeVerticesBuffer)
+  edgeGeometry.addAttribute("colorTime", edgeColorsStartTimesBuffer)
 
   scene.add(new THREE.LineSegments(edgeGeometry, edgeMaterial))
   scene.add(new THREE.Points(nodeGeometry, nodeMaterial))
@@ -104,9 +108,7 @@ const initialize = () => {
   })
 
   initializeFollowings()
-
   Nodes.forEach(n => n.init())
-
   messageState.init()
 
   start = Date.now()
@@ -118,20 +120,19 @@ const initialize = () => {
   }, cycleDur)
 
   timer(d => {
+    const shouldUpdate = Math.random() < 0.5 // perf
+
+    edgeMaterial.uniforms['uTime'].value = d
+
     const diff = d - lastCycleTime
     const targetIndex = Math.max(0, Math.min(Math.round((diff / cycleDur) * Nodes.length), Nodes.length))
 
-    // update links
-    if(targetIndex < updateLinksNodeIndex) { // wrap around
-      updateLinksNodeIndex = 0
-    }
+    if(targetIndex < updateLinksNodeIndex) { updateLinksNodeIndex = 0 } // wrap around
 
     for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
       Nodes[i].adjustFollowing()
       setFollowedBy(Nodes[i])
     }
-
-    updateLinksNodeIndex = targetIndex
 
     links = []
     for(let i=0; i<Nodes.length; i++) {
@@ -150,37 +151,7 @@ const initialize = () => {
       }
     }
 
-    force.force("link").links(links)
-    if(Math.random() < 0.5) { // perf
-      force.alphaTarget(0.1).restart()
-    }
-    // end update links
-
-    minFollowedByLength = Infinity
-    maxFollowedByLength = 0
-
-    quadtree = d3quadtree().extent([[-1, -1], [width, height]])
-
-    for(let i=0; i < Nodes.length; i++) {
-      let node = Nodes[i]
-
-      nodePositions[i * 2] = node.x - width / 2
-      nodePositions[i * 2 + 1] = -(node.y - height / 2)
-      nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
-      if(node.trumporhillary === 0) { // red
-        nodeSizesColors[i * 2 + 1] = decodeFloat(229, 29, 46, 254)
-      } else if(node.trumporhillary === 1 || node.trumporhillary === 2 || node.trumporhillary === 5) { // blue
-        nodeSizesColors[i * 2 + 1] = decodeFloat(18, 168, 224, 254)
-      } else { // purple
-        nodeSizesColors[i * 2 + 1] = decodeFloat(200, 200, 200, 254)
-      }
-      quadtree.add([node.x, node.y, node])
-      updateMinMaxFollowedBy(node.followedBy.length)
-    }
-
-    nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
-
-    for(let i=0; i < Math.max(lastOccupiedEdgeVertexIndex, links.length); i++) {
+    for(let i=0; i<links.length; i++) {
       const link = links[i]
       let source, target
       if(link) {
@@ -191,15 +162,66 @@ const initialize = () => {
         target = emptyNode
       }
 
-      edgeVertices[i * 2 * 3] = source.x - width / 2
-      edgeVertices[i * 2 * 3 + 1] = -(source.y - height / 2)
-      edgeVertices[i * 2 * 3 + 3] = target.x - width / 2
-      edgeVertices[i * 2 * 3 + 4] = -(target.y - height / 2)
+      if(i < lastOccupiedEdgeVertexIndex) {
+        edgeVertices[i * 2 * 3] = source.x - width / 2
+        edgeVertices[i * 2 * 3 + 1] = -(source.y - height / 2)
+        edgeVertices[i * 2 * 3 + 3] = target.x - width / 2
+        edgeVertices[i * 2 * 3 + 4] = -(target.y - height / 2)
+      }
+
+      // revive in case we want custom edge colors
+      // edgeColorsStartTimes[i * 2 * 2] = decodeFloat(229, 29, 46, 254)
+      // edgeColorsStartTimes[i * 2 * 2 + 2] = decodeFloat(229, 29, 46, 254)  
+
+      if(source.index >= updateLinksNodeIndex && source.index < targetIndex) { // update times
+        // source
+        edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
+        // target
+        edgeColorsStartTimes[i * 2 * 2 + 3] = d
+      }
+    }
+
+    if(lastOccupiedEdgeVertexIndex > links.length) {
+      for(let i=links.length; i<lastOccupiedEdgeVertexIndex; i++) {
+        edgeVertices[i * 2 * 3] = 0
+        edgeVertices[i * 2 * 3 + 1] = 0
+        edgeVertices[i * 2 * 3 + 3] = 0
+        edgeVertices[i * 2 * 3 + 4] = 0
+      }
     }
 
     lastOccupiedEdgeVertexIndex = links.length
+    updateLinksNodeIndex = targetIndex
 
+    if(shouldUpdate) {
+      force.force("link").links(links)
+      force.alphaTarget(0.1).restart() 
+      quadtree = d3quadtree().extent([[-1, -1], [width, height]])
+      minFollowedByLength = Infinity
+      maxFollowedByLength = 0
+    }
+
+    for(let i=0; i < Nodes.length; i++) {
+      let node = Nodes[i]
+      nodePositions[i * 2] = node.x - width / 2
+      nodePositions[i * 2 + 1] = -(node.y - height / 2)
+      nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
+      if(node.trumporhillary === 0) { // red
+        nodeSizesColors[i * 2 + 1] = decodeFloat(229, 29, 46, 254)
+      } else if(node.trumporhillary === 1 || node.trumporhillary === 2 || node.trumporhillary === 5) { // blue
+        nodeSizesColors[i * 2 + 1] = decodeFloat(18, 168, 224, 254)
+      } else { // purple
+        nodeSizesColors[i * 2 + 1] = decodeFloat(200, 200, 200, 254)
+      }
+      if(shouldUpdate) {
+        quadtree.add([node.x, node.y, node])
+        updateMinMaxFollowedBy(node.followedBy.length)
+      }
+    }
+
+    nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
     edgeVerticesBuffer.needsUpdate = true
+    edgeColorsStartTimesBuffer.needsUpdate = true
     nodePositionBuffer.needsUpdate = true
     nodeSizesColorsBuffer.needsUpdate = true
     renderer.render(scene, camera)
@@ -223,7 +245,7 @@ document.addEventListener("mousemove", e => {
 
 Promise.all(['nodes', 'edges'].map(getData))
   .then(data => {
-    nodeData = data[0].filter((d, i) => i < 600) 
+    nodeData = data[0].filter((d, i) => i < 500) 
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 

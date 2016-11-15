@@ -77,15 +77,65 @@
     }
   </script>
   <script type="x-shader/x-vertex" id="edge-vertexshader">
+    precision highp float;
+
+    lowp vec4 encode_float(highp float v) {
+      highp float av = abs(v);
+
+      highp vec4 c = vec4(0,0,0,0);
+
+      //Compute exponent and mantissa
+      highp float e = floor(log2(av));
+      highp float m = av * pow(2.0, -e) - 1.0;
+
+      //Unpack mantissa
+      c[1] = floor(128.0 * m);
+      m -= c[1] / 128.0;
+      c[2] = floor(32768.0 * m);
+      m -= c[2] / 32768.0;
+      c[3] = floor(8388608.0 * m);
+
+      //Unpack exponent
+      highp float ebias = e + 127.0;
+      c[0] = floor(ebias / 2.0);
+      ebias -= c[0] * 2.0;
+      c[1] += floor(ebias) * 128.0;
+
+      //Unpack sign bit
+      c[0] += 128.0 * step(0.0, -v);
+
+      //Scale back to range
+      return c / 255.0;
+    }
+
+    uniform vec3 color;
+    uniform float uTime;
+    attribute vec2 colorTime;
+    varying vec4 vColor;
+    uniform float defaultOpacity;
+    uniform float peakTime;
+    uniform float totalTime;
+
     void main() {
+      // vColor = encode_float(color.x);
+      float diff = uTime - colorTime.y;
+      float opacity = defaultOpacity;
+
+      if(diff < peakTime) {
+        opacity = defaultOpacity + (diff / peakTime) * (1. - defaultOpacity);
+      } else if(diff < totalTime) {
+        opacity = defaultOpacity + (1. - (diff - peakTime) / (totalTime - peakTime)) * (1. - defaultOpacity);
+      }
+
+      vColor = vec4(color, opacity);
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
   </script>
   <script type="x-shader/x-fragment" id="edge-fragmentshader">
-    uniform vec3 color;
+    varying vec4 vColor;
 
     void main() {
-      gl_FragColor = vec4(color, 0.1);
+      gl_FragColor = vColor;
     }
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script>

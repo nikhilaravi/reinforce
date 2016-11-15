@@ -18,6 +18,7 @@ export const initializeNodes = seedData => {
 		new Node({
 			belief: sampleArray(beliefs),
 			id: d.node_id,
+			index: i,
 			username: i,
 			trumporhillary: d.trumporhillary
 		}))

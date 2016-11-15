@@ -8,6 +8,7 @@ const cyclesInMemory = 3
 export default class Node {
 	constructor(opts) {
 		this.id = opts.id
+		this.index = opts.index
 		this.username = opts.username
 		this.belief = opts.belief
 		this.trumporhillary = opts.trumporhillary
