@@ -19,6 +19,17 @@ export default {
     return FLOAT_VIEW[0]
   },
 
+  mean: function(arr){
+
+    let avg = 0
+    for(let i = 0; i < arr.length; i++){
+      avg += arr[i]
+    }
+
+    return parseFloat(avg) / arr.length
+
+  },
+
   sampleArray: function(arr) {
   	return arr[Math.round(Math.random() * (arr.length - 1))]
   },

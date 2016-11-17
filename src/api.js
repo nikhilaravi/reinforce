@@ -1,2 +1,2 @@
 export const getData = url =>
-  fetch(`src/data/${url}.json`).then(data=>data.json())
+  fetch(`src/data/toy/${url}.json`).then(data=>data.json())

@@ -16,6 +16,7 @@ let start, lastCycleTime = 0,
   popoverElement = document.querySelector("#popover"),
   popoverID = popoverElement.querySelector(".node_id"),
   popoverBelief = popoverElement.querySelector('.node_belief'),
+  popoverCivility = popoverElement.querySelector('.node_civility'),
   quadtree = d3quadtree(),
   renderer = new THREE.WebGLRenderer({ alpha: true }), 
   width = window.innerWidth, height = window.innerHeight,
@@ -48,7 +49,7 @@ const edgeMaterial = new THREE.ShaderMaterial({
   uniforms: {
     color: {
       type: 'c',
-      value: new THREE.Color(0xCCE1F1)
+      value: new THREE.Color(0x000000)
     }
   },
   vertexShader: document.getElementById("edge-vertexshader").textContent,
@@ -101,6 +102,7 @@ const initialize = () => {
     const source = Nodes.find(n => n.id === +l.source)
     const target = Nodes.find(n => n.id === +l.target)
     source.following = source.following.concat(target.id)
+    source._followingNodes.push(target)
   })
 
   initializeFollowings()
@@ -110,11 +112,13 @@ const initialize = () => {
   messageState.init()
 
   start = Date.now()
-  messageState.cycle()
+  // messageState.cycle()
+  messageState.cycleFollowing()
 
   cycleSID = setInterval(() => {
     lastCycleTime = Date.now() - start
-    messageState.cycle()
+    // messageState.cycle()
+    messageState.cycleFollowing()
   }, cycleDur)
 
   timer(d => {
@@ -214,6 +218,7 @@ document.addEventListener("mousemove", e => {
     popoverElement.style.display = 'block'
     popoverID.innerHTML = match[2].id
     popoverBelief.innerHTML = 'trumporhillary: ' + match[2].trumporhillary
+    popoverCivility.innerHTML = 'civility: ' + match[2].civility
   } else {
     popoverElement.style.display = 'none'
   }

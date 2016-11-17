@@ -2,7 +2,7 @@ import helpers from './helpers/helpers'
 import { Nodes } from './nodes'
 import mediator from './mediator'
 
-let current = []
+// let current = []
 
 /* 
 what goes into state? on what basis should we have the agent learn?
@@ -17,32 +17,39 @@ for puckworld, state was where all the pieces were on the board, and reward was 
 
 export default {
 	init() {
-		helpers.bindAll(this, [ "collectMessages", "emitMessages", "cycle" ])
+		// helpers.bindAll(this, [ "collectMessages", "emitMessages", "cycle" ])
+		helpers.bindAll(this, [ "cycleFollowing" ])
 	},
 
-	cycle() {
-		this.collectMessages()
-		this.emitMessages()
-
-		// current.forEach(d => console.log(d))
-
-		current = []
-	},
-
-	collectMessages() {
+	cycleFollowing() {
 		for(let i=0; i<Nodes.length; i++) {
-			current.push(Object.assign(
-				Nodes[i].getMessage(), {
-					id: uuid.v4()
-				}))
-		}
-	},
-
-	emitMessages() {
-		mediator.publish("newMessages", current)
-
-		for(let i=0; i<Nodes.length; i++) {
-			Nodes[i].sendMessages(current)
+			Nodes[i].chooseActions()
 		}
 	}
+	
+	// cycle() {
+	// 	this.collectMessages()
+	// 	this.emitMessages()
+
+	// 	// current.forEach(d => console.log(d))
+
+	// 	current = []
+	// },
+
+	// collectMessages() {
+	// 	for(let i=0; i<Nodes.length; i++) {
+	// 		current.push(Object.assign(
+	// 			Nodes[i].getMessage(), {
+	// 				id: uuid.v4()
+	// 			}))
+	// 	}
+	// },
+
+	// emitMessages() {
+	// 	mediator.publish("newMessages", current)
+
+	// 	for(let i=0; i<Nodes.length; i++) {
+	// 		Nodes[i].sendMessages(current)
+	// 	}
+	// }
 }
