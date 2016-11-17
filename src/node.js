@@ -66,17 +66,14 @@ export default class Node {
 	}
 
 	getMessage() {
-		let orientation = "", retweetID = null
+		let orientation = this.belief, retweetID = null
 
-		if(this.nextAction === 1) { 
-			orientation = this.belief 
-			if(Math.random() < 0.5) {
-				const matchingMessages = this.memory.reduce(flatten)
-					.filter(msg => msg.orientation === this.belief)
+		if(Math.random() < 0.5) {
+			const matchingMessages = this.memory.reduce(flatten)
+				.filter(msg => msg.orientation === this.belief)
 
-				if(matchingMessages.length) {
-					retweetID = sampleArray(matchingMessages).id
-				}
+			if(matchingMessages.length) {
+				retweetID = sampleArray(matchingMessages).id
 			}
 		}
 		
