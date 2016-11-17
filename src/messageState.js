@@ -35,7 +35,7 @@ export default {
 	collectMessages() {
 		for(let i=0; i<Nodes.length; i++) {
 			current.push(Object.assign(
-				Nodes[i].getMessage(), {
+				Nodes[i].sampleNextState(), {
 					id: uuid.v4()
 				}))
 		}

@@ -49,7 +49,7 @@ export const initializeFollowings = () => {
 				record[target] = []
 			}
 			// belief is one of conservative, liberal, green,
-			var nodeObj = {id: node.id, belief: node.belief}
+			var nodeObj = {id: node.id, belief: node.trumporhillary}
 			record[target].push(nodeObj)
 		}
 	}
@@ -82,10 +82,10 @@ export const setFollowedBy = node => {
 	for(let i=0; i<toRemove.length; i++) {
 
 		// find the node to unfollow from the global node list
-		let match = Nodes.find(d => d.id === toRemove[i])
+		let match = Nodes.find(d => d.id === toRemove[i].id)
 
 		// find the index of the given node from the node to unfollow's followedBy list
-		let index = match.followedBy.map(n => n.id).indexOf(node.id)
+		let index = match.followedBy.map(n => n.id).indexOf(node.id);
 
 		// update the followedBy list of the node to unfollow to remove the given node
 		match.followedBy = match.followedBy.slice(0, index).concat(match.followedBy.slice(index + 1))
@@ -99,10 +99,10 @@ export const setFollowedBy = node => {
 	for(let i=0; i<toAdd.length; i++) {
 
 		// find the node to follow
-		let match = Nodes.find(d => d.id === toAdd[i])
+		let match = Nodes.find(d => d.id === toAdd[i].id)
 
 		// add the given node to the list of followers of the new node
-		var newFollower = {id: node.id, belief: node.belief}
+		var newFollower = {id: node.id, belief: node.trumporhillary}
 		match.followedBy = match.followedBy.concat(newFollower)
 
 		//update the min max follower length

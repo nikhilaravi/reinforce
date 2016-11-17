@@ -86,13 +86,34 @@ export default class Node {
 		// update this to two arrays of objects of this.following and this.follwed_by and their corresponding beliefs and a number between 0 and 1 which is the node's current propensity for diverse info
 	}
 
+	getDiversityScore(belief_distribution) {
+		var keys = Object.keys(belief_distribution)
+		var belief_counts = keys.reduce((acc, curr, index) => {
+			acc[curr] = belief_distribution[curr].length
+			return acc
+		}, [0,0,0,0,0])
+		var mean_followers_per_belief = belief_counts.reduce(function(a, b) { return a + b; })/belief_counts.length;
+		var difference_from_mean = belief_counts.map(count => Math.pow((count-mean_followers_per_belief),2));
+		var sum_sqrt_distance = Math.pow((difference_from_mean.reduce(function(a, b) { return a + b; })),0.5);
+		return 1/sum_sqrt_distance
+	}
+
 	getReward() { // total reach
+		// 5 belief states 0, 1, 2, 3, 4
 
 		// reward based distribution of beliefs in the list of people you are following
 		// - change in the distribution of people in the network - if equal to unequal, negative reward
 		// unequal to more equal, more positive reward.
-
-		return getReach(this)
+		let reward
+		var belief_distribution = createDictByProp(this._following, 'belief');
+		var diversity_score = this.getDiversityScore(belief_distribution)
+		reward = diversity_score
+		if (this._lastFollowing !== undefined){
+			var previous_belief_distribution = createDictByProp(this._lastFollowing, 'belief');
+			var previous_diversity_score = this.getDiversityScore(previous_belief_distribution)
+			reward = diversity_score - previous_diversity_score
+		}
+		return reward
 	}
 
 	// in each cycle a node will either remain silent or retweet a message
@@ -102,7 +123,29 @@ export default class Node {
 	// the effect of the action is also affected by the propensity to be exposed to new ideas.
 	// if action is to update propensity increase by random amount? or proportional to current propensity
 
-	getMessage() {
+	sampleNextState() {
+
+		// if(this.nextAction === 0) {
+		//
+		// }
+		// else if(this.nextAction === 1) {
+		//
+		// }
+		// else if(this.nextAction === 2) {
+		//
+		// }
+		// else if(this.nextAction === 3) {
+		//
+		// }
+		// else if(this.nextAction === 4) {
+		//
+		// }
+		// else if(this.nextAction === 5) {
+		//
+		// }
+
+
+
 
     // if not retweet action then no message is sent
 		let orientation = "", retweetID = null
@@ -189,16 +232,18 @@ export default class Node {
 
     // update lastFollowing to the current following list
 		this._lastFollowing = this._following.slice()
+		var following_IDs = this._following.map(n => n.id)
 
 		if(strongCounterOrientation) {
 			// if enough people disaggree - change your belief to match the strong counter orientation
 			this.belief = strongCounterOrientation[0].orientation
-
 			// now follow someone randomly from the strong counter orientation group
 			const availableFollowees = Nodes.filter(n =>
-				n.belief === this.belief && !this._following.includes(n.id))
+				n.belief === this.belief && !following_IDs.includes(n.id))
 			if(availableFollowees.length) {
-				this._following.push(sampleArray(availableFollowees).id)
+				var newFollowee = sampleArray(availableFollowees)
+				var newNodeObj = {id: newFollowee.id, belief: newFollowee.trumporhillary}
+				this._following.push(newNodeObj)
 			}
 		}
 
@@ -210,7 +255,7 @@ export default class Node {
 
 			if(overpoliticalUsers.length) {
 				this._following.splice(
-					this._following.findIndex(d => d === sampleArray(overpoliticalUsers)), 1)
+					following_IDs.findIndex(d => d === sampleArray(overpoliticalUsers)), 1)
 			}
 		}
 
@@ -219,6 +264,6 @@ export default class Node {
 	}
 
 	init() {
-		bindAll(this, [ "getMessage", "recieveMessages", "adjustFollowing" ])
+		bindAll(this, [ "sampleNextState", "recieveMessages", "adjustFollowing" , "getReward"])
 	}
 }

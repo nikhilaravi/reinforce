@@ -110,7 +110,7 @@ const initialize = () => {
   links.forEach(l => {
     const source = Nodes.find(n => n.id === +l.source)
     const target = Nodes.find(n => n.id === +l.target)
-    source.following = source.following.concat({id: target.id, belief: target.belief});
+    source.following = source.following.concat({id: target.id, belief: target.trumporhillary})
   })
 
   // initialize the followedBy property of each node
@@ -156,23 +156,21 @@ const initialize = () => {
     for(let i=0; i<Nodes.length; i++) {
       let n = Nodes[i]
       if(n.following.length) {
-        // for each node this node is following
+        // for each person being followed
         for(let j=0; j<n.following.length; j++) {
           let target
-          // for each node in the graph
+          // iterate through nodes
           for(let k=0; k<Nodes.length; k++) {
-            // if the node is the current follower
+            // if node id matches the id of the following
             if(Nodes[k].id === n.following[j].id) {
               target = Nodes[k]
               break
             }
           }
-          links.push({ source: n, target: target });
+          links.push({ source: n, target })
         }
       }
     }
-    console.log('updated links', links[0])
-
     // update links in the force layout
     force.force("link").links(links)
     force.alphaTarget(0.1).restart()
