@@ -104,7 +104,7 @@ const initialize = () => {
   links.forEach(l => {
     const source = Nodes.find(n => n.id === +l.source)
     const target = Nodes.find(n => n.id === +l.target)
-    source.following = source.following.concat(target.id)
+    source.following = source.following.concat(target)
   })
 
   initializeFollowings()
@@ -131,7 +131,7 @@ const initialize = () => {
 
     for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
       Nodes[i].adjustFollowing()
-      setFollowedBy(Nodes[i])
+      // setFollowedBy(Nodes[i])
     }
 
     links = []
@@ -141,7 +141,7 @@ const initialize = () => {
         for(let j=0; j<n.following.length; j++) {
           let target
           for(let k=0; k<Nodes.length; k++) {
-            if(Nodes[k].id === n.following[j]) {
+            if(Nodes[k].id === n.following[j].id) {
               target = Nodes[k]
               break
             }
@@ -245,7 +245,7 @@ document.addEventListener("mousemove", e => {
 
 Promise.all(['nodes', 'edges'].map(getData))
   .then(data => {
-    nodeData = data[0].filter((d, i) => i < 500) 
+    nodeData = data[0].filter((d, i) => i < 20) 
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 

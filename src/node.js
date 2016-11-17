@@ -2,6 +2,7 @@ import helpers from './helpers/helpers'
 const { flatten, sampleArray, createDictByProp, bindAll } = helpers
 import { values } from 'underscore'
 import { Nodes, getReach } from './nodes'
+import { beliefs } from './config'
 
 const cyclesInMemory = 3
 
@@ -43,16 +44,25 @@ export default class Node {
 
 	get lastFollowing() { return this._lastFollowing }
 
-	getNumStates() { return 1 }
+	getNumStates() { return beliefs.length }
 
-	getMaxNumActions() { return 2 }
+	getMaxNumActions() { return beliefs.length }
 
 	getState() { // evolve state here
-		return [ Math.random() ]
+		let counts = beliefs.reduce((acc, curr) => {
+			acc[curr] = 0
+			return acc
+		}, {})
+
+		for(let i=0; i<this._following.length; i++) {
+			counts[this._following[i].belief]++
+		}
+
+		return values(counts)
 	}
 
 	getReward() { // total reach
-		return getReach(this)
+		return Math.random()
 	}
 
 	getMessage() {
@@ -80,7 +90,7 @@ export default class Node {
 
 		const filteredMessages = []
 		for(let i=0; i<messages.length; i++) {
-			if(this._following.indexOf(messages[i].user) > -1) {
+			if(this._following.find(d => d.id === messages[i].user)) {
 				filteredMessages.push(messages[i])
 			}
 		}
@@ -116,7 +126,7 @@ export default class Node {
 			const availableFollowees = Nodes.filter(n =>
 				n.belief === this.belief && !this._following.includes(n.id))
 			if(availableFollowees.length) {
-				this._following.push(sampleArray(availableFollowees).id)
+				this._following.push(sampleArray(availableFollowees))
 			}
 		}
 
@@ -128,7 +138,7 @@ export default class Node {
 
 			if(overpoliticalUsers.length) {
 				this._following.splice(
-					this._following.findIndex(d => d === sampleArray(overpoliticalUsers)), 1)
+					this._following.findIndex(d => d.id === sampleArray(overpoliticalUsers)), 1)
 			}
 		}
 
