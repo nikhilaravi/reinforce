@@ -143,7 +143,8 @@ const initialize = () => {
     // iterate through the nodes
     for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
       // update follower and follwedBy
-      Nodes[i].adjustFollowing()
+      // get next action for the node
+      Nodes[i].setNextAction()
       setFollowedBy(Nodes[i])
     }
 

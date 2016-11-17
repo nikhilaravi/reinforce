@@ -22,12 +22,13 @@ export default {
 	},
 
 	cycle() {
-		this.collectMessages()
-		this.emitMessages()
+		// this.collectMessages()
+		// this.emitMessages()
 
 		// current.forEach(d => console.log(d))
-
-		current = []
+		for(let i=0; i<Nodes.length; i++) {
+				Nodes[i].setNextAction()
+		}
 	},
 
 

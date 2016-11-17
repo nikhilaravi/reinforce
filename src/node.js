@@ -46,6 +46,7 @@ export default class Node {
 		this._lastFollowing = []
 		this._followedBy = []
 		this.memory = [[]]
+		this.rewards = []
 
 		this.agent = new RL.DQNAgent(this, {
 	    update: 'qlearn',
@@ -91,7 +92,8 @@ export default class Node {
 		var belief_counts = keys.reduce((acc, curr, index) => {
 			acc[curr] = belief_distribution[curr].length
 			return acc
-		}, [0,0,0,0,0])
+		}, [0,0])
+		// console.log('BELIEF distribution', belief_counts)
 		var mean_followers_per_belief = belief_counts.reduce(function(a, b) { return a + b; })/belief_counts.length;
 		var difference_from_mean = belief_counts.map(count => Math.pow((count-mean_followers_per_belief),2));
 		var sum_sqrt_distance = Math.pow((difference_from_mean.reduce(function(a, b) { return a + b; })),0.5);
@@ -113,7 +115,7 @@ export default class Node {
 			var previous_diversity_score = this.getDiversityScore(previous_belief_distribution)
 			reward = diversity_score - previous_diversity_score
 		}
-		return reward
+		return 5000*reward
 	}
 
 	// in each cycle a node will either remain silent or retweet a message
@@ -123,53 +125,105 @@ export default class Node {
 	// the effect of the action is also affected by the propensity to be exposed to new ideas.
 	// if action is to update propensity increase by random amount? or proportional to current propensity
 
-	sampleNextState() {
+	followNewNode(belief, same) {
+		// belief is a number 0, 1,2,3,4,5, same is either True or False
+		this._lastFollowing = this._following.slice()
+		var following_IDs = this._following.map(n => n.id)
+		let availableFolloweesWithBelief
+		if (same) {
+			availableFolloweesWithBelief = Nodes.filter(n =>
+				n.trumporhillary === belief && !following_IDs.includes(n.id))
+		} else {
+			availableFolloweesWithBelief = Nodes.filter(n =>
+				n.trumporhillary !== belief && !following_IDs.includes(n.id))
+		}
+		if (availableFolloweesWithBelief.length) {
+			var newFollowee = sampleArray(availableFolloweesWithBelief)
+			var newNodeObj = {id: newFollowee.id, belief: newFollowee.trumporhillary}
+			this._following.push(newNodeObj)
+		}
+	}
 
-		// if(this.nextAction === 0) {
-		//
-		// }
-		// else if(this.nextAction === 1) {
-		//
-		// }
-		// else if(this.nextAction === 2) {
-		//
-		// }
-		// else if(this.nextAction === 3) {
-		//
-		// }
-		// else if(this.nextAction === 4) {
-		//
-		// }
-		// else if(this.nextAction === 5) {
-		//
-		// }
+	unfollowNode(belief, same) {
+		this._lastFollowing = this._following.slice()
+		var following_IDs = this._following.map(n => n.id)
+		let availableFolloweesWithBelief
+		if (same) {
+			availableFolloweesWithBelief = Nodes.filter(n =>
+				n.trumporhillary === belief && !following_IDs.includes(n.id))
+		} else {
+			availableFolloweesWithBelief = Nodes.filter(n =>
+				n.trumporhillary !== belief && !following_IDs.includes(n.id))
+		}
+		if (availableFolloweesWithBelief.length) {
+			var nodeToUnFollow = sampleArray(availableFolloweesWithBelief)
+			var nodeIndex = following_IDs.findIndex(d => d === nodeToUnFollow.id)
+			this._following.splice(nodeIndex, 1)
+		}
+	}
 
+	sampleNextState(action) {
 
-
-
-    // if not retweet action then no message is sent
-		let orientation = "", retweetID = null
-
-		if(this.nextAction === 1) {
-			orientation = this.belief
-
-      // with 0.5 probability randomly select a tweet from one of the people the node is following with the same orientation as the node
-      // retweet the message
-
-			if(Math.random() < 0.5) {
-				const matchingMessages = this.memory.reduce(flatten)
-					.filter(msg => msg.orientation === this.belief)
-
-        // if a message of the correct orientation is found retweet it
-				if(matchingMessages.length) {
-					retweetID = sampleArray(matchingMessages).id
-				}
+		// belief is defined to be either trump or hilary
+		if(action === 0) {
+			// follow a new node with the same belief
+			this.followNewNode(this.trumporhillary, true)
+		}
+		else if(action === 1) {
+			// follow a new node with a different belief
+			this.followNewNode(this.trumporhillary, false)
+		}
+		else if(action === 2) {
+			// unfollow a node with the same belief
+			this.unfollowNode(this.trumporhillary, true)
+		}
+		else if(action === 3) {
+			// unfollow a node with a different belief
+			this.unfollowNode(this.trumporhillary, false)
+		}
+		else if(action === 4) {
+			// change it's belief
+			if (this.trumporhillary === 1) {
+				this.trumporhillary = 0
+			} else {
+				this.trumporhillary = 1
 			}
 		}
-
-		return {
-			orientation, retweetID, user: this.id
+		else if(action === 5) {
+			// do nothing
+			console.log('Doing nothing')
 		}
+		// calcualte next state and reward based on the action taken from the current state
+		var reward = this.getReward()
+		this.rewards.push[reward]
+		if (this.id === 12) {
+			console.log('NODE', this.id, 'belief', this.trumporhillary, 'action', action, 'Reward', reward)
+		}
+		var nextStateAndReward = {nextState: this.getState(), r: reward}
+		return nextStateAndReward;
+    // // if not retweet action then no message is sent
+		// let orientation = "", retweetID = null
+		//
+		// if(this.nextAction === 1) {
+		// 	orientation = this.belief
+		//
+    //   // with 0.5 probability randomly select a tweet from one of the people the node is following with the same orientation as the node
+    //   // retweet the message
+		//
+		// 	if(Math.random() < 0.5) {
+		// 		const matchingMessages = this.memory.reduce(flatten)
+		// 			.filter(msg => msg.orientation === this.belief)
+		//
+    //     // if a message of the correct orientation is found retweet it
+		// 		if(matchingMessages.length) {
+		// 			retweetID = sampleArray(matchingMessages).id
+		// 		}
+		// 	}
+		// }
+		//
+		// return {
+		// 	orientation, retweetID, user: this.id
+		// }
 	}
 
 	// invoked with the messages of all the modes in the network in the current cycle
@@ -199,7 +253,8 @@ export default class Node {
 
 		const state = this.getState(),
 			action = this.agent.act(state),
-			r = this.getReward()
+			obs = this.sampleNextState(action), // determines the next state based on the current state and action - observes the reward from taking this action
+			reward = obs.r
 
 			//state = env.getState();
 			// action = agent.act(state);
@@ -208,9 +263,7 @@ export default class Node {
 			// save the reward to the reward history of the agent - so can be plotted for each agent.
 
     // instruct the agent to learn based on the current reward
-		this.agent.learn(r)
-
-		this.nextAction = action
+		this.agent.learn(reward)
 	}
 
   // update followers of a node
@@ -264,6 +317,6 @@ export default class Node {
 	}
 
 	init() {
-		bindAll(this, [ "sampleNextState", "recieveMessages", "adjustFollowing" , "getReward"])
+		bindAll(this, [ "sampleNextState", "recieveMessages", "adjustFollowing" , "unfollowNode", "followNewNode", "getReward"])
 	}
 }
