@@ -109,14 +109,14 @@ const initialize = () => {
 
   initializeFollowings()
   Nodes.forEach(n => n.init())
-  messageState.init()
+  // messageState.init()
 
   start = Date.now()
-  messageState.cycle()
+  // messageState.cycle()
 
   cycleSID = setInterval(() => {
     lastCycleTime = Date.now() - start
-    messageState.cycle()
+    // messageState.cycle()
   }, cycleDur)
 
   timer(d => {
@@ -130,26 +130,11 @@ const initialize = () => {
     if(targetIndex < updateLinksNodeIndex) { updateLinksNodeIndex = 0 } // wrap around
 
     for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
-      Nodes[i].adjustFollowing()
-      setFollowedBy(Nodes[i])
+      // Nodes[i].adjustFollowing()
+      // setFollowedBy(Nodes[i])
     }
 
-    links = []
-    for(let i=0; i<Nodes.length; i++) {
-      let n = Nodes[i]
-      if(n.following.length) {
-        for(let j=0; j<n.following.length; j++) {
-          let target
-          for(let k=0; k<Nodes.length; k++) {
-            if(Nodes[k].id === n.following[j]) {
-              target = Nodes[k]
-              break
-            }
-          }
-          links.push({ source: n, target })
-        }
-      }
-    }
+    
 
     for(let i=0; i<links.length; i++) {
       const link = links[i]
@@ -245,7 +230,7 @@ document.addEventListener("mousemove", e => {
 
 Promise.all(['nodes', 'edges'].map(getData))
   .then(data => {
-    nodeData = data[0].filter((d, i) => i < 500) 
+    nodeData = data[0]
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
@@ -256,4 +241,21 @@ Promise.all(['nodes', 'edges'].map(getData))
 
     initializeNodes(nodeData)
     initialize()
+
+    links = []
+    for(let i=0; i<Nodes.length; i++) {
+      let n = Nodes[i]
+      if(n.following.length) {
+        for(let j=0; j<n.following.length; j++) {
+          let target
+          for(let k=0; k<Nodes.length; k++) {
+            if(Nodes[k].id === n.following[j]) {
+              target = Nodes[k]
+              break
+            }
+          }
+          links.push({ source: n, target })
+        }
+      }
+    }
   })
