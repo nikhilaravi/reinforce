@@ -11,7 +11,7 @@ import messageState from './messageState'
 import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './nodes'
-
+import { initFlot } from './chart.js'
 
 // intialise constants
 let start, lastCycleTime = 0,
@@ -129,6 +129,9 @@ const initialize = () => {
     lastCycleTime = Date.now() - start
     messageState.cycle()
   }, cycleDur)
+
+  // initialise chart
+  initFlot(Nodes[0])
 
   timer(d => {
     const shouldUpdate = Math.random() < 0.5 // perf

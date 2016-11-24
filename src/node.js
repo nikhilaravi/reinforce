@@ -46,7 +46,7 @@ export default class Node {
 		this._lastFollowing = []
 		this._followedBy = []
 		this.memory = [[]]
-		this.rewards = []
+		this._rewards = []
 
 		this.agent = new RL.DQNAgent(this, {
 	    update: 'qlearn',
@@ -60,7 +60,6 @@ export default class Node {
 	    num_hidden_units: 100 // number of neurons in hidden layer
 	  })
 	}
-
 	set followedBy(newFollowedBy) { this._followedBy = newFollowedBy }
 
 	get followedBy() { return this._followedBy }
@@ -83,7 +82,8 @@ export default class Node {
 	}
 
 	getState() { // evolve state here
-		return [this._followedBy, this._following, this.belief]
+		// updatee this to be just the beliefs
+		return [this._followedBy, this._following, this.trumporhillary]
 		// update this to two arrays of objects of this.following and this.follwed_by and their corresponding beliefs and a number between 0 and 1 which is the node's current propensity for diverse info
 	}
 
@@ -125,9 +125,7 @@ export default class Node {
 	// the effect of the action is also affected by the propensity to be exposed to new ideas.
 	// if action is to update propensity increase by random amount? or proportional to current propensity
 
-	followNewNode(belief, same) {
-		// belief is a number 0, 1,2,3,4,5, same is either True or False
-		this._lastFollowing = this._following.slice()
+	findAvailableFollowees(belief, same) {
 		var following_IDs = this._following.map(n => n.id)
 		let availableFolloweesWithBelief
 		if (same) {
@@ -137,6 +135,16 @@ export default class Node {
 			availableFolloweesWithBelief = Nodes.filter(n =>
 				n.trumporhillary !== belief && !following_IDs.includes(n.id))
 		}
+		return availableFolloweesWithBelief
+	}
+
+	followNewNode(belief, same) {
+		// belief is a number 0 or 1, same is either True or False
+
+		this._lastFollowing = this._following.slice()
+
+		var availableFolloweesWithBelief = this.findAvailableFollowees(belief, same)
+
 		if (availableFolloweesWithBelief.length) {
 			var newFollowee = sampleArray(availableFolloweesWithBelief)
 			var newNodeObj = {id: newFollowee.id, belief: newFollowee.trumporhillary}
@@ -147,14 +155,8 @@ export default class Node {
 	unfollowNode(belief, same) {
 		this._lastFollowing = this._following.slice()
 		var following_IDs = this._following.map(n => n.id)
-		let availableFolloweesWithBelief
-		if (same) {
-			availableFolloweesWithBelief = Nodes.filter(n =>
-				n.trumporhillary === belief && !following_IDs.includes(n.id))
-		} else {
-			availableFolloweesWithBelief = Nodes.filter(n =>
-				n.trumporhillary !== belief && !following_IDs.includes(n.id))
-		}
+		var availableFolloweesWithBelief = this.findAvailableFollowees(belief, same)
+
 		if (availableFolloweesWithBelief.length) {
 			var nodeToUnFollow = sampleArray(availableFolloweesWithBelief)
 			var nodeIndex = following_IDs.findIndex(d => d === nodeToUnFollow.id)
@@ -195,12 +197,13 @@ export default class Node {
 		}
 		// calcualte next state and reward based on the action taken from the current state
 		var reward = this.getReward()
-		this.rewards.push[reward]
+		this._rewards.push(reward)
 		if (this.id === 12) {
 			console.log('NODE', this.id, 'belief', this.trumporhillary, 'action', action, 'Reward', reward)
 		}
 		var nextStateAndReward = {nextState: this.getState(), r: reward}
 		return nextStateAndReward;
+
     // // if not retweet action then no message is sent
 		// let orientation = "", retweetID = null
 		//
@@ -248,19 +251,10 @@ export default class Node {
 
 	setNextAction() {
 
-    // the state is a random number between 0 and 1
-    // the action is a number in the range(getMaxNumActions())
-
 		const state = this.getState(),
-			action = this.agent.act(state),
+			action = this.agent.act(state), // the action is a number in the range(getMaxNumActions())
 			obs = this.sampleNextState(action), // determines the next state based on the current state and action - observes the reward from taking this action
 			reward = obs.r
-
-			//state = env.getState();
-			// action = agent.act(state);
-			// var obs = env.sampleNextState(action); // sampleNextState updates the object state representation - i.e. update this.following and this.follwed_by
-			// agent.learn(obs.r);
-			// save the reward to the reward history of the agent - so can be plotted for each agent.
 
     // instruct the agent to learn based on the current reward
 		this.agent.learn(reward)
@@ -317,6 +311,6 @@ export default class Node {
 	}
 
 	init() {
-		bindAll(this, [ "sampleNextState", "recieveMessages", "adjustFollowing" , "unfollowNode", "followNewNode", "getReward"])
+		bindAll(this, [ "sampleNextState", "recieveMessages", "adjustFollowing" , "findAvailableFollowees", "unfollowNode", "followNewNode", "getReward"])
 	}
 }
