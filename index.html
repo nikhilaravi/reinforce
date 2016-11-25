@@ -13,6 +13,14 @@
       <div class="node_id"></div>
       <div class="node_belief"></div>
     </div>
+    <div id=chart_title>Reward at each time step</div>
+    <div id="chart">
+      <div id="flotreward" style="width:450px; height: 175px;"></div>
+      <div id="chart_caption">
+        <div class="chart_node_id"></div>
+        <div class="chart_node_belief"></div>
+      </div>
+    </div>
   </div>
   <script type="x-shader/x-vertex" id="node-vertexshader">
     precision highp float;
@@ -140,6 +148,12 @@
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/node-uuid/1.4.7/uuid.min.js"></script>
+  <!-- jquery and jqueryui -->
+  <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+  <link href="/vendor/jquery-ui.min.css" rel="stylesheet">
+  <script src="/vendor/jquery-ui.min.js"></script>
+  <!-- flotjs -->
+  <script src="/vendor/jquery.flot.min.js"></script>
   <script src="/vendor/rl.js"></script>
   <script src="/dist/main.js"></script>
 </body>
