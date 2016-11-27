@@ -18,9 +18,10 @@ export default class Node {
 		this._lastFollowing = []
 		this._followedBy = []
 		this.memory = [[]]
+		this._rewards = []
 
 		this.agent = new RL.DQNAgent(this, {
-	    update: 'qlearn', 
+	    update: 'qlearn',
 	    gamma: 0.9, // discount factor, [0, 1)
 	    epsilon: 0.2, // initial epsilon for epsilon-greedy policy, [0, 1)
 	    alpha: 0.01, // value function learning rate
@@ -76,10 +77,10 @@ export default class Node {
 				retweetID = sampleArray(matchingMessages).id
 			}
 		}
-		
+
 		return {
 			orientation, retweetID, user: this.id
-		}	
+		}
 	}
 
 	sendMessages(messages) {
@@ -99,6 +100,8 @@ export default class Node {
 		const state = this.getState(),
 			action = this.agent.act(state),
 			r = this.getReward()
+
+		this._rewards.push(r) // save the reward to memory
 
 		this.agent.learn(r)
 

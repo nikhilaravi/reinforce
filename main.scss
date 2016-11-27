@@ -21,3 +21,19 @@ body, html {
 	background: white;
 	position: absolute;
 }
+
+#flotreward, #chart_caption {
+	display: inline-block;
+	width: 10rem;
+	vertical-align: middle;
+}
+
+.chart_node_id, .chart_node_belief {
+	display: block;
+}
+
+#chart_title {
+	font-size: 1.1rem;
+	margin-left: 15em;
+	margin-top: 1em
+}
