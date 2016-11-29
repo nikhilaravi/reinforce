@@ -1,7 +1,7 @@
 import helpers from './helpers/helpers'
 import { Nodes } from './nodes'
+import { maxCyclesInMemory } from './config'
 
-const maxCyclesInMemory = 5
 let memory = {}, current = []
 
 const updateMessageReach = (id, followersCount, retweet) => {
@@ -36,10 +36,7 @@ export default {
 
 	collectMessages() {
 		for(let i=0; i<Nodes.length; i++) {
-			let message = Object.assign(
-				Nodes[i].getMessage(), {
-					id: uuid.v4()
-				})
+			let message = Nodes[i].getMessage()
 
 			current.push(message)
 

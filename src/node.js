@@ -79,7 +79,10 @@ export default class Node {
 		}
 
 		return {
-			orientation, retweetID, user: this.id
+			orientation, 
+			retweetID, 
+			user: this.id,
+			id: uuid.v4()
 		}
 	}
 
