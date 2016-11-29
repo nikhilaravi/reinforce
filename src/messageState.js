@@ -6,6 +6,16 @@ let messagePassingRecord = {},
 	memory = {}, 
 	current = []
 
+const updateMessagePassingRecord = ({ user, retweet }) => {
+	if(!retweet) { return }
+
+	if(typeof messagePassingRecord[user][retweet.user] === 'undefined') {
+		messagePassingRecord[user][retweet.user] = 0
+	}
+
+	messagePassingRecord[user][retweet.user]++
+}
+
 const updateMessageReach = (id, followersCount, retweet) => {
 	if(typeof memory[id] === 'undefined' && !retweet) {
 		memory[id] = {
@@ -29,6 +39,10 @@ export default {
 
 	init() {
 		helpers.bindAll(this, [ "collectMessages", "cycle" ])
+
+		for(let i=0; i<Nodes.length; i++) {
+			messagePassingRecord[Nodes[i].id] = {}
+		}
 	},
 
 	cycle() {
@@ -51,6 +65,8 @@ export default {
 			current.push(message)
 
 			updateMessageReach(message.id, Nodes[i].followedBy.length, message.retweet)
+
+			updateMessagePassingRecord(message)
 		}
 	},
 
