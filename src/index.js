@@ -135,7 +135,7 @@ const initialize = () => {
 
     for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
       Nodes[i].adjustFollowing()
-      // setFollowedBy(Nodes[i])
+      setFollowedBy(Nodes[i])
     }
 
     links = []

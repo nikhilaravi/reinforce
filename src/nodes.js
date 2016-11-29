@@ -49,17 +49,46 @@ export const initializeFollowings = () => {
 }
 
 export const setFollowedBy = node => {
-	const toRemove = difference(node.lastFollowing, node.following), 
-		toAdd = difference(node.following, node.lastFollowing)
+	const toRemove = [], toAdd = []
+
+	for(let i=0; i<node.following.length; i++) {
+		let wasFollowing = false
+		let thisNode = node.following[i]
+		for(let j=0; j<node.lastFollowing.length; j++) {
+			if(node.lastFollowing[j].id === thisNode.id) {
+				wasFollowing = true
+				break
+			}
+		}
+
+		if(!wasFollowing) {
+			toAdd.push(thisNode)
+		}
+	}
+
+	for(let i=0; i<node.lastFollowing.length; i++) {
+		let isFollowing = false
+		let thisNode = node.lastFollowing[i]
+		for(let j=0; j<node.following.length; j++) {
+			if(node.following[j].id === thisNode.id) {
+				isFollowing = true
+				break
+			}
+		}
+
+		if(!isFollowing) {
+			toRemove.push(thisNode)
+		}
+	}
 
 	for(let i=0; i<toRemove.length; i++) {
-		let match = Nodes.find(d => d.id === toRemove[i])
+		let match = Nodes.find(d => d.id === toRemove[i].id)
 		let index = match.followedBy.indexOf(node.id)
 		match.followedBy = match.followedBy.slice(0, index).concat(match.followedBy.slice(index + 1))
 	}
 
 	for(let i=0; i<toAdd.length; i++) {
-		let match = Nodes.find(d => d.id === toAdd[i])
+		let match = Nodes.find(d => d.id === toAdd[i].id)
 		match.followedBy = match.followedBy.concat(node.id)
 	}
 }
