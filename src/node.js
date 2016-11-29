@@ -22,6 +22,8 @@ export default class Node {
 		this.ownMessages = {}
 		this._rewards = []
 
+		this.cycleInterval = Math.round(Math.random() * maxCyclesInMemory)
+
 		this.agent = new RL.DQNAgent(this, {
 	    update: 'qlearn',
 	    gamma: 0.9, // discount factor, [0, 1)
@@ -79,13 +81,18 @@ export default class Node {
 	}
 
 	getMessage() {
+		let seedLearning = false
+		if(messageState.cycleIndex % maxCyclesInMemory === this.cycleInterval) {
+			seedLearning = true
+		}
+
 		const message = { 
 			orientation: this.belief, 
 			retweetID: null,
 			user: this.id, id: uuid.v4() 
 		}
 
-		if(Math.random() < 0.5) {
+		if(Math.random() < 0.5 && !seedLearning) {
 			const matchingMessages = this.memory.reduce(flatten)
 				.filter(msg => msg.orientation === this.belief)
 
@@ -94,7 +101,7 @@ export default class Node {
 			}
 		}
 
-		if(!message.retweetID) {
+		if(seedLearning) {
 			this.ownMessages[message.id] = 0
 		}
 
