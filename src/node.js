@@ -81,7 +81,7 @@ export default class Node {
 
 		const message = { 
 			orientation: this.belief, 
-			retweetID: null,
+			retweet: null,
 			user: this.id, id: uuid.v4() 
 		}
 
@@ -90,7 +90,8 @@ export default class Node {
 				.filter(msg => msg.orientation === this.belief)
 
 			if(matchingMessages.length) {
-				message.retweetID = sampleArray(matchingMessages).id
+				const { id, user } = sampleArray(matchingMessages)
+				message.retweet = { id, user }
 			}
 		}
 

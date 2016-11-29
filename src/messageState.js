@@ -2,7 +2,9 @@ import helpers from './helpers/helpers'
 import { Nodes } from './nodes'
 import { maxCyclesInMemory } from './config'
 
-let memory = {}, current = []
+let messagePassingRecord = {},
+	memory = {}, 
+	current = []
 
 const updateMessageReach = (id, followersCount, retweet) => {
 	if(typeof memory[id] === 'undefined' && !retweet) {
@@ -48,7 +50,7 @@ export default {
 
 			current.push(message)
 
-			updateMessageReach(message.id, Nodes[i].followedBy.length, message.retweetID)
+			updateMessageReach(message.id, Nodes[i].followedBy.length, message.retweet)
 		}
 	},
 
