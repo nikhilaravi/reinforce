@@ -70,8 +70,8 @@ export default class Node {
 
 		if(ready.length) {
 			ready.forEach(r => {
-				console.log(r)
-				console.log(messageState.getMessageReach(r))
+				// console.log(r)
+				// console.log(messageState.getMessageReach(r))
 				delete this.ownMessages[r]
 			})
 		}

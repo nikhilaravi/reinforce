@@ -259,9 +259,9 @@ document.addEventListener("click", e => {
   }
 })
 
-Promise.all(['nodes', 'edges'].map(getData))
+Promise.all(['nodes_toy', 'edges_toy'].map(getData))
   .then(data => {
-    nodeData = data[0].filter((d, i) => i < 200) 
+    nodeData = data[0]
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
