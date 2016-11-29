@@ -66,7 +66,7 @@ export default class Node {
 
 	getReward() { // total reach
 		const ready = Object.keys(this.ownMessages)
-			.filter(m => this.ownMessages[m] > (maxCyclesInMemory - 1))
+			.filter(m => this.ownMessages[m] > maxCyclesInMemory)
 
 		if(ready.length) {
 			ready.forEach(r => {
