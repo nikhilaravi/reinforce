@@ -19,7 +19,7 @@ export default class Node {
 		this._lastFollowing = []
 		this._followedBy = []
 		this.memory = [[]]
-		this.ownMessages = {}
+		this.learningMessage = null
 		this._rewards = []
 
 		this.cycleInterval = Math.round(Math.random() * maxCyclesInMemory)
@@ -67,17 +67,10 @@ export default class Node {
 	}
 
 	getReward() { // total reach
-		const ready = Object.keys(this.ownMessages)
-			.filter(m => this.ownMessages[m] > maxCyclesInMemory)
-
-		if(ready.length) {
-			ready.forEach(r => {
-				// console.log(r)
-				// console.log(messageState.getMessageReach(r))
-				delete this.ownMessages[r]
-			})
+		if(this.learningMessage && this.learningMessage[1] >= maxCyclesInMemory) {
+			return messageState.getMessageReach(this.learningMessage[0])
 		}
-		return Math.random()
+		return null
 	}
 
 	getMessage() {
@@ -102,7 +95,7 @@ export default class Node {
 		}
 
 		if(seedLearning) {
-			this.ownMessages[message.id] = 0
+			this.learningMessage = [message.id, 0]
 		}
 
 		return message
@@ -122,21 +115,25 @@ export default class Node {
 	}
 
 	cycle() {
-		Object.keys(this.ownMessages).forEach(k => {
-			this.ownMessages[k]++
-		})
+		if(this.learningMessage) {
+			this.learningMessage[1] = this.learningMessage[1] + 1
+		}
 	}
 
 	setNextAction() {
-		const state = this.getState(),
-			action = this.agent.act(state),
-			r = this.getReward()
+		const r = this.getReward()
+		if(r !== null) {
+			const state = this.getState(),
+				action = this.agent.act(state)
 
-		this._rewards.push(r) // save the reward to memory
+			this._rewards.push(r) // save the reward to memory
 
-		this.agent.learn(r)
+			this.agent.learn(r)
 
-		this.nextAction = action
+			this.nextAction = action			
+		} else {
+			this.nextAction = null
+		}
 	}
 
 	adjustFollowing() {
