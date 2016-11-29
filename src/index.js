@@ -209,7 +209,8 @@ const initialize = () => {
       let node = Nodes[i]
       nodePositions[i * 2] = node.x - width / 2
       nodePositions[i * 2 + 1] = -(node.y - height / 2)
-      nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
+      // nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
+      nodeSizesColors[i * 2] = 5
       if(node.trumporhillary === 0) { // red
         nodeSizesColors[i * 2 + 1] = decodeFloat(229, 29, 46, 254)
       } else if(node.trumporhillary === 1 || node.trumporhillary === 2 || node.trumporhillary === 5) { // blue
