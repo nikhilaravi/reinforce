@@ -4,8 +4,6 @@ import { maxCyclesInMemory } from './config'
 
 let memory = {}, current = []
 
-export let cycleIndex = 0
-
 const updateMessageReach = (id, followersCount, retweet) => {
 	if(typeof memory[id] === 'undefined' && !retweet) {
 		memory[id] = {
@@ -25,6 +23,8 @@ const updateMessageReach = (id, followersCount, retweet) => {
 }
 
 export default {
+	cycleIndex: 0,
+
 	init() {
 		helpers.bindAll(this, [ "collectMessages", "cycle" ])
 	},
@@ -39,7 +39,7 @@ export default {
 
 		current = []
 
-		cycleIndex++
+		this.cycleIndex++
 	},
 
 	collectMessages() {
