@@ -44,7 +44,7 @@ export default {
 
 			current.push(message)
 
-			updateMessageReach(message.id, Nodes[i].followedBy.length, !!message.retweetID)
+			updateMessageReach(message.id, Nodes[i].followedBy.length, message.retweetID)
 		}
 	},
 

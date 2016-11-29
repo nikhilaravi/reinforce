@@ -3,6 +3,7 @@ const { flatten, sampleArray, createDictByProp, bindAll } = helpers
 import { values } from 'underscore'
 import { Nodes, getReach } from './nodes'
 import { beliefs, maxCyclesInMemory } from './config'
+import messageState from './messageState'
 
 const cyclesInMemory = 3
 
@@ -64,6 +65,16 @@ export default class Node {
 	}
 
 	getReward() { // total reach
+		const ready = Object.keys(this.ownMessages)
+			.filter(m => this.ownMessages[m] > (maxCyclesInMemory - 1))
+
+		if(ready.length) {
+			ready.forEach(r => {
+				console.log(r)
+				console.log(messageState.getMessageReach(r))
+				delete this.ownMessages[r]
+			})
+		}
 		return Math.random()
 	}
 
@@ -83,7 +94,7 @@ export default class Node {
 			}
 		}
 
-		if(!!message.retweetID) {
+		if(!message.retweetID) {
 			this.ownMessages[message.id] = 0
 		}
 
