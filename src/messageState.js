@@ -24,12 +24,16 @@ const updateMessageReach = (id, followersCount, retweet) => {
 
 export default {
 	init() {
-		helpers.bindAll(this, [ "collectMessages", "emitMessages", "cycle" ])
+		helpers.bindAll(this, [ "collectMessages", "cycle" ])
 	},
 
 	cycle() {
 		this.collectMessages()
-		this.emitMessages()
+
+		for(let i=0; i<Nodes.length; i++) {
+			Nodes[i].sendMessages(current)
+			Nodes[i].cycle()
+		}
 
 		current = []
 	},
@@ -41,12 +45,6 @@ export default {
 			current.push(message)
 
 			updateMessageReach(message.id, Nodes[i].followedBy.length, !!message.retweetID)
-		}
-	},
-
-	emitMessages() {
-		for(let i=0; i<Nodes.length; i++) {
-			Nodes[i].sendMessages(current)
 		}
 	},
 

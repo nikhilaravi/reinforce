@@ -2,7 +2,7 @@ import helpers from './helpers/helpers'
 const { flatten, sampleArray, createDictByProp, bindAll } = helpers
 import { values } from 'underscore'
 import { Nodes, getReach } from './nodes'
-import { beliefs } from './config'
+import { beliefs, maxCyclesInMemory } from './config'
 
 const cyclesInMemory = 3
 
@@ -18,6 +18,7 @@ export default class Node {
 		this._lastFollowing = []
 		this._followedBy = []
 		this.memory = [[]]
+		this.ownMessages = {}
 		this._rewards = []
 
 		this.agent = new RL.DQNAgent(this, {
@@ -67,23 +68,26 @@ export default class Node {
 	}
 
 	getMessage() {
-		let orientation = this.belief, retweetID = null
+		const message = { 
+			orientation: this.belief, 
+			retweetID: null,
+			user: this.id, id: uuid.v4() 
+		}
 
 		if(Math.random() < 0.5) {
 			const matchingMessages = this.memory.reduce(flatten)
 				.filter(msg => msg.orientation === this.belief)
 
 			if(matchingMessages.length) {
-				retweetID = sampleArray(matchingMessages).id
+				message.retweetID = sampleArray(matchingMessages).id
 			}
 		}
 
-		return {
-			orientation, 
-			retweetID, 
-			user: this.id,
-			id: uuid.v4()
+		if(!!message.retweetID) {
+			this.ownMessages[message.id] = 0
 		}
+
+		return message
 	}
 
 	sendMessages(messages) {
@@ -97,6 +101,12 @@ export default class Node {
 		}
 
 		this.memory.push(filteredMessages)
+	}
+
+	cycle() {
+		Object.keys(this.ownMessages).forEach(k => {
+			this.ownMessages[k]++
+		})
 	}
 
 	setNextAction() {
@@ -149,6 +159,6 @@ export default class Node {
 	}
 
 	init() {
-		bindAll(this, [ "getMessage", "sendMessages", "adjustFollowing" ])
+		bindAll(this, [ "cycle", "getMessage", "sendMessages", "adjustFollowing" ])
 	}
 }
