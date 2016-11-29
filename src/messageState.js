@@ -72,5 +72,9 @@ export default {
 
 	getMessageReach(id) {
 		return memory[id].reach
+	},
+
+	getRetweetCount(userA, userB) {
+		return messagePassingRecord[userA][userB]
 	}
 }
