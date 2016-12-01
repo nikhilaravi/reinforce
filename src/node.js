@@ -1,7 +1,7 @@
 import helpers from './helpers/helpers'
 const { flatten, sampleArray, createDictByProp, bindAll } = helpers
 import { values } from 'underscore'
-import { Nodes, getReach } from './nodes'
+import { Nodes } from './nodes'
 import { beliefs, maxCyclesInMemory } from './config'
 import messageState from './messageState'
 

@@ -9,10 +9,6 @@ import { difference } from 'underscore'
 
 export let Nodes
 
-export const getReach = node => {
-	return Math.random()
-}
-
 export const initializeNodes = seedData => {
 	Nodes = seedData.map((d, i) =>
 		new Node({
