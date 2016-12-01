@@ -54,7 +54,7 @@ export default class Node {
 
 	getMaxNumActions() { return beliefs.length }
 
-	getState() { // evolve state here
+	getState() {
 		let counts = beliefs.reduce((acc, curr) => {
 			acc[curr] = 0
 			return acc
@@ -74,6 +74,12 @@ export default class Node {
 		return null
 	}
 
+	getDiversity() {
+		if(!this._following.length) { return 1 }
+		return this.getState().reduce((acc, curr) =>
+			acc + Math.pow(((curr / this._following.length) - (1 / beliefs.length)), 2), 0) // means squared error
+	}
+
 	getMessage() {
 		let seedLearning = false
 		if(messageState.cycleIndex % maxCyclesInMemory === this.cycleInterval) {
@@ -89,8 +95,12 @@ export default class Node {
 		if(seedLearning) {
 			this.learningMessage = [message.id, 0]
 		} else { // consider whether to retweet
+			// sort the messages you've heard by the quotient
+			// retweet the highest one above a certain threshold (which means some notes might not retweet much at all)
 			const matchingMessages = this.memory.reduce(flatten)
 				.filter(msg => msg.orientation === this.belief)
+
+			console.log(this.getDiversity())
 
 			if(matchingMessages.length) {
 				const { id, user } = sampleArray(matchingMessages)
