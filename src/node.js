@@ -200,9 +200,10 @@ export default class Node {
 			const followingIDs = this._following.map(n => n.id)
 			const availableFollowees = Nodes.filter(n =>
 				n.belief === beliefs[this.nextAction] && !followingIDs.includes(n.id))
+			let newFollowee
 
 			if(availableFollowees.length) {
-				this._following.push(sampleArray(availableFollowees))
+				newFollowee = sampleArray(availableFollowees)
 			}
 
 			// unfollow someone who never retweets you
@@ -215,6 +216,10 @@ export default class Node {
 
 			this._following.splice(
 				this._following.findIndex(d => d.id === sampleArray(choppingBlock)), 1)
+
+			if(newFollowee) {
+				this._following.push(newFollowee)
+			}
 		}
 
 		this.setNextAction()

@@ -166,6 +166,8 @@ const initialize = () => {
         target = emptyNode
       }
 
+      // wrap the below in conditional, e.g. source.index === 0, to highlight only one node
+
       if(i < lastOccupiedEdgeVertexIndex) {
         edgeVertices[i * 2 * 3] = source.x - width / 2
         edgeVertices[i * 2 * 3 + 1] = -(source.y - height / 2)
