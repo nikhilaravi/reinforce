@@ -86,7 +86,9 @@ export default class Node {
 			user: this.id, id: uuid.v4() 
 		}
 
-		if(Math.random() < 0.5 && !seedLearning) {
+		if(seedLearning) {
+			this.learningMessage = [message.id, 0]
+		} else { // consider whether to retweet
 			const matchingMessages = this.memory.reduce(flatten)
 				.filter(msg => msg.orientation === this.belief)
 
@@ -94,10 +96,6 @@ export default class Node {
 				const { id, user } = sampleArray(matchingMessages)
 				message.retweet = { id, user }
 			}
-		}
-
-		if(seedLearning) {
-			this.learningMessage = [message.id, 0]
 		}
 
 		return message
