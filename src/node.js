@@ -6,6 +6,7 @@ import { beliefs, maxCyclesInMemory } from './config'
 import messageState from './messageState'
 
 const cyclesInMemory = 3
+const EPS = 0.00001
 
 export default class Node {
 	constructor(opts) {
@@ -75,9 +76,8 @@ export default class Node {
 	}
 
 	getDiversity() {
-		if(!this._following.length) { return 1 }
 		return this.getState().reduce((acc, curr) =>
-			acc + Math.pow(((curr / this._following.length) - (1 / beliefs.length)), 2), 0) // means squared error
+			acc + Math.pow(((curr / Math.max(EPS, this._following.length)) - (1 / beliefs.length)), 2), 0) / beliefs.length // means squared error
 	}
 
 	getMessage() {
