@@ -19,7 +19,9 @@ const updateMessagePassingRecord = ({ user, retweet }) => {
 const updateMessageReach = (id, followersCount, retweet) => {
 	if(typeof memory[id] === 'undefined' && !retweet) {
 		memory[id] = {
-			reach: 0,
+			actual: 0,
+			potential: 0,
+			pending: 0,
 			cycles: 0
 		}
 	}
@@ -28,8 +30,8 @@ const updateMessageReach = (id, followersCount, retweet) => {
 		if(memory[id].cycles > maxCyclesInMemory) {
 			delete memory[id]
 		} else {
-			memory[id].reach += followersCount
-			memory[id].cycles++			
+			memory[id].pending += followersCount
+			memory[id].actual++
 		}			
 	}
 }
@@ -46,6 +48,13 @@ export default {
 	},
 
 	cycle() {
+		Object.keys(memory).forEach(k => {
+			const entry = memory[k]
+			entry.cycles++
+			entry.potential += entry.pending
+			entry.pending = 0
+		})
+
 		this.collectMessages()
 
 		for(let i=0; i<Nodes.length; i++) {
@@ -66,7 +75,7 @@ export default {
 				let message = messages[j]
 				current.push(message)
 
-				updateMessageReach(message.id, Nodes[i].followedBy.length, message.retweet)
+				updateMessageReach(message.retweet ? message.retweet.id : message.id, Nodes[i].followedBy.length, message.retweet)
 
 				updateMessagePassingRecord(message)
 			}
@@ -74,7 +83,8 @@ export default {
 	},
 
 	getMessageReach(id) {
-		return memory[id].reach
+		const entry = memory[id]
+		return entry.actual / Math.max(0.0001, entry.potential)
 	},
 
 	getRetweetCount(userA, userB) {
