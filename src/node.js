@@ -140,6 +140,16 @@ export default class Node {
 
 	adjustFollowing() {
 		if(this.nextAction !== null) {
+			// follow someone from the group that the learning agent tells you
+			const followingIDs = this._following.map(n => n.id)
+			const availableFollowees = Nodes.filter(n =>
+				n.belief === beliefs[this.nextAction] && !followingIDs.includes(n.id))
+
+			if(availableFollowees.length) {
+				this._following.push(sampleArray(availableFollowees))
+			}
+
+			// unfollow someone who never retweets you
 			const choppingBlock = []
 			for(let i=0; i<this.following.length; i++) {
 				if(!messageState.getRetweetCount(this.id, this.following[i].id)) {
@@ -147,30 +157,11 @@ export default class Node {
 				}
 			}
 
+			this._lastFollowing = this._following.slice()
+
 			this._following.splice(
 				this._following.findIndex(d => d.id === sampleArray(choppingBlock)), 1)
 		}
-
-		// const byBeliefs = createDictByProp(this.memory.reduce(flatten), 'orientation'),
-		// 	agreementCount = byBeliefs[this.belief] ? byBeliefs[this.belief].length : 0.0001,
-		// 	strongCounterOrientation = Object.keys(byBeliefs)
-		// 		.filter(d => d !== this.belief && !!d)
-		// 		.map(k => byBeliefs[k] )
-		// 		.find(d => d.length / agreementCount > 1.5)
-
-		// this._lastFollowing = this._following.slice()
-
-		// if(strongCounterOrientation) {
-		// 	// change your belief to match the strong counter orientation
-		// 	this.belief = strongCounterOrientation[0].orientation
-
-		// 	// now follow someone randomly from the strong counter orientation group
-		// 	const availableFollowees = Nodes.filter(n =>
-		// 		n.belief === this.belief && !this._following.includes(n.id))
-		// 	if(availableFollowees.length) {
-		// 		this._following.push(sampleArray(availableFollowees))
-		// 	}
-		// }
 
 		this.setNextAction()
 	}
