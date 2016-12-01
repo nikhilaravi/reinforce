@@ -22,6 +22,7 @@ export default class Node {
 		this.learningMessage = null
 		this._rewards = []
 		this.nextAction = null
+		this.retweeted = []
 
 		this.maxMSE = beliefs.reduce((acc, curr) =>
 			acc + Math.pow(-(1 / beliefs.length), 2), 0) / beliefs.length
@@ -141,13 +142,22 @@ export default class Node {
 					}
 				}
 
-				const { id, user, orientation } = sampleArray(messageBreakdown[sampledBelief].messages)
-				message.orientation = orientation
-				message.retweet = { id, user }				
+				const notYetRetweeted = []
+				for(let i=0; i<messageBreakdown[sampledBelief].messages.length; i++) {
+					let message = messageBreakdown[sampledBelief].messages[i]
+					if(this.retweeted.indexOf(message.id) === -1) {
+						notYetRetweeted.push(message)
+					}
+				}
+
+				if(notYetRetweeted.length) {
+					const { id, user, orientation } = sampleArray(notYetRetweeted)
+					message.orientation = orientation
+					message.retweet = { id, user }
+					this.retweeted.push(id)					
+				}
 			}
-
 		}
-
 		return message
 	}
 
