@@ -84,7 +84,7 @@ export default {
 
 	getMessageReach(id) {
 		const entry = memory[id]
-		return entry.actual / Math.max(0.0001, entry.potential)
+		return Math.log(entry.actual) / Math.log(Math.max(0.0001, entry.potential))
 	},
 
 	getRetweetCount(userA, userB) {
