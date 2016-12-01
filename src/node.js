@@ -98,18 +98,54 @@ export default class Node {
 
 		if(seedLearning) {
 			this.learningMessage = [message.id, 0]
-		} else { // consider whether to retweet
-			// sort the messages you've heard by the quotient
-			// retweet the highest one above a certain threshold (which means some notes might not retweet much at all)
-			const matchingMessages = this.lastReceivedMessages
-				.filter(msg => msg.orientation === this.belief)
+		} else if(this.lastReceivedMessages.length) { // consider what to retweet
+			const diversity = this.getDiversity()
 
-			console.log(this.getDiversity())
+			const messageBreakdown = beliefs.reduce((acc, curr) => {
+				acc[curr] = {
+					messages: [],
+					count: 0,
+					threshold: 0
+				}
 
-			if(matchingMessages.length) {
-				const { id, user } = sampleArray(matchingMessages)
-				message.retweet = { id, user }
+				return acc
+			}, {})
+
+			const keys = Object.keys(messageBreakdown)
+
+			for(let i=0; i<this.lastReceivedMessages.length; i++) {
+				let message = this.lastReceivedMessages[i]
+				messageBreakdown[message.orientation].messages.push(message)
+				messageBreakdown[message.orientation].count++
 			}
+
+			keys.forEach(k => {
+				if(k !== this.belief) {
+					messageBreakdown[k].count *= diversity
+				}
+			})
+
+			const modifiedTotal = keys.reduce((acc, curr) => acc + messageBreakdown[curr].count, 0)
+
+			if(modifiedTotal > 0) { // could be 0 if you have a perfectly homogeneous environment but you don't agree with anyone in it 
+				keys.forEach(k => {
+					messageBreakdown[k].threshold = messageBreakdown[k].count / modifiedTotal
+				})
+
+				let sampledBelief = Math.random(), cumulativeThreshold = 0
+				for(let i=0; i<keys.length; i++) {
+					cumulativeThreshold += messageBreakdown[keys[i]].threshold
+					if(sampledBelief < cumulativeThreshold) {
+						sampledBelief = keys[i]
+						break
+					}
+				}
+
+				const { id, user, orientation } = sampleArray(messageBreakdown[sampledBelief].messages)
+				message.orientation = orientation
+				message.retweet = { id, user }				
+			}
+
 		}
 
 		return message
