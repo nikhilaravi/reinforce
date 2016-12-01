@@ -5,7 +5,6 @@ import { Nodes } from './nodes'
 import { beliefs, maxCyclesInMemory } from './config'
 import messageState from './messageState'
 
-const cyclesInMemory = 3
 const EPS = 0.00001
 
 export default class Node {
@@ -19,7 +18,7 @@ export default class Node {
 		this._following = []
 		this._lastFollowing = []
 		this._followedBy = []
-		this.memory = [[]]
+		this.lastReceivedMessages = []
 		this.learningMessage = null
 		this._rewards = []
 		this.nextAction = null
@@ -97,7 +96,7 @@ export default class Node {
 		} else { // consider whether to retweet
 			// sort the messages you've heard by the quotient
 			// retweet the highest one above a certain threshold (which means some notes might not retweet much at all)
-			const matchingMessages = this.memory.reduce(flatten)
+			const matchingMessages = this.lastReceivedMessages
 				.filter(msg => msg.orientation === this.belief)
 
 			console.log(this.getDiversity())
@@ -112,16 +111,12 @@ export default class Node {
 	}
 
 	sendMessages(messages) {
-		if(this.memory.length > cyclesInMemory) { this.memory.shift() }
-
-		const filteredMessages = []
+		this.lastReceivedMessages = []
 		for(let i=0; i<messages.length; i++) {
 			if(this._following.find(d => d.id === messages[i].user)) {
-				filteredMessages.push(messages[i])
+				this.lastReceivedMessages.push(messages[i])
 			}
 		}
-
-		this.memory.push(filteredMessages)
 	}
 
 	cycle() {
