@@ -111,7 +111,7 @@ const initialize = () => {
   initializeFollowings()
   Nodes.forEach(n => n.init())
   messageState.init()
-  // initFlot(Nodes[20]);
+  initFlot(Nodes[20]);
 
   start = Date.now()
   messageState.cycle()
@@ -255,7 +255,7 @@ document.addEventListener("click", e => {
   const match = quadtree.find(e.pageX, e.pageY, 3)
   console.log('match', match)
   if(match) {
-    // initFlot(match[2])
+    initFlot(match[2])
   } else {
     //
   }
