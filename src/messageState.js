@@ -60,13 +60,16 @@ export default {
 
 	collectMessages() {
 		for(let i=0; i<Nodes.length; i++) {
-			let message = Nodes[i].getMessage()
+			let messages = Nodes[i].getMessage()
 
-			current.push(message)
+			for(let j=0; j<messages.length; j++) {
+				let message = messages[j]
+				current.push(message)
 
-			updateMessageReach(message.id, Nodes[i].followedBy.length, message.retweet)
+				updateMessageReach(message.id, Nodes[i].followedBy.length, message.retweet)
 
-			updateMessagePassingRecord(message)
+				updateMessagePassingRecord(message)
+			}
 		}
 	},
 

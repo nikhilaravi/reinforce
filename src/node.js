@@ -86,20 +86,36 @@ export default class Node {
 	}
 
 	getMessage() {
-		let seedLearning = false
+		const messages = []
+		const originalTweet = this.getOriginalTweet()
+		const retweet = this.getRetweet()
+
+		if(originalTweet) {
+			this.learningMessage = [originalTweet.id, 0]
+			messages.push(originalTweet)
+		}
+
+		if(retweet) {
+			messages.push(retweet)
+		}
+
+		return messages
+	}
+
+	getOriginalTweet() {
 		if(messageState.cycleIndex % maxCyclesInMemory === this.cycleInterval) {
-			seedLearning = true
+			return {
+				user: this.id, id: uuid.v4(),
+				orientation: this.belief,
+				retweet: null				
+			}
 		}
+		return null
+	}
 
-		const message = { 
-			orientation: this.belief, 
-			retweet: null,
-			user: this.id, id: uuid.v4() 
-		}
-
-		if(seedLearning) {
-			this.learningMessage = [message.id, 0]
-		} else if(this.lastReceivedMessages.length) { // consider what to retweet
+	getRetweet() {
+		let message = null
+		if(this.lastReceivedMessages.length) {
 			const diversity = this.getDiversity()
 
 			const messageBreakdown = beliefs.reduce((acc, curr) => {
@@ -152,8 +168,13 @@ export default class Node {
 
 				if(notYetRetweeted.length) {
 					const { id, user, orientation } = sampleArray(notYetRetweeted)
-					message.orientation = orientation
-					message.retweet = { id, user }
+
+					message = {
+						user: this.id, id: uuid.v4(),
+						orientation,
+						retweet: { id, user }						
+					}
+
 					this.retweeted.push(id)					
 				}
 			}
