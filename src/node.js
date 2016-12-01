@@ -23,6 +23,9 @@ export default class Node {
 		this._rewards = []
 		this.nextAction = null
 
+		this.maxMSE = beliefs.reduce((acc, curr) =>
+			acc + Math.pow(-(1 / beliefs.length), 2), 0) / beliefs.length
+
 		this.cycleInterval = Math.round(Math.random() * maxCyclesInMemory)
 
 		this.agent = new RL.DQNAgent(this, {
@@ -75,8 +78,10 @@ export default class Node {
 	}
 
 	getDiversity() {
-		return this.getState().reduce((acc, curr) =>
+		const mse = this.getState().reduce((acc, curr) =>
 			acc + Math.pow(((curr / Math.max(EPS, this._following.length)) - (1 / beliefs.length)), 2), 0) / beliefs.length // means squared error
+
+		return 1 - (mse / this.maxMSE)
 	}
 
 	getMessage() {
