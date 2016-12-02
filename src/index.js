@@ -31,7 +31,7 @@ let start, lastCycleTime = 0,
   force = forceSimulation(),
   emptyNode = new THREE.Vector2(),
   links, nodeData, edgeData,
-  cycleSID = null, cycleDur = 6000,
+  cycleSID = null, cycleDur = 1000,
   updateLinksSID = null, updateLinksNodeIndex = 0,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
   nodeSizeScale = scaleLinear().range([4, 25]).clamp(true),
@@ -105,7 +105,7 @@ const initialize = () => {
   links.forEach(l => {
     const source = Nodes.find(n => n.id === +l.source)
     const target = Nodes.find(n => n.id === +l.target)
-    source.following = source.following.concat(target.id)
+    source.following = source.following.concat(target)
   })
 
   initializeFollowings()
@@ -145,7 +145,7 @@ const initialize = () => {
         for(let j=0; j<n.following.length; j++) {
           let target
           for(let k=0; k<Nodes.length; k++) {
-            if(Nodes[k].id === n.following[j]) {
+            if(Nodes[k].id === n.following[j].id) {
               target = Nodes[k]
               break
             }
@@ -165,6 +165,8 @@ const initialize = () => {
         source = emptyNode
         target = emptyNode
       }
+
+      // wrap the below in conditional, e.g. source.index === 0, to highlight only one node
 
       if(i < lastOccupiedEdgeVertexIndex) {
         edgeVertices[i * 2 * 3] = source.x - width / 2
@@ -209,7 +211,8 @@ const initialize = () => {
       let node = Nodes[i]
       nodePositions[i * 2] = node.x - width / 2
       nodePositions[i * 2 + 1] = -(node.y - height / 2)
-      nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
+      // nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
+      nodeSizesColors[i * 2] = 5
       if(node.trumporhillary === 0) { // red
         nodeSizesColors[i * 2 + 1] = decodeFloat(229, 29, 46, 254)
       } else if(node.trumporhillary === 1 || node.trumporhillary === 2 || node.trumporhillary === 5) { // blue
@@ -258,9 +261,9 @@ document.addEventListener("click", e => {
   }
 })
 
-Promise.all(['nodes', 'edges'].map(getData))
+Promise.all(['nodes_toy', 'edges_toy'].map(getData))
   .then(data => {
-    nodeData = data[0].filter((d, i) => i < 500)
+    nodeData = data[0]
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
