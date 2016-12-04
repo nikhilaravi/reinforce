@@ -36,7 +36,8 @@ let start, lastCycleTime = 0,
   updateLinksSID = null, updateLinksNodeIndex = 0,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
   nodeSizeScale = scaleLinear().range([4, 25]).clamp(true),
-  peakTime = 250.0
+  peakTime = 250.0,
+  canvasLeft = 0, canvasTop = 0
 
 scene.add(camera)
 camera.position.z = 1000
@@ -74,6 +75,10 @@ const updateMinMaxFollowedBy = length => {
 }
 
 const initialize = () => {
+  const { top, left } = document.querySelector("canvas").getBoundingClientRect()
+  canvasTop = top
+  canvasLeft = left
+
   nodePositions = new Float32Array(Nodes.length * 2)
   nodeSizesColors = new Float32Array(Nodes.length * 2)
   edgeVertices = new Float32Array(edgeData.length * 2 * 6)
@@ -241,7 +246,7 @@ document.addEventListener("mousemove", e => {
   popoverElement.style.left = e.pageX + 'px'
   popoverElement.style.top = e.pageY + 'px'
 
-  const match = quadtree.find(e.pageX, e.pageY, 3)
+  const match = quadtree.find(e.pageX - canvasLeft, e.pageY - canvasTop, 3)
   if(match) {
     popoverElement.style.display = 'block'
     popoverID.innerHTML = match[2].id
@@ -253,7 +258,7 @@ document.addEventListener("mousemove", e => {
 
 document.addEventListener("click", e => {
   e.preventDefault()
-  const match = quadtree.find(e.pageX, e.pageY, 3)
+  const match = quadtree.find(e.pageX - canvasLeft, e.pageY - canvasTop, 3)
   console.log('match', match)
   if(match) {
     initFlot(match[2])
