@@ -1,3 +1,4 @@
+import { shuffle } from 'underscore'
 import helpers from './helpers/helpers'
 const { flatten, sampleArray, roundDown, decodeFloat } = helpers
 import { scaleOrdinal, schemeCategory10, scaleLinear } from 'd3-scale'
@@ -31,7 +32,7 @@ let start, lastCycleTime = 0,
   force = forceSimulation(),
   emptyNode = new THREE.Vector2(),
   links, nodeData, edgeData,
-  cycleSID = null, cycleDur = 1000,
+  cycleSID = null, cycleDur = 2500,
   updateLinksSID = null, updateLinksNodeIndex = 0,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
   nodeSizeScale = scaleLinear().range([4, 25]).clamp(true),
@@ -263,12 +264,12 @@ document.addEventListener("click", e => {
 
 Promise.all(['nodes_toy', 'edges_toy'].map(getData))
   .then(data => {
-    nodeData = data[0]
+    nodeData = shuffle(data[0])
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
-    edgeData = data[1].filter(d =>
-      [+d.source, +d.target].every(id => nodeData.find(n => n.node_id === id)))
+    edgeData = shuffle(data[1].filter(d =>
+      [+d.source, +d.target].every(id => nodeData.find(n => n.node_id === id))))
 
     edgeData.splice(roundDown(edgeData.length, 3))
 

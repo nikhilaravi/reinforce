@@ -29,7 +29,7 @@ module.exports = function(options) {
         commonjs({ 
           include: './node_modules/**',
           namedExports: { 
-            './node_modules/underscore/underscore.js': ['values', 'difference'],
+            './node_modules/underscore/underscore.js': ['values', 'difference', 'shuffle'],
             './node_modules/pagerank-js/lib/pagerank.js': ['PageRank']
           }
         })
