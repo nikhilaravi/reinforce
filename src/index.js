@@ -15,6 +15,7 @@ import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './n
 import { initFlot } from './charts.js'
 
 let start, lastCycleTime = 0,
+  halo = document.querySelector("#halo"),
   popoverElement = document.querySelector("#popover"),
   popoverID = popoverElement.querySelector(".node_id"),
   popoverBelief = popoverElement.querySelector('.node_belief'),
@@ -37,7 +38,7 @@ let start, lastCycleTime = 0,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
   nodeSizeScale = scaleLinear().range([4, 25]).clamp(true),
   peakTime = 250.0,
-  canvasLeft = 0, canvasTop = 0
+  canvasLeft = 0, canvasTop = 0, match, activeNode = null
 
 scene.add(camera)
 camera.position.z = 1000
@@ -226,6 +227,12 @@ const initialize = () => {
       } else { // purple
         nodeSizesColors[i * 2 + 1] = decodeFloat(200, 200, 200, 254)
       }
+
+      if(activeNode && node.id === activeNode[2].id) {
+        halo.style.left = (canvasLeft + node.x) + 'px'
+        halo.style.top = (canvasTop + node.y) + 'px'
+      }
+
       if(shouldUpdate) {
         quadtree.add([node.x, node.y, node])
         updateMinMaxFollowedBy(node.followedBy.length)
@@ -241,12 +248,20 @@ const initialize = () => {
   })
 }
 
+const revealHalo = () => {
+  halo.classList.add("active")
+}
+
+const removeHalo = () => {
+  halo.classList.remove("active")
+}
+
 document.addEventListener("mousemove", e => {
   e.preventDefault()
   popoverElement.style.left = e.pageX + 'px'
   popoverElement.style.top = e.pageY + 'px'
 
-  const match = quadtree.find(e.pageX - canvasLeft, e.pageY - canvasTop, 3)
+  match = quadtree.find(e.pageX - canvasLeft, e.pageY - canvasTop, 3)
   if(match) {
     popoverElement.style.display = 'block'
     popoverID.innerHTML = match[2].id
@@ -258,12 +273,16 @@ document.addEventListener("mousemove", e => {
 
 document.addEventListener("click", e => {
   e.preventDefault()
-  const match = quadtree.find(e.pageX - canvasLeft, e.pageY - canvasTop, 3)
-  console.log('match', match)
   if(match) {
-    initFlot(match[2])
-  } else {
-    //
+    console.log('match', match)
+    if(!activeNode) {
+      initFlot(match[2])
+      activeNode = match  
+      revealHalo()    
+    } else {
+      activeNode = null
+      removeHalo()
+    }
   }
 })
 
