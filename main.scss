@@ -12,6 +12,7 @@ body {
 body, html {
 	font-size: 10px;
 	font-family: Helvetica;
+	overflow: hidden;
 }
 
 #popover, #halo {
@@ -22,8 +23,8 @@ body, html {
 }
 
 #halo {
-	transform: translate3d(-50%, -50%, 0);
-	transition: all $transition-duration;
+	top: 0;
+	left: 0;
 }
 
 #halo.active {
@@ -39,6 +40,10 @@ body, html {
 	box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.2);
 	border-radius: 2px;
 	background: white;
+}
+
+canvas {
+	position: absolute;
 }
 
 #flotreward, #chart_caption {

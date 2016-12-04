@@ -68,8 +68,6 @@ const edgeMaterial = new THREE.ShaderMaterial({
 renderer.setSize(width, height)
 renderer.setPixelRatio(window.devicePixelRatio)
 
-document.body.appendChild(renderer.domElement)
-
 const updateMinMaxFollowedBy = length => {
   if(length > maxFollowedByLength) maxFollowedByLength = length
   if(length < minFollowedByLength) minFollowedByLength = length
@@ -229,8 +227,7 @@ const initialize = () => {
       }
 
       if(activeNode && node.id === activeNode[2].id) {
-        halo.style.left = (canvasLeft + node.x) + 'px'
-        halo.style.top = (canvasTop + node.y) + 'px'
+        halo.style.transform = `translate3d(${canvasLeft + node.x - 6}px, ${canvasTop + node.y - 6}px, 0)`
       }
 
       if(shouldUpdate) {
