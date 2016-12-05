@@ -217,8 +217,6 @@ export default class Node {
 
 	adjustFollowing() {
 		if(this.nextAction !== null) {
-			this._lastFollowing = this._following.slice()
-
 			// follow someone from the group that the learning agent tells you
 			const followingIDs = this._following.map(n => n.id)
 			const availableFollowees = Nodes.filter(n =>

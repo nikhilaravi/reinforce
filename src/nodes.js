@@ -87,4 +87,8 @@ export const setFollowedBy = node => {
 		let match = Nodes.find(d => d.id === toAdd[i].id)
 		match.followedBy = match.followedBy.concat(node.id)
 	}
+
+	if(toAdd.length || toRemove.length) {
+		node.lastFollowing = node.following.slice()
+	}
 }

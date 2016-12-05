@@ -36,7 +36,7 @@ let start, lastCycleTime = 0,
   cycleSID = null, cycleDur = 1500,
   updateLinksSID = null, updateLinksNodeIndex = 0,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
-  nodeSizeScale = scaleLinear().range([4, 25]).clamp(true),
+  nodeSizeScale = scaleLinear().range([2, 15]).clamp(true),
   peakTime = 250.0, totalTime = 350.0,
   canvasLeft = 0, canvasTop = 0, match, activeNode = null
 
@@ -233,8 +233,7 @@ const initialize = () => {
       let node = Nodes[i]
       nodePositions[i * 2] = node.x - width / 2
       nodePositions[i * 2 + 1] = -(node.y - height / 2)
-      // nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
-      nodeSizesColors[i * 2] = 5
+      nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
       if(node.trumporhillary === 0) { // red
         nodeSizesColors[i * 2 + 1] = decodeFloat(229, 29, 46, 254)
       } else if(node.trumporhillary === 1 || node.trumporhillary === 2 || node.trumporhillary === 5) { // blue
