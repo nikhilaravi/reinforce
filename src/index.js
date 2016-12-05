@@ -37,7 +37,7 @@ let start, lastCycleTime = 0,
   updateLinksSID = null, updateLinksNodeIndex = 0,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
   nodeSizeScale = scaleLinear().range([4, 25]).clamp(true),
-  peakTime = 250.0,
+  peakTime = 250.0, totalTime = 350.0,
   canvasLeft = 0, canvasTop = 0, match, activeNode = null
 
 scene.add(camera)
@@ -53,7 +53,7 @@ const edgeMaterial = new THREE.ShaderMaterial({
   uniforms: {
     uTime: { value: 0.0 },
     peakTime: { value: peakTime },
-    totalTime: { value: 350.0 },
+    totalTime: { value: totalTime },
     defaultOpacity: { value: 0.05 },
     color: {
       type: 'c',
@@ -184,11 +184,28 @@ const initialize = () => {
       // edgeColorsStartTimes[i * 2 * 2] = decodeFloat(229, 29, 46, 254)
       // edgeColorsStartTimes[i * 2 * 2 + 2] = decodeFloat(229, 29, 46, 254)
 
-      if(source.index >= updateLinksNodeIndex && source.index < targetIndex) { // update times
-        // source
-        edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
-        // target
-        edgeColorsStartTimes[i * 2 * 2 + 3] = d
+      if(activeNode) {
+        let targetIDs = target.outgoingMessages.map(d => d.id)
+
+        if(source.lastReceivedMessages.filter(m => {
+          const outgoingMatch = source.id === activeNode.id || (m.retweet && m.retweet.user === activeNode.id)
+          const incomingMatch = targetIDs.indexOf(m.id) > -1
+          return outgoingMatch && incomingMatch
+        }).length) {
+          if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > totalTime) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > totalTime)) {
+            // source
+            edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
+            // target
+            edgeColorsStartTimes[i * 2 * 2 + 3] = d            
+          }
+        }
+      } else {
+        if(source.index >= updateLinksNodeIndex && source.index < targetIndex) { // update times
+          // source
+          edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
+          // target
+          edgeColorsStartTimes[i * 2 * 2 + 3] = d
+        }        
       }
     }
 
@@ -226,7 +243,7 @@ const initialize = () => {
         nodeSizesColors[i * 2 + 1] = decodeFloat(200, 200, 200, 254)
       }
 
-      if(activeNode && node.id === activeNode[2].id) {
+      if(activeNode && node.id === activeNode.id) {
         halo.style.transform = `translate3d(${canvasLeft + node.x - 6}px, ${canvasTop + node.y - 6}px, 0)`
       }
 
@@ -271,10 +288,9 @@ document.addEventListener("mousemove", e => {
 document.addEventListener("click", e => {
   e.preventDefault()
   if(match) {
-    console.log('match', match)
     if(!activeNode) {
-      initFlot(match[2])
-      activeNode = match  
+      activeNode = match[2]
+      initFlot(activeNode)
       revealHalo()    
     } else {
       activeNode = null
