@@ -20,6 +20,7 @@ export default class Node {
 		this._followedBy = []
 		this.lastReceivedMessages = []
 		this.learningMessage = null
+		this.outgoingMessages = []
 		this._rewards = []
 		this.nextAction = null
 		this.retweeted = []
@@ -86,20 +87,21 @@ export default class Node {
 	}
 
 	getMessage() {
-		const messages = []
+		this.outgoingMessages = []
+
 		const originalTweet = this.getOriginalTweet()
 		const retweet = this.getRetweet()
 
 		if(originalTweet) {
 			this.learningMessage = [originalTweet.id, 0]
-			messages.push(originalTweet)
+			this.outgoingMessages.push(originalTweet)
 		}
 
 		if(retweet) {
-			messages.push(retweet)
+			this.outgoingMessages.push(retweet)
 		}
 
-		return messages
+		return this.outgoingMessages
 	}
 
 	getOriginalTweet() {
