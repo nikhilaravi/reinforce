@@ -194,17 +194,17 @@ const initialize = () => {
         }).length) {
           if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > cycleDur) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > cycleDur)) {
             // source
-            edgeColorsStartTimes[i * 2 * 2 + 1] = d
+            edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
             // target
-            edgeColorsStartTimes[i * 2 * 2 + 3] = d - peakTime           
+            edgeColorsStartTimes[i * 2 * 2 + 3] = d           
           }
         }
       } else {
         if(source.index >= updateLinksNodeIndex && source.index < targetIndex) { // update times
           // source
-          edgeColorsStartTimes[i * 2 * 2 + 1] = d
+          edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
           // target
-          edgeColorsStartTimes[i * 2 * 2 + 3] = d - peakTime
+          edgeColorsStartTimes[i * 2 * 2 + 3] = d
         }        
       }
     }
