@@ -192,19 +192,19 @@ const initialize = () => {
           const incomingMatch = targetIDs.indexOf(m.id) > -1
           return outgoingMatch && incomingMatch
         }).length) {
-          if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > totalTime) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > totalTime)) {
+          if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > (totalTime * 1.5)) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > (totalTime * 1.5))) { // multiplying totaltime by 2 so there's more of a pause between pulses
             // source
-            edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
+            edgeColorsStartTimes[i * 2 * 2 + 1] = d
             // target
-            edgeColorsStartTimes[i * 2 * 2 + 3] = d            
+            edgeColorsStartTimes[i * 2 * 2 + 3] = d - peakTime           
           }
         }
       } else {
         if(source.index >= updateLinksNodeIndex && source.index < targetIndex) { // update times
           // source
-          edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
+          edgeColorsStartTimes[i * 2 * 2 + 1] = d
           // target
-          edgeColorsStartTimes[i * 2 * 2 + 3] = d
+          edgeColorsStartTimes[i * 2 * 2 + 3] = d - peakTime
         }        
       }
     }
@@ -288,13 +288,13 @@ document.addEventListener("mousemove", e => {
 document.addEventListener("click", e => {
   e.preventDefault()
   if(match) {
-    if(!activeNode) {
+    if(activeNode && activeNode.id === match[2].id) {
+      activeNode = null
+      removeHalo()      
+    } else {
       activeNode = match[2]
       initFlot(activeNode)
-      revealHalo()    
-    } else {
-      activeNode = null
-      removeHalo()
+      revealHalo()          
     }
   }
 })
