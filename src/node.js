@@ -88,7 +88,7 @@ export default class Node {
 
 	getMessage() {
 		this.outgoingMessages = []
-		
+
 		const originalTweet = this.getOriginalTweet()
 		const retweet = this.getRetweet()
 

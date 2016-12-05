@@ -33,7 +33,7 @@ let start, lastCycleTime = 0,
   force = forceSimulation(),
   emptyNode = new THREE.Vector2(),
   links, nodeData, edgeData,
-  cycleSID = null, cycleDur = 2500,
+  cycleSID = null, cycleDur = 1500,
   updateLinksSID = null, updateLinksNodeIndex = 0,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
   nodeSizeScale = scaleLinear().range([4, 25]).clamp(true),
@@ -192,7 +192,7 @@ const initialize = () => {
           const incomingMatch = targetIDs.indexOf(m.id) > -1
           return outgoingMatch && incomingMatch
         }).length) {
-          if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > (totalTime * 1.5)) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > (totalTime * 1.5))) { // multiplying totaltime by 2 so there's more of a pause between pulses
+          if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > cycleDur) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > cycleDur)) {
             // source
             edgeColorsStartTimes[i * 2 * 2 + 1] = d
             // target
