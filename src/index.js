@@ -33,7 +33,7 @@ let start, lastCycleTime = 0,
   emptyNode = new THREE.Vector2(),
   links, nodeData, edgeData,
   cycleSID = null, cycleDur = 1500,
-  updateLinksSID = null, updateLinksNodeIndex = 0,
+  updateLinksSID = null,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
   nodeSizeScale = scaleLinear().range([2, 15]).clamp(true),
   peakTime = 250.0, totalTime = 350.0,
@@ -125,12 +125,8 @@ const initialize = () => {
   timer(d => {
     const shouldUpdate = Math.random() < 0.5 // perf
 
-    edgeMaterial.uniforms['uTime'].value = d
-
     const diff = d - lastCycleTime
     const targetIndex = Math.max(0, Math.min(Math.round((diff / cycleDur) * Nodes.length), Nodes.length))
-
-    if(targetIndex < updateLinksNodeIndex) { updateLinksNodeIndex = 0 } // wrap around
 
     links = []
     for(let i=0; i<n; i++) {
@@ -171,7 +167,6 @@ const initialize = () => {
     }
 
     lastOccupiedEdgeVertexIndex = l
-    updateLinksNodeIndex = targetIndex
 
     if(shouldUpdate) {
       force.force("link").links(links)
