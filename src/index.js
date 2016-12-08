@@ -11,7 +11,7 @@ import messageState from './messageState'
 import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './nodes'
-import { initFlot } from './charts.js'
+import { initFlot, initNetworkConnectivity} from './charts.js'
 
 let start, lastCycleTime = 0,
   popoverElement = document.querySelector("#popover"),
@@ -112,7 +112,7 @@ const initialize = () => {
   Nodes.forEach(n => n.init())
   messageState.init()
   initFlot(Nodes[20]);
-
+  initNetworkConnectivity(Nodes)
   start = Date.now()
   messageState.cycle()
 
@@ -219,6 +219,7 @@ const initialize = () => {
       }
       if(shouldUpdate) {
         quadtree.add([node.x, node.y, node])
+        // initNetworkConnectivity(Nodes)
         updateMinMaxFollowedBy(node.followedBy.length)
       }
     }
