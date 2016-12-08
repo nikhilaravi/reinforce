@@ -100,8 +100,8 @@ const initialize = () => {
     .force("link", forceLink().id(d => d.id))
     .force("charge", forceManyBody().strength(-10).distanceMax(200))
     .force("center", forceCenter(width / 2, height / 2))
-    .force("vertical", forceY().strength(0.01))
-    .force("horizontal", forceX().strength(0.01))
+    .force("vertical", forceY().strength(0.005)) // the smaller these numbers, the fewer ring effects, but the farther the nodes travel
+    .force("horizontal", forceX().strength(0.005))
     .velocityDecay(0.6)
 
   links = edgeData
