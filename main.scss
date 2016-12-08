@@ -52,6 +52,10 @@ body, html {
 	display: block;
 }
 
+#chart, #chart_title {
+	display: none;
+}
+
 #chart_title {
 	font-size: 1.1rem;
 	margin-left: 15em;

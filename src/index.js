@@ -116,15 +116,15 @@ const initialize = () => {
   initializeFollowings()
   Nodes.forEach(n => n.init())
   messageState.init()
-  initFlot(Nodes[20]);
+  // initFlot(Nodes[20]);
 
   start = Date.now()
-  messageState.cycle()
+  // messageState.cycle()
 
-  cycleSID = setInterval(() => {
-    lastCycleTime = Date.now() - start
-    messageState.cycle()
-  }, cycleDur)
+  // cycleSID = setInterval(() => {
+  //   lastCycleTime = Date.now() - start
+  //   messageState.cycle()
+  // }, cycleDur)
 
   // initialise chart to the first node - will be changed to show the rewards of the node that is clicked
 
@@ -138,10 +138,10 @@ const initialize = () => {
 
     if(targetIndex < updateLinksNodeIndex) { updateLinksNodeIndex = 0 } // wrap around
 
-    for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
-      Nodes[i].adjustFollowing()
-      setFollowedBy(Nodes[i])
-    }
+    // for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
+    //   Nodes[i].adjustFollowing()
+    //   setFollowedBy(Nodes[i])
+    // }
 
     links = []
     for(let i=0; i<Nodes.length; i++) {
@@ -224,7 +224,7 @@ const initialize = () => {
     if(shouldUpdate) {
       force.force("link").links(links)
       force.alphaTarget(0.1).restart()
-      quadtree = d3quadtree().extent([[-1, -1], [width, height]])
+      // quadtree = d3quadtree().extent([[-1, -1], [width, height]])
       minFollowedByLength = Infinity
       maxFollowedByLength = 0
     }
@@ -247,8 +247,8 @@ const initialize = () => {
       }
 
       if(shouldUpdate) {
-        quadtree.add([node.x, node.y, node])
-        updateMinMaxFollowedBy(node.followedBy.length)
+        // quadtree.add([node.x, node.y, node])
+        // updateMinMaxFollowedBy(node.followedBy.length)
       }
     }
 
