@@ -12,7 +12,7 @@ import messageState from './messageState'
 import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './nodes'
-import { initFlot } from './charts.js'
+import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart } from './charts.js'
 
 let start, lastCycleTime = 0,
   halo = document.querySelector("#halo"),
@@ -117,7 +117,6 @@ const initialize = () => {
   Nodes.forEach(n => n.init())
   messageState.init()
   initFlot(Nodes[20]);
-
   start = Date.now()
   messageState.cycle()
 
@@ -142,7 +141,8 @@ const initialize = () => {
       Nodes[i].adjustFollowing()
       setFollowedBy(Nodes[i])
     }
-
+    initNetworkConnectivity(Nodes)
+    initDiversityChart(Nodes)
     links = []
     for(let i=0; i<Nodes.length; i++) {
       let n = Nodes[i]
@@ -196,7 +196,7 @@ const initialize = () => {
             // source
             edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
             // target
-            edgeColorsStartTimes[i * 2 * 2 + 3] = d           
+            edgeColorsStartTimes[i * 2 * 2 + 3] = d
           }
         }
       } else {
@@ -205,7 +205,7 @@ const initialize = () => {
           edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
           // target
           edgeColorsStartTimes[i * 2 * 2 + 3] = d
-        }        
+        }
       }
     }
 
@@ -248,6 +248,7 @@ const initialize = () => {
 
       if(shouldUpdate) {
         quadtree.add([node.x, node.y, node])
+        // initNetworkConnectivity(Nodes)
         updateMinMaxFollowedBy(node.followedBy.length)
       }
     }
@@ -289,11 +290,11 @@ document.addEventListener("click", e => {
   if(match) {
     if(activeNode && activeNode.id === match[2].id) {
       activeNode = null
-      removeHalo()      
+      removeHalo()
     } else {
       activeNode = match[2]
       initFlot(activeNode)
-      revealHalo()          
+      revealHalo()
     }
   }
 })
