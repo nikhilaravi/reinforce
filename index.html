@@ -9,12 +9,26 @@
 </head>
 <body>
   <div id="root" style="height: 100%">
-    <div id=chart_title>Reward at each time step</div>
-    <div id="chart">
-      <div id="flotreward" style="width:450px; height: 175px;"></div>
-      <div id="chart_caption">
-        <div class="chart_node_id"></div>
-        <div class="chart_node_belief"></div>
+    <div class='charts' >
+      <div class="chart">
+        <div id=chart_title>Node reward at each time step</div>
+        <div id="flotreward" style="width:450px; height: 175px;"></div>
+        <div id="chart_caption">
+          <div class="chart_node_id"></div>
+          <div class="chart_node_belief"></div>
+        </div>
+      </div>
+      <div class="chart">
+        <div id=chart_title>Network Modularity</div>
+        <div id="flotnetwork" style="width:450px; height: 175px;"></div>
+      </div>
+      <div class="chart">
+        <div id=chart_title>Node diversity</div>
+        <div id="flotnodediversity" style="width:450px; height: 175px;"></div>
+      </div>
+      <div class="chart">
+        <div id=chart_title>Network diversity</div>
+        <div id="flotdiversitynetwork" style="width:450px; height: 175px;"></div>
       </div>
     </div>
     <canvas></canvas>
@@ -156,6 +170,7 @@
   <script src="/vendor/jquery-ui.min.js"></script>
   <!-- flotjs -->
   <script src="/vendor/jquery.flot.min.js"></script>
+  <script src="/vendor/jquery.flot.axislabels.js"></script>
   <script src="/vendor/rl.js"></script>
   <script src="/dist/main.js"></script>
 </body>
