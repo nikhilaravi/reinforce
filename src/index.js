@@ -205,12 +205,33 @@ const initialize = () => {
 Promise.all(['terrorism_nodes', 'terrorism_edges'].map(getData))
   .then(data => {
     console.log(data[0].length)
-    nodeData = shuffle(data[0].filter((d, i) => i < 2000))
+    nodeData = data[0].filter((d, i) => i < 2000)
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
-    edgeData = shuffle(data[1].filter(d =>
-      [+d.source, +d.target].every(id => nodeData.find(n => n.node_id === id))))
+    let filteredEdgeData = []
+    for(let i=0, l=data[1].length; i<l; i++) {
+      let edge = data[1][i]
+      let sourceExists = false
+      let targetExists = false
+      for(let j=0, n=nodeData.length; j<n; j++) {
+        if(nodeData[j].node_id == edge.source) {
+          sourceExists = true
+        }
+        if(nodeData[j].node_id == edge.target) {
+          targetExists = true
+        }
+        if(sourceExists && targetExists) {
+          break
+        }
+      }
+
+      if(sourceExists && targetExists) {
+        filteredEdgeData.push(edge)
+      }
+    }
+
+    edgeData = filteredEdgeData
 
     edgeData.splice(roundDown(edgeData.length, 3))
 
