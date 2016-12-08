@@ -19,7 +19,6 @@ let start, lastCycleTime = 0,
   popoverElement = document.querySelector("#popover"),
   popoverID = popoverElement.querySelector(".node_id"),
   popoverBelief = popoverElement.querySelector('.node_belief'),
-  quadtree = d3quadtree(),
   renderer = new THREE.WebGLRenderer({ alpha: true, canvas: document.querySelector("canvas") }),
   width = window.innerWidth, height = window.innerHeight,
   scene = new THREE.Scene(),
@@ -116,17 +115,12 @@ const initialize = () => {
   initializeFollowings()
   Nodes.forEach(n => n.init())
   messageState.init()
-  // initFlot(Nodes[20]);
-
   start = Date.now()
-  // messageState.cycle()
-
-  // cycleSID = setInterval(() => {
-  //   lastCycleTime = Date.now() - start
-  //   messageState.cycle()
-  // }, cycleDur)
 
   // initialise chart to the first node - will be changed to show the rewards of the node that is clicked
+
+  const n = Nodes.length
+  const l = links.length
 
   timer(d => {
     const shouldUpdate = Math.random() < 0.5 // perf
@@ -138,13 +132,8 @@ const initialize = () => {
 
     if(targetIndex < updateLinksNodeIndex) { updateLinksNodeIndex = 0 } // wrap around
 
-    // for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
-    //   Nodes[i].adjustFollowing()
-    //   setFollowedBy(Nodes[i])
-    // }
-
     links = []
-    for(let i=0; i<Nodes.length; i++) {
+    for(let i=0; i<n; i++) {
       let n = Nodes[i]
       if(n.following.length) {
         for(let j=0; j<n.following.length; j++) {
@@ -160,7 +149,7 @@ const initialize = () => {
       }
     }
 
-    for(let i=0; i<links.length; i++) {
+    for(let i=0; i<l; i++) {
       const link = links[i]
       let source, target
       if(link) {
@@ -179,57 +168,19 @@ const initialize = () => {
         edgeVertices[i * 2 * 3 + 3] = target.x - width / 2
         edgeVertices[i * 2 * 3 + 4] = -(target.y - height / 2)
       }
-
-      // revive in case we want custom edge colors
-      // edgeColorsStartTimes[i * 2 * 2] = decodeFloat(229, 29, 46, 254)
-      // edgeColorsStartTimes[i * 2 * 2 + 2] = decodeFloat(229, 29, 46, 254)
-
-      if(activeNode) {
-        let targetIDs = target.outgoingMessages.map(d => d.id)
-
-        if(source.lastReceivedMessages.filter(m => {
-          const outgoingMatch = source.id === activeNode.id || (m.retweet && m.retweet.user === activeNode.id)
-          const incomingMatch = targetIDs.indexOf(m.id) > -1
-          return outgoingMatch && incomingMatch
-        }).length) {
-          if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > cycleDur) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > cycleDur)) {
-            // source
-            edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
-            // target
-            edgeColorsStartTimes[i * 2 * 2 + 3] = d           
-          }
-        }
-      } else {
-        if(source.index >= updateLinksNodeIndex && source.index < targetIndex) { // update times
-          // source
-          edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
-          // target
-          edgeColorsStartTimes[i * 2 * 2 + 3] = d
-        }        
-      }
     }
 
-    if(lastOccupiedEdgeVertexIndex > links.length) {
-      for(let i=links.length; i<lastOccupiedEdgeVertexIndex; i++) {
-        edgeVertices[i * 2 * 3] = 0
-        edgeVertices[i * 2 * 3 + 1] = 0
-        edgeVertices[i * 2 * 3 + 3] = 0
-        edgeVertices[i * 2 * 3 + 4] = 0
-      }
-    }
-
-    lastOccupiedEdgeVertexIndex = links.length
+    lastOccupiedEdgeVertexIndex = l
     updateLinksNodeIndex = targetIndex
 
     if(shouldUpdate) {
       force.force("link").links(links)
       force.alphaTarget(0.1).restart()
-      // quadtree = d3quadtree().extent([[-1, -1], [width, height]])
       minFollowedByLength = Infinity
       maxFollowedByLength = 0
     }
 
-    for(let i=0; i < Nodes.length; i++) {
+    for(let i=0; i < n; i++) {
       let node = Nodes[i]
       nodePositions[i * 2] = node.x - width / 2
       nodePositions[i * 2 + 1] = -(node.y - height / 2)
@@ -245,11 +196,6 @@ const initialize = () => {
       if(activeNode && node.id === activeNode.id) {
         halo.style.transform = `translate3d(${canvasLeft + node.x - 6}px, ${canvasTop + node.y - 6}px, 0)`
       }
-
-      if(shouldUpdate) {
-        // quadtree.add([node.x, node.y, node])
-        // updateMinMaxFollowedBy(node.followedBy.length)
-      }
     }
 
     nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
@@ -261,46 +207,10 @@ const initialize = () => {
   })
 }
 
-const revealHalo = () => {
-  halo.classList.add("active")
-}
-
-const removeHalo = () => {
-  halo.classList.remove("active")
-}
-
-document.addEventListener("mousemove", e => {
-  e.preventDefault()
-  popoverElement.style.left = e.pageX + 'px'
-  popoverElement.style.top = e.pageY + 'px'
-
-  match = quadtree.find(e.pageX - canvasLeft, e.pageY - canvasTop, 3)
-  if(match) {
-    popoverElement.style.display = 'block'
-    popoverID.innerHTML = match[2].id
-    popoverBelief.innerHTML = 'trumporhillary: ' + match[2].trumporhillary
-  } else {
-    popoverElement.style.display = 'none'
-  }
-})
-
-document.addEventListener("click", e => {
-  e.preventDefault()
-  if(match) {
-    if(activeNode && activeNode.id === match[2].id) {
-      activeNode = null
-      removeHalo()      
-    } else {
-      activeNode = match[2]
-      initFlot(activeNode)
-      revealHalo()          
-    }
-  }
-})
-
-Promise.all(['nodes_toy', 'edges_toy'].map(getData))
+Promise.all(['terrorism_nodes', 'terrorism_edges'].map(getData))
   .then(data => {
-    nodeData = shuffle(data[0])
+    console.log(data[0].length)
+    nodeData = shuffle(data[0].filter((d, i) => i < 2000))
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
