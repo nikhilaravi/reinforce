@@ -69,15 +69,18 @@ export default {
 
 	collectMessages() {
 		for(let i=0; i<Nodes.length; i++) {
-			let messages = Nodes[i].getMessage()
+			let node = Nodes[i]
+			if(node.infected) {
+				let messages = node.getMessage()
 
-			for(let j=0; j<messages.length; j++) {
-				let message = messages[j]
-				current.push(message)
+				for(let j=0; j<messages.length; j++) {
+					let message = messages[j]
+					current.push(message)
 
-				updateMessageReach(message.retweet ? message.retweet.id : message.id, Nodes[i].followedBy.length, message.retweet)
+					// updateMessageReach(message.retweet ? message.retweet.id : message.id, Nodes[i].followedBy.length, message.retweet)
 
-				updateMessagePassingRecord(message)
+					// updateMessagePassingRecord(message)
+				}
 			}
 		}
 	},

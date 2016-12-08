@@ -15,6 +15,7 @@ export default class Node {
 		this.belief = opts.belief
 		this.trumporhillary = opts.trumporhillary
 
+		this.hasTweeted = false
 		this._following = []
 		this._lastFollowing = []
 		this._followedBy = []
@@ -87,6 +88,7 @@ export default class Node {
 	}
 
 	getMessage() {
+		if(this.hasTweeted) { return }
 		this.outgoingMessages = []
 
 		const originalTweet = this.getOriginalTweet()

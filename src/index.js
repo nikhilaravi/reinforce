@@ -33,7 +33,7 @@ let start, lastCycleTime = 0,
   emptyNode = new THREE.Vector2(),
   links, nodeData, edgeData,
   cycleSID = null, cycleDur = 1500,
-  updateLinksSID = null,
+  updateLinksSID = null, updateLinksNodeIndex = 0,
   nodeSizeScale = scaleLog().range([4, 20]).clamp(true),
   nodeSizeMin = Infinity, nodeSizeMax = 0,
   peakTime = 250.0, totalTime = 350.0,
@@ -112,6 +112,8 @@ const initialize = () => {
     n.init()
     setFollowedBy(n)
   })
+
+  let infectedCount = 0
   for(let i=0; i<Nodes.length; i++) {
     let count = Nodes[i].followedBy.length
     if(count > nodeSizeMax) {
@@ -120,7 +122,21 @@ const initialize = () => {
     if(count < nodeSizeMin) {
       nodeSizeMin = Math.max(1, count)
     }
+
+    if(Math.random() < 0.05) {
+      infectedCount++
+      Nodes[i].infected = true
+    }
   }
+
+  messageState.init()
+  start = Date.now()
+
+  messageState.cycle()
+  cycleSID = setInterval(() => {
+    lastCycleTime = Date.now() - start
+    messageState.cycle()
+  }, cycleDur)
 
   nodeSizeScale.domain([nodeSizeMin, nodeSizeMax])
   messageState.init()
@@ -134,8 +150,12 @@ const initialize = () => {
   timer(d => {
     const shouldUpdate = Math.random() < 0.5 // perf
 
+    edgeMaterial.uniforms['uTime'].value = d
+
     const diff = d - lastCycleTime
     const targetIndex = Math.max(0, Math.min(Math.round((diff / cycleDur) * Nodes.length), Nodes.length))
+
+    if(targetIndex < updateLinksNodeIndex) { updateLinksNodeIndex = 0 }
 
     links = []
     for(let i=0; i<n; i++) {
@@ -172,6 +192,19 @@ const initialize = () => {
         edgeVertices[i * 2 * 3 + 1] = -(source.y - height / 2)
         edgeVertices[i * 2 * 3 + 3] = target.x - width / 2
         edgeVertices[i * 2 * 3 + 4] = -(target.y - height / 2)
+      }
+  
+      let targetIDs = target.outgoingMessages.map(d => d.id)
+
+      if(source.lastReceivedMessages.filter(m => {
+        return targetIDs.indexOf(m.id) > -1
+      }).length) {
+        if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > cycleDur) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > cycleDur)) {
+          // source
+          edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
+          // target
+          edgeColorsStartTimes[i * 2 * 2 + 3] = d           
+        }
       }
     }
 
@@ -210,7 +243,7 @@ const initialize = () => {
 
 Promise.all(['terrorism_nodes', 'terrorism_edges'].map(getData))
   .then(data => {
-    nodeData = data[0].filter((d, i) => i < 500)
+    nodeData = shuffle(data[0].filter((d, i) => i < 500))
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
