@@ -1,7 +1,7 @@
 import { shuffle } from 'underscore'
 import helpers from './helpers/helpers'
 const { flatten, sampleArray, roundDown, decodeFloat } = helpers
-import { scaleOrdinal, schemeCategory10, scaleLinear } from 'd3-scale'
+import { scaleLog, scaleOrdinal, schemeCategory10, scaleLinear } from 'd3-scale'
 import { forceSimulation, forceLink, forceManyBody, forceCenter, forceX, forceY } from 'd3-force'
 import { quadtree as d3quadtree } from 'd3-quadtree'
 import { select, selectAll, event } from 'd3-selection'
@@ -34,8 +34,8 @@ let start, lastCycleTime = 0,
   links, nodeData, edgeData,
   cycleSID = null, cycleDur = 1500,
   updateLinksSID = null,
-  maxFollowedByLength = 0, minFollowedByLength = Infinity,
-  nodeSizeScale = scaleLinear().range([2, 15]).clamp(true),
+  nodeSizeScale = scaleLog().range([4, 20]).clamp(true),
+  nodeSizeMin = Infinity, nodeSizeMax = 0,
   peakTime = 250.0, totalTime = 350.0,
   canvasLeft = 0, canvasTop = 0, match, activeNode = null
 
@@ -66,11 +66,6 @@ const edgeMaterial = new THREE.ShaderMaterial({
 
 renderer.setSize(width, height)
 renderer.setPixelRatio(window.devicePixelRatio)
-
-const updateMinMaxFollowedBy = length => {
-  if(length > maxFollowedByLength) maxFollowedByLength = length
-  if(length < minFollowedByLength) minFollowedByLength = length
-}
 
 const initialize = () => {
   const { top, left } = document.querySelector("canvas").getBoundingClientRect()
@@ -109,11 +104,25 @@ const initialize = () => {
   links.forEach(l => {
     const source = Nodes.find(n => n.id === +l.source)
     const target = Nodes.find(n => n.id === +l.target)
-    source.following = source.following.concat(target)
+    target.following = target.following.concat(source)
   })
 
   initializeFollowings()
-  Nodes.forEach(n => n.init())
+  Nodes.forEach(n => {
+    n.init()
+    setFollowedBy(n)
+  })
+  for(let i=0; i<Nodes.length; i++) {
+    let count = Nodes[i].followedBy.length
+    if(count > nodeSizeMax) {
+      nodeSizeMax = count
+    }
+    if(count < nodeSizeMin) {
+      nodeSizeMin = Math.max(1, count)
+    }
+  }
+
+  nodeSizeScale.domain([nodeSizeMin, nodeSizeMax])
   messageState.init()
   start = Date.now()
 
@@ -171,8 +180,6 @@ const initialize = () => {
     if(shouldUpdate) {
       force.force("link").links(links)
       force.alphaTarget(0.1).restart()
-      minFollowedByLength = Infinity
-      maxFollowedByLength = 0
     }
 
     for(let i=0; i < n; i++) {
@@ -193,7 +200,6 @@ const initialize = () => {
       }
     }
 
-    nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
     edgeVerticesBuffer.needsUpdate = true
     edgeColorsStartTimesBuffer.needsUpdate = true
     nodePositionBuffer.needsUpdate = true
@@ -204,8 +210,7 @@ const initialize = () => {
 
 Promise.all(['terrorism_nodes', 'terrorism_edges'].map(getData))
   .then(data => {
-    console.log(data[0].length)
-    nodeData = data[0].filter((d, i) => i < 2000)
+    nodeData = data[0].filter((d, i) => i < 500)
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
