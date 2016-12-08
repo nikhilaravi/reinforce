@@ -1,9 +1,11 @@
 import helpers from './helpers/helpers'
 const { flatten, sampleArray, createDictByProp, bindAll } = helpers
 import { values } from 'underscore'
-import { Nodes, getReach } from './nodes'
+import { Nodes } from './nodes'
+import { beliefs, maxCyclesInMemory } from './config'
+import messageState from './messageState'
 
-const cyclesInMemory = 3
+const EPS = 0.00001
 
 export default class Node {
 	constructor(opts) {
@@ -16,8 +18,17 @@ export default class Node {
 		this._following = []
 		this._lastFollowing = []
 		this._followedBy = []
-		this.memory = [[]]
+		this.lastReceivedMessages = []
+		this.learningMessage = null
+		this.outgoingMessages = []
 		this._rewards = []
+		this.nextAction = null
+		this.retweeted = []
+
+		this.maxMSE = beliefs.reduce((acc, curr) =>
+			acc + Math.pow(-(1 / beliefs.length), 2), 0) / beliefs.length
+
+		this.cycleInterval = Math.round(Math.random() * maxCyclesInMemory)
 
 		this.agent = new RL.DQNAgent(this, {
 	    update: 'qlearn',
@@ -44,94 +55,191 @@ export default class Node {
 
 	get lastFollowing() { return this._lastFollowing }
 
-	getNumStates() { return 1 }
+	getNumStates() { return beliefs.length }
 
-	getMaxNumActions() { return 2 }
+	getMaxNumActions() { return beliefs.length }
 
-	getState() { // evolve state here
-		return [ Math.random() ]
+	getState() {
+		let counts = beliefs.reduce((acc, curr) => {
+			acc[curr] = 0
+			return acc
+		}, {})
+
+		for(let i=0; i<this._following.length; i++) {
+			counts[this._following[i].belief]++
+		}
+
+		return values(counts)
 	}
 
 	getReward() { // total reach
-		return getReach(this)
+		if(this.learningMessage && this.learningMessage[1] >= maxCyclesInMemory) {
+			return messageState.getMessageReach(this.learningMessage[0])
+		}
+		return null
+	}
+
+	getDiversity() {
+		const mse = this.getState().reduce((acc, curr) =>
+			acc + Math.pow(((curr / Math.max(EPS, this._following.length)) - (1 / beliefs.length)), 2), 0) / beliefs.length // means squared error
+
+		return 1 - (mse / this.maxMSE)
 	}
 
 	getMessage() {
-		let orientation = "", retweetID = null
+		this.outgoingMessages = []
 
-		if(this.nextAction === 1) {
-			orientation = this.belief
-			if(Math.random() < 0.5) {
-				const matchingMessages = this.memory.reduce(flatten)
-					.filter(msg => msg.orientation === this.belief)
+		const originalTweet = this.getOriginalTweet()
+		const retweet = this.getRetweet()
 
-				if(matchingMessages.length) {
-					retweetID = sampleArray(matchingMessages).id
+		if(originalTweet) {
+			this.learningMessage = [originalTweet.id, 0]
+			this.outgoingMessages.push(originalTweet)
+		}
+
+		if(retweet) {
+			this.outgoingMessages.push(retweet)
+		}
+
+		return this.outgoingMessages
+	}
+
+	getOriginalTweet() {
+		if(messageState.cycleIndex % maxCyclesInMemory === this.cycleInterval) {
+			return {
+				user: this.id, id: uuid.v4(),
+				orientation: this.belief,
+				retweet: null				
+			}
+		}
+		return null
+	}
+
+	getRetweet() {
+		let message = null
+		if(this.lastReceivedMessages.length) {
+			const diversity = this.getDiversity()
+
+			const messageBreakdown = beliefs.reduce((acc, curr) => {
+				acc[curr] = {
+					messages: [],
+					count: 0,
+					threshold: 0
+				}
+
+				return acc
+			}, {})
+
+			const keys = Object.keys(messageBreakdown)
+
+			for(let i=0; i<this.lastReceivedMessages.length; i++) {
+				let message = this.lastReceivedMessages[i]
+				messageBreakdown[message.orientation].messages.push(message)
+				messageBreakdown[message.orientation].count++
+			}
+
+			keys.forEach(k => {
+				if(k !== this.belief) {
+					messageBreakdown[k].count *= diversity
+				}
+			})
+
+			const modifiedTotal = keys.reduce((acc, curr) => acc + messageBreakdown[curr].count, 0)
+
+			if(modifiedTotal > 0) { // could be 0 if you have a perfectly homogeneous environment but you don't agree with anyone in it 
+				keys.forEach(k => {
+					messageBreakdown[k].threshold = messageBreakdown[k].count / modifiedTotal
+				})
+
+				let sampledBelief = Math.random(), cumulativeThreshold = 0
+				for(let i=0; i<keys.length; i++) {
+					cumulativeThreshold += messageBreakdown[keys[i]].threshold
+					if(sampledBelief < cumulativeThreshold) {
+						sampledBelief = keys[i]
+						break
+					}
+				}
+
+				const notYetRetweeted = []
+				for(let i=0; i<messageBreakdown[sampledBelief].messages.length; i++) {
+					let message = messageBreakdown[sampledBelief].messages[i]
+					if(this.retweeted.indexOf(message.id) === -1) {
+						notYetRetweeted.push(message)
+					}
+				}
+
+				if(notYetRetweeted.length) {
+					const { id, user, orientation } = sampleArray(notYetRetweeted)
+
+					message = {
+						user: this.id, id: uuid.v4(),
+						orientation,
+						retweet: { id, user }						
+					}
+
+					this.retweeted.push(id)					
 				}
 			}
 		}
-
-		return {
-			orientation, retweetID, user: this.id
-		}
+		return message
 	}
 
 	sendMessages(messages) {
-		if(this.memory.length > cyclesInMemory) { this.memory.shift() }
-
-		const filteredMessages = []
+		this.lastReceivedMessages = []
 		for(let i=0; i<messages.length; i++) {
-			if(this._following.indexOf(messages[i].user) > -1) {
-				filteredMessages.push(messages[i])
+			if(this._following.find(d => d.id === messages[i].user)) {
+				this.lastReceivedMessages.push(messages[i])
 			}
 		}
+	}
 
-		this.memory.push(filteredMessages)
+	cycle() {
+		if(this.learningMessage) {
+			this.learningMessage[1] = this.learningMessage[1] + 1
+		}
 	}
 
 	setNextAction() {
-		const state = this.getState(),
-			action = this.agent.act(state),
-			r = this.getReward()
+		const r = this.getReward()
+		if(r !== null) {
+			const state = this.getState(),
+				action = this.agent.act(state)
 
-		this._rewards.push(r) // save the reward to memory
+			this._rewards.push(r) // save the reward to memory
 
-		this.agent.learn(r)
+			this.agent.learn(r)
 
-		this.nextAction = action
+			this.nextAction = action			
+		} else {
+			this.nextAction = null
+		}
 	}
 
 	adjustFollowing() {
-		const byBeliefs = createDictByProp(this.memory.reduce(flatten), 'orientation'),
-			agreementCount = byBeliefs[this.belief] ? byBeliefs[this.belief].length : 0.0001,
-			strongCounterOrientation = Object.keys(byBeliefs)
-				.filter(d => d !== this.belief && !!d)
-				.map(k => byBeliefs[k] )
-				.find(d => d.length / agreementCount > 1.5)
-
-		this._lastFollowing = this._following.slice()
-
-		if(strongCounterOrientation) {
-			// change your belief to match the strong counter orientation
-			this.belief = strongCounterOrientation[0].orientation
-
-			// now follow someone randomly from the strong counter orientation group
+		if(this.nextAction !== null) {
+			// follow someone from the group that the learning agent tells you
+			const followingIDs = this._following.map(n => n.id)
 			const availableFollowees = Nodes.filter(n =>
-				n.belief === this.belief && !this._following.includes(n.id))
+				n.belief === beliefs[this.nextAction] && !followingIDs.includes(n.id))
+			let newFollowee
+
 			if(availableFollowees.length) {
-				this._following.push(sampleArray(availableFollowees).id)
+				newFollowee = sampleArray(availableFollowees)
 			}
-		}
 
-		// unfollow anyone who has been political for the last 3 rounds
-		if(values(byBeliefs).length) {
-			const messagesByUser = createDictByProp(values(byBeliefs).reduce(flatten), 'user'),
-				overpoliticalUsers = Object.keys(messagesByUser)
-					.filter(k => messagesByUser[k].length === cyclesInMemory)
+			// unfollow someone who never retweets you
+			const choppingBlock = []
+			for(let i=0; i<this.following.length; i++) {
+				if(!messageState.getRetweetCount(this.id, this.following[i].id)) {
+					choppingBlock.push(this.following[i].id)
+				}
+			}
 
-			if(overpoliticalUsers.length) {
-				this._following.splice(
-					this._following.findIndex(d => d === sampleArray(overpoliticalUsers)), 1)
+			this._following.splice(
+				this._following.findIndex(d => d.id === sampleArray(choppingBlock)), 1)
+
+			if(newFollowee) {
+				this._following.push(newFollowee)
 			}
 		}
 
@@ -139,6 +247,6 @@ export default class Node {
 	}
 
 	init() {
-		bindAll(this, [ "getMessage", "sendMessages", "adjustFollowing" ])
+		bindAll(this, [ "cycle", "getMessage", "sendMessages", "adjustFollowing" ])
 	}
 }

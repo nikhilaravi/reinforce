@@ -1,3 +1,4 @@
+import { shuffle } from 'underscore'
 import helpers from './helpers/helpers'
 const { flatten, sampleArray, roundDown, decodeFloat } = helpers
 import { scaleOrdinal, schemeCategory10, scaleLinear } from 'd3-scale'
@@ -11,14 +12,15 @@ import messageState from './messageState'
 import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './nodes'
-import { initFlot, initNetworkConnectivity} from './charts.js'
+import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart } from './charts.js'
 
 let start, lastCycleTime = 0,
+  halo = document.querySelector("#halo"),
   popoverElement = document.querySelector("#popover"),
   popoverID = popoverElement.querySelector(".node_id"),
   popoverBelief = popoverElement.querySelector('.node_belief'),
   quadtree = d3quadtree(),
-  renderer = new THREE.WebGLRenderer({ alpha: true }),
+  renderer = new THREE.WebGLRenderer({ alpha: true, canvas: document.querySelector("canvas") }),
   width = window.innerWidth, height = window.innerHeight,
   scene = new THREE.Scene(),
   camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 10000),
@@ -31,11 +33,12 @@ let start, lastCycleTime = 0,
   force = forceSimulation(),
   emptyNode = new THREE.Vector2(),
   links, nodeData, edgeData,
-  cycleSID = null, cycleDur = 6000,
+  cycleSID = null, cycleDur = 1500,
   updateLinksSID = null, updateLinksNodeIndex = 0,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
-  nodeSizeScale = scaleLinear().range([4, 25]).clamp(true),
-  peakTime = 250.0
+  nodeSizeScale = scaleLinear().range([2, 15]).clamp(true),
+  peakTime = 250.0, totalTime = 350.0,
+  canvasLeft = 0, canvasTop = 0, match, activeNode = null
 
 scene.add(camera)
 camera.position.z = 1000
@@ -50,7 +53,7 @@ const edgeMaterial = new THREE.ShaderMaterial({
   uniforms: {
     uTime: { value: 0.0 },
     peakTime: { value: peakTime },
-    totalTime: { value: 350.0 },
+    totalTime: { value: totalTime },
     defaultOpacity: { value: 0.05 },
     color: {
       type: 'c',
@@ -65,14 +68,16 @@ const edgeMaterial = new THREE.ShaderMaterial({
 renderer.setSize(width, height)
 renderer.setPixelRatio(window.devicePixelRatio)
 
-document.body.appendChild(renderer.domElement)
-
 const updateMinMaxFollowedBy = length => {
   if(length > maxFollowedByLength) maxFollowedByLength = length
   if(length < minFollowedByLength) minFollowedByLength = length
 }
 
 const initialize = () => {
+  const { top, left } = document.querySelector("canvas").getBoundingClientRect()
+  canvasTop = top
+  canvasLeft = left
+
   nodePositions = new Float32Array(Nodes.length * 2)
   nodeSizesColors = new Float32Array(Nodes.length * 2)
   edgeVertices = new Float32Array(edgeData.length * 2 * 6)
@@ -105,14 +110,13 @@ const initialize = () => {
   links.forEach(l => {
     const source = Nodes.find(n => n.id === +l.source)
     const target = Nodes.find(n => n.id === +l.target)
-    source.following = source.following.concat(target.id)
+    source.following = source.following.concat(target)
   })
 
   initializeFollowings()
   Nodes.forEach(n => n.init())
   messageState.init()
   initFlot(Nodes[20]);
-  initNetworkConnectivity(Nodes)
   start = Date.now()
   messageState.cycle()
 
@@ -137,7 +141,8 @@ const initialize = () => {
       Nodes[i].adjustFollowing()
       setFollowedBy(Nodes[i])
     }
-
+    initNetworkConnectivity(Nodes)
+    initDiversityChart(Nodes)
     links = []
     for(let i=0; i<Nodes.length; i++) {
       let n = Nodes[i]
@@ -145,7 +150,7 @@ const initialize = () => {
         for(let j=0; j<n.following.length; j++) {
           let target
           for(let k=0; k<Nodes.length; k++) {
-            if(Nodes[k].id === n.following[j]) {
+            if(Nodes[k].id === n.following[j].id) {
               target = Nodes[k]
               break
             }
@@ -166,6 +171,8 @@ const initialize = () => {
         target = emptyNode
       }
 
+      // wrap the below in conditional, e.g. source.index === 0, to highlight only one node
+
       if(i < lastOccupiedEdgeVertexIndex) {
         edgeVertices[i * 2 * 3] = source.x - width / 2
         edgeVertices[i * 2 * 3 + 1] = -(source.y - height / 2)
@@ -177,11 +184,28 @@ const initialize = () => {
       // edgeColorsStartTimes[i * 2 * 2] = decodeFloat(229, 29, 46, 254)
       // edgeColorsStartTimes[i * 2 * 2 + 2] = decodeFloat(229, 29, 46, 254)
 
-      if(source.index >= updateLinksNodeIndex && source.index < targetIndex) { // update times
-        // source
-        edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
-        // target
-        edgeColorsStartTimes[i * 2 * 2 + 3] = d
+      if(activeNode) {
+        let targetIDs = target.outgoingMessages.map(d => d.id)
+
+        if(source.lastReceivedMessages.filter(m => {
+          const outgoingMatch = source.id === activeNode.id || (m.retweet && m.retweet.user === activeNode.id)
+          const incomingMatch = targetIDs.indexOf(m.id) > -1
+          return outgoingMatch && incomingMatch
+        }).length) {
+          if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > cycleDur) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > cycleDur)) {
+            // source
+            edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
+            // target
+            edgeColorsStartTimes[i * 2 * 2 + 3] = d
+          }
+        }
+      } else {
+        if(source.index >= updateLinksNodeIndex && source.index < targetIndex) { // update times
+          // source
+          edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
+          // target
+          edgeColorsStartTimes[i * 2 * 2 + 3] = d
+        }
       }
     }
 
@@ -217,6 +241,11 @@ const initialize = () => {
       } else { // purple
         nodeSizesColors[i * 2 + 1] = decodeFloat(200, 200, 200, 254)
       }
+
+      if(activeNode && node.id === activeNode.id) {
+        halo.style.transform = `translate3d(${canvasLeft + node.x - 6}px, ${canvasTop + node.y - 6}px, 0)`
+      }
+
       if(shouldUpdate) {
         quadtree.add([node.x, node.y, node])
         // initNetworkConnectivity(Nodes)
@@ -233,12 +262,20 @@ const initialize = () => {
   })
 }
 
+const revealHalo = () => {
+  halo.classList.add("active")
+}
+
+const removeHalo = () => {
+  halo.classList.remove("active")
+}
+
 document.addEventListener("mousemove", e => {
   e.preventDefault()
   popoverElement.style.left = e.pageX + 'px'
   popoverElement.style.top = e.pageY + 'px'
 
-  const match = quadtree.find(e.pageX, e.pageY, 3)
+  match = quadtree.find(e.pageX - canvasLeft, e.pageY - canvasTop, 3)
   if(match) {
     popoverElement.style.display = 'block'
     popoverID.innerHTML = match[2].id
@@ -250,23 +287,26 @@ document.addEventListener("mousemove", e => {
 
 document.addEventListener("click", e => {
   e.preventDefault()
-  const match = quadtree.find(e.pageX, e.pageY, 3)
-  console.log('match', match)
   if(match) {
-    initFlot(match[2])
-  } else {
-    //
+    if(activeNode && activeNode.id === match[2].id) {
+      activeNode = null
+      removeHalo()
+    } else {
+      activeNode = match[2]
+      initFlot(activeNode)
+      revealHalo()
+    }
   }
 })
 
-Promise.all(['nodes', 'edges'].map(getData))
+Promise.all(['nodes_toy', 'edges_toy'].map(getData))
   .then(data => {
-    nodeData = data[0].filter((d, i) => i < 500)
+    nodeData = shuffle(data[0])
 
     nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
-    edgeData = data[1].filter(d =>
-      [+d.source, +d.target].every(id => nodeData.find(n => n.node_id === id)))
+    edgeData = shuffle(data[1].filter(d =>
+      [+d.source, +d.target].every(id => nodeData.find(n => n.node_id === id))))
 
     edgeData.splice(roundDown(edgeData.length, 3))
 
