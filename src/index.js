@@ -117,13 +117,13 @@ const initialize = () => {
   initializeFollowings()
   Nodes.forEach(n => n.init())
   messageState.init()
-  initFlot(Nodes[20]);
+  // initFlot(Nodes[20]);
   start = Date.now()
-  messageState.cycle()
+  // messageState.cycle()
 
   cycleSID = setInterval(() => {
     lastCycleTime = Date.now() - start
-    messageState.cycle()
+  //   messageState.cycle()
   }, cycleDur)
 
   // initialise chart to the first node - will be changed to show the rewards of the node that is clicked
