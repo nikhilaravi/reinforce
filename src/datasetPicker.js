@@ -2,6 +2,8 @@ import mediator from './mediator'
 
 let pickerOpen = false
 
+const initialDataset = 'downTerrorism'
+
 const datasets = {
 	downTerrorism: {
 		nodes: 'downsampled_terrorism_nodes',
@@ -36,20 +38,33 @@ const updatePickerVisibility = () => {
 	}
 }
 
+const selectDataset = (dataset) => {
+	const activeNode = document.querySelector("[data-dataset=" + dataset + "]")
+
+	Array.prototype.forEach.call(document.querySelectorAll("#dataset-picker .dropdown .option"), node => {
+		node.classList.remove("active")
+	})
+
+	activeNode.classList.add("active")
+	document.querySelector("#dataset-picker .current").textContent = activeNode.textContent
+	mediator.publish("selectDataset", datasets[dataset])
+}
+
 document.addEventListener("click", e => {
-	if(e.target.closest("#dataset-picker .select")) {
+	const target = e.target
+	if(target.closest("#dataset-picker .select")) {
 		e.stopPropagation()
 		e.preventDefault()
 		togglePicker()
 
-		if(e.target.closest(".dropdown")) {
-			Array.prototype.forEach.call(e.target.closest(".dropdown").querySelectorAll(".option"), node => {
-				node.classList.remove("active")
-			})
-
-			e.target.classList.add("active")
+		if(target.closest(".dropdown")) {
+			selectDataset(target.getAttribute("data-dataset"))
 		}
 	} else {
 		closePicker()
 	}
 })
+
+setTimeout(() => { // timeout - wait for index.js to subscribe
+	selectDataset(initialDataset)
+}, 0)

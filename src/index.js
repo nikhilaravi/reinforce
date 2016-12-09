@@ -15,8 +15,9 @@ import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './n
 import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart } from './charts.js'
 import { desiredDiversity } from './config.js'
 import './datasetPicker'
+import mediator from './mediator'
 
-let start, lastCycleTime = 0,
+let start, lastCycleTime = 0, rafID = null,
   halo = document.querySelector("#halo"),
   popoverElement = document.querySelector("#popover"),
   popoverID = popoverElement.querySelector(".node_id"),
@@ -119,7 +120,7 @@ const initialize = () => {
   Nodes.forEach(n => n.init())
   messageState.init()
   // initFlot(Nodes[20]);
-  start = Date.now()
+  
   // messageState.cycle()
 
   cycleSID = setInterval(() => {
@@ -129,7 +130,9 @@ const initialize = () => {
 
   // initialise chart to the first node - will be changed to show the rewards of the node that is clicked
 
-  timer(d => {
+  const loop = () => {
+    const d = Date.now() - start
+
     const shouldUpdate = Math.random() < 0.5 // perf
 
     edgeMaterial.uniforms['uTime'].value = d
@@ -261,7 +264,11 @@ const initialize = () => {
     nodePositionBuffer.needsUpdate = true
     nodeSizesColorsBuffer.needsUpdate = true
     renderer.render(scene, camera)
-  })
+
+    rafID = requestAnimationFrame(loop)
+  }
+
+  rafID = requestAnimationFrame(loop)
 }
 
 const revealHalo = () => {
@@ -301,17 +308,24 @@ document.addEventListener("click", e => {
   }
 })
 
-Promise.all(['downsampled_terrorism_nodes', 'downsampled_terrorism_edges'].map(getData))
-  .then(data => {
-    nodeData = shuffle(data[0])
+mediator.subscribe("selectDataset", dataset => {
+  window.clearInterval(cycleSID)
+  window.cancelAnimationFrame(rafID)
 
-    nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
+  Promise.all([dataset.nodes, dataset.edges].map(getData))
+    .then(data => {
+      nodeData = shuffle(data[0])
 
-    edgeData = shuffle(data[1].filter(d =>
-      [+d.source, +d.target].every(id => nodeData.find(n => n.node_id === id))))
+      nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
 
-    edgeData.splice(roundDown(edgeData.length, 3))
+      edgeData = shuffle(data[1].filter(d =>
+        [+d.source, +d.target].every(id => nodeData.find(n => n.node_id === id))))
 
-    initializeNodes(nodeData, desiredDiversity)
-    initialize()
-  })
+      edgeData.splice(roundDown(edgeData.length, 3))
+
+      lastCycleTime = 0
+      start = Date.now()
+      initializeNodes(nodeData, desiredDiversity)
+      initialize()
+    })
+})
