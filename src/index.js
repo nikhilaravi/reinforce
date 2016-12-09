@@ -127,16 +127,7 @@ const initialize = () => {
     const shouldUpdate = Math.random() < 0.5 // perf
 
     edgeMaterial.uniforms['uTime'].value = d
-
-    const diff = d - lastCycleTime
-    const targetIndex = Math.max(0, Math.min(Math.round((diff / cycleDur) * Nodes.length), Nodes.length))
-
-    if(targetIndex < updateLinksNodeIndex) { updateLinksNodeIndex = 0 } // wrap around
-
-    for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
-      Nodes[i].adjustFollowing()
-      setFollowedBy(Nodes[i])
-    }
+    
     // initNetworkConnectivity(Nodes)
     // initDiversityChart(Nodes)
     links = []
@@ -176,32 +167,17 @@ const initialize = () => {
         edgeVertices[i * 2 * 3 + 4] = -(target.y - height / 2)
       }
 
-      // revive in case we want custom edge colors
-      // edgeColorsStartTimes[i * 2 * 2] = decodeFloat(229, 29, 46, 254)
-      // edgeColorsStartTimes[i * 2 * 2 + 2] = decodeFloat(229, 29, 46, 254)
+      if(source.newlyFollowing) {
+        const newlyFollowingIDs = source.newlyFollowing.map(d => d.id)
 
-      if(activeNode) {
-        let targetIDs = target.outgoingMessages.map(d => d.id)
-
-        if(source.lastReceivedMessages.filter(m => {
-          const outgoingMatch = source.id === activeNode.id || (m.retweet && m.retweet.user === activeNode.id)
-          const incomingMatch = targetIDs.indexOf(m.id) > -1
-          return outgoingMatch && incomingMatch
-        }).length) {
+        if(newlyFollowingIDs.indexOf(target.id) > -1) {
           if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > cycleDur) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > cycleDur)) {
             // source
             edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
             // target
-            edgeColorsStartTimes[i * 2 * 2 + 3] = d
+            edgeColorsStartTimes[i * 2 * 2 + 3] = d            
           }
-        }
-      } else {
-        if(source.index >= updateLinksNodeIndex && source.index < targetIndex) { // update times
-          // source
-          edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
-          // target
-          edgeColorsStartTimes[i * 2 * 2 + 3] = d
-        }
+        }        
       }
     }
 
@@ -215,6 +191,18 @@ const initialize = () => {
     }
 
     lastOccupiedEdgeVertexIndex = links.length
+
+    const diff = d - lastCycleTime
+    const targetIndex = Math.max(0, Math.min(Math.round((diff / cycleDur) * Nodes.length), Nodes.length))
+
+    if(targetIndex < updateLinksNodeIndex) { updateLinksNodeIndex = 0 } // wrap around
+
+    for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
+      let node = Nodes[i]
+      node.adjustFollowing()
+      setFollowedBy(node)
+    }
+
     updateLinksNodeIndex = targetIndex
 
     if(shouldUpdate) {

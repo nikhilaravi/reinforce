@@ -17,6 +17,8 @@ export default class Node {
 		this.trumporhillary = opts.trumporhillary
 		this.desiredDiversity = opts.desiredDiversity
 
+		this._newlyFollowing = []
+		this._newlyNotFollowing = []
 		this._following = []
 		this._lastFollowing = []
 		this._followedBy = []
@@ -26,8 +28,6 @@ export default class Node {
 		this._rewards = []
 		this.nextAction = null
 		this.retweeted = []
-
-		this.cycleInterval = Math.round(Math.random() * maxCyclesInMemory)
 	}
 
 	set followedBy(newFollowedBy) { this._followedBy = newFollowedBy }
