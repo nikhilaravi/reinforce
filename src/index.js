@@ -60,7 +60,7 @@ const edgeMaterial = new THREE.ShaderMaterial({
     defaultOpacity: { value: 0.05 },
     color: {
       type: 'c',
-      value: new THREE.Color(0xB3BDDB)
+      value: new THREE.Color(0xABABBF)
     }
   },
   vertexShader: document.getElementById("edge-vertexshader").textContent,
@@ -240,11 +240,11 @@ const initialize = () => {
       nodePositions[i * 2 + 1] = -(node.y - height / 2)
       nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
       if(node.trumporhillary === 0) { // red
-        nodeSizesColors[i * 2 + 1] = decodeFloat(229, 29, 46, 254)
+        nodeSizesColors[i * 2 + 1] = decodeFloat(254, 25, 83, 254)
       } else if(node.trumporhillary === 1 || node.trumporhillary === 2 || node.trumporhillary === 5) { // blue
-        nodeSizesColors[i * 2 + 1] = decodeFloat(18, 168, 224, 254)
+        nodeSizesColors[i * 2 + 1] = decodeFloat(0, 190, 254, 254)
       } else { // purple
-        nodeSizesColors[i * 2 + 1] = decodeFloat(200, 200, 200, 254)
+        nodeSizesColors[i * 2 + 1] = decodeFloat(254, 254, 254, 254)
       }
 
       if(activeNode && node.id === activeNode.id) {
