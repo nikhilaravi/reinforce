@@ -92,113 +92,6 @@ export default class Node {
 		return 1 - (mse / this.maxMSE)
 	}
 
-	getMessage() {
-		this.outgoingMessages = []
-
-		const originalTweet = this.getOriginalTweet()
-		const retweet = this.getRetweet()
-
-		if(originalTweet) {
-			this.learningMessage = [originalTweet.id, 0]
-			this.outgoingMessages.push(originalTweet)
-		}
-
-		if(retweet) {
-			this.outgoingMessages.push(retweet)
-		}
-
-		return this.outgoingMessages
-	}
-
-	getOriginalTweet() {
-		if(messageState.cycleIndex % maxCyclesInMemory === this.cycleInterval) {
-			return {
-				user: this.id, id: uuid.v4(),
-				orientation: this.belief,
-				retweet: null				
-			}
-		}
-		return null
-	}
-
-	getRetweet() {
-		let message = null
-		if(this.lastReceivedMessages.length) {
-			const diversity = this.getDiversity()
-
-			const messageBreakdown = beliefs.reduce((acc, curr) => {
-				acc[curr] = {
-					messages: [],
-					count: 0,
-					threshold: 0
-				}
-
-				return acc
-			}, {})
-
-			const keys = Object.keys(messageBreakdown)
-
-			for(let i=0; i<this.lastReceivedMessages.length; i++) {
-				let message = this.lastReceivedMessages[i]
-				messageBreakdown[message.orientation].messages.push(message)
-				messageBreakdown[message.orientation].count++
-			}
-
-			keys.forEach(k => {
-				if(k !== this.belief) {
-					messageBreakdown[k].count *= diversity
-				}
-			})
-
-			const modifiedTotal = keys.reduce((acc, curr) => acc + messageBreakdown[curr].count, 0)
-
-			if(modifiedTotal > 0) { // could be 0 if you have a perfectly homogeneous environment but you don't agree with anyone in it 
-				keys.forEach(k => {
-					messageBreakdown[k].threshold = messageBreakdown[k].count / modifiedTotal
-				})
-
-				let sampledBelief = Math.random(), cumulativeThreshold = 0
-				for(let i=0; i<keys.length; i++) {
-					cumulativeThreshold += messageBreakdown[keys[i]].threshold
-					if(sampledBelief < cumulativeThreshold) {
-						sampledBelief = keys[i]
-						break
-					}
-				}
-
-				const notYetRetweeted = []
-				for(let i=0; i<messageBreakdown[sampledBelief].messages.length; i++) {
-					let message = messageBreakdown[sampledBelief].messages[i]
-					if(this.retweeted.indexOf(message.id) === -1) {
-						notYetRetweeted.push(message)
-					}
-				}
-
-				if(notYetRetweeted.length) {
-					const { id, user, orientation } = sampleArray(notYetRetweeted)
-
-					message = {
-						user: this.id, id: uuid.v4(),
-						orientation,
-						retweet: { id, user }						
-					}
-
-					this.retweeted.push(id)					
-				}
-			}
-		}
-		return message
-	}
-
-	sendMessages(messages) {
-		this.lastReceivedMessages = []
-		for(let i=0; i<messages.length; i++) {
-			if(this._following.find(d => d.id === messages[i].user)) {
-				this.lastReceivedMessages.push(messages[i])
-			}
-		}
-	}
-
 	cycle() {
 		if(this.learningMessage) {
 			this.learningMessage[1] = this.learningMessage[1] + 1
@@ -246,6 +139,6 @@ export default class Node {
 	}
 
 	init() {
-		bindAll(this, [ "cycle", "getMessage", "sendMessages", "adjustFollowing" ])
+		bindAll(this, [ "cycle", "adjustFollowing" ])
 	}
 }
