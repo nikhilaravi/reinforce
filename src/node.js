@@ -214,12 +214,11 @@ export default class Node {
 			for(let i=0; i<this._following.length; i++) {
 				let followee = this._following[i]
 				if(followee.belief === this.belief) {
-					choppingBlock.push(followee)
+					choppingBlock.push(followee.id)
 				}
 			}
 			this._following.splice(
 				this._following.findIndex(d => d.id === sampleArray(choppingBlock)), 1)
-
 		}
 
 		const otherBeliefs = beliefs.filter(b => b !== this.belief)
