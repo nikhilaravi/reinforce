@@ -167,7 +167,7 @@ const initialize = () => {
         edgeVertices[i * 2 * 3 + 4] = -(target.y - height / 2)
       }
 
-      if(source.newlyFollowing) {
+      if(source.newlyFollowing && source.newlyFollowing.length !== source.following.length) {
         const newlyFollowingIDs = source.newlyFollowing.map(d => d.id)
 
         if(newlyFollowingIDs.indexOf(target.id) > -1) {
