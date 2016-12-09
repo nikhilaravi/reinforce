@@ -37,7 +37,7 @@ let start, lastCycleTime = 0,
   cycleSID = null, cycleDur = 1500,
   updateLinksSID = null, updateLinksNodeIndex = 0,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
-  nodeSizeScale = scaleLinear().range([2, 15]).clamp(true),
+  nodeSizeScale = scaleLinear().range([4, 20]).clamp(true),
   peakTime = 250.0, totalTime = 350.0,
   canvasLeft = 0, canvasTop = 0, match, activeNode = null
 
@@ -300,7 +300,7 @@ document.addEventListener("click", e => {
   }
 })
 
-Promise.all(['nodes_toy', 'edges_toy'].map(getData))
+Promise.all(['downsampled_terrorism_nodes', 'downsampled_terrorism_edges'].map(getData))
   .then(data => {
     nodeData = shuffle(data[0])
 
