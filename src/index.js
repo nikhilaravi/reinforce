@@ -14,6 +14,7 @@ import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './nodes'
 import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart } from './charts.js'
 import { desiredDiversity } from './config.js'
+import './datasetPicker'
 
 let start, lastCycleTime = 0,
   halo = document.querySelector("#halo"),

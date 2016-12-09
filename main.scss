@@ -1,5 +1,4 @@
-$dove-gray: #707070;
-$transition-duration: 250ms;
+@import "scss/variables";
 
 body {
 	margin: 0;
@@ -11,7 +10,7 @@ body {
 
 body, html {
 	font-size: 10px;
-	font-family: Helvetica;
+	font-family: 'News Cycle';
 	// overflow: hidden;
 }
 
@@ -70,3 +69,5 @@ body, html {
 	display: inline-block !important;
 	display: none !important;
 }
+
+@import "scss/dataset_picker";

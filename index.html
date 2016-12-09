@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link href="https://fonts.googleapis.com/css?family=News+Cycle" rel="stylesheet">
   <link href="bundle.css" rel="stylesheet">
 </head>
 <body>
@@ -29,6 +30,17 @@
       <div class="chart">
         <div id=chart_title>Network diversity</div>
         <div id="flotdiversitynetwork" style="width:450px; height: 175px;"></div>
+      </div>
+    </div>
+    <div id="dataset-picker">
+      <div class="label">Pick a dataset</div>
+      <div class="select">
+        <div class="current">Terrorism</div>
+        <div class="dropdown">
+          <div class="active option">Terrorism</div>
+          <div class="option">Toy (segregated)</div>
+          <div class="option">Toy (random)</div>
+        </div>
       </div>
     </div>
     <canvas></canvas>
