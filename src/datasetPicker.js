@@ -7,11 +7,13 @@ const initialDataset = 'downTerrorism'
 const datasets = {
 	downTerrorism: {
 		nodes: 'downsampled_terrorism_nodes',
-		edges: 'downsampled_terrorism_edges'
+		edges: 'downsampled_terrorism_edges',
+		beliefs: ["conservative", "liberal", "neutral"]
 	},
 	toy: {
 		nodes: 'nodes_toy',
-		edges: 'edges_toy'
+		edges: 'edges_toy',
+		beliefs: ["conservative", "liberal"]
 	}
 }
 

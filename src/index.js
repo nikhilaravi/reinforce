@@ -7,8 +7,6 @@ import { quadtree as d3quadtree } from 'd3-quadtree'
 import { select, selectAll, event } from 'd3-selection'
 import { drag as d3drag } from 'd3-drag'
 import { range } from 'd3-array'
-import { timer } from 'd3-timer'
-import messageState from './messageState'
 import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './nodes'
@@ -39,7 +37,7 @@ let start, lastCycleTime = 0, rafID = null,
   cycleSID = null, cycleDur = 1500,
   updateLinksSID = null, updateLinksNodeIndex = 0,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
-  nodeSizeScale = scaleLinear().range([4, 20]).clamp(true),
+  nodeSizeScale = scaleLinear().range([5, 25]).clamp(true),
   peakTime = 250.0, totalTime = 350.0,
   canvasLeft = 0, canvasTop = 0, match, activeNode = null
 
@@ -57,7 +55,7 @@ const edgeMaterial = new THREE.ShaderMaterial({
     uTime: { value: 0.0 },
     peakTime: { value: peakTime },
     totalTime: { value: totalTime },
-    defaultOpacity: { value: 0.05 },
+    defaultOpacity: { value: 0.08 },
     color: {
       type: 'c',
       value: new THREE.Color(0xABABBF)
@@ -118,17 +116,11 @@ const initialize = () => {
 
   initializeFollowings()
   Nodes.forEach(n => n.init())
-  messageState.init()
   // initFlot(Nodes[20]);
   
-  // messageState.cycle()
-
   cycleSID = setInterval(() => {
     lastCycleTime = Date.now() - start
-  //   messageState.cycle()
   }, cycleDur)
-
-  // initialise chart to the first node - will be changed to show the rewards of the node that is clicked
 
   const loop = () => {
     const d = Date.now() - start
@@ -239,9 +231,9 @@ const initialize = () => {
       nodePositions[i * 2] = node.x - width / 2
       nodePositions[i * 2 + 1] = -(node.y - height / 2)
       nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
-      if(node.trumporhillary === 0) { // red
+      if(node.belief === "conservative") { // red
         nodeSizesColors[i * 2 + 1] = decodeFloat(254, 25, 83, 254)
-      } else if(node.trumporhillary === 1 || node.trumporhillary === 2 || node.trumporhillary === 5) { // blue
+      } else if(node.belief === "liberal") { // blue
         nodeSizesColors[i * 2 + 1] = decodeFloat(0, 190, 254, 254)
       } else { // purple
         nodeSizesColors[i * 2 + 1] = decodeFloat(254, 254, 254, 254)
@@ -288,7 +280,7 @@ document.addEventListener("mousemove", e => {
   if(match) {
     popoverElement.style.display = 'block'
     popoverID.innerHTML = match[2].id
-    popoverBelief.innerHTML = 'trumporhillary: ' + match[2].trumporhillary
+    popoverBelief.innerHTML = 'belief: ' + match[2].belief
   } else {
     popoverElement.style.display = 'none'
   }
@@ -325,7 +317,7 @@ mediator.subscribe("selectDataset", dataset => {
 
       lastCycleTime = 0
       start = Date.now()
-      initializeNodes(nodeData, desiredDiversity)
+      initializeNodes(nodeData, desiredDiversity, dataset.beliefs)
       initialize()
     })
 })

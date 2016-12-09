@@ -1,6 +1,5 @@
 import helpers from './helpers/helpers'
 const { sampleArray } = helpers
-import { beliefs } from './config'
 import Node from './node'
 import { users } from './fixedData'
 import { scaleLinear } from 'd3-scale'
@@ -9,16 +8,26 @@ import { difference } from 'underscore'
 
 export let Nodes
 
-export const initializeNodes = (seedData, desiredDiversity) => {
-	Nodes = seedData.map((d, i) =>
-		new Node({
-			belief: d.trumporhillary === 0 ? beliefs[0] : beliefs[1],
+export const initializeNodes = (seedData, desiredDiversity, beliefs) => {
+	Nodes = seedData.map((d, i) => {
+		let belief = d.trumporhillary
+		if(belief === 0) {
+			belief = beliefs[0]
+		} else if(belief === 1 || belief === 2 || belief === 5) {
+			belief = beliefs[1]
+		} else {
+			belief = beliefs[2]
+		}
+
+		return new Node({
+			belief,
+			beliefs,
 			id: d.node_id,
 			index: i,
 			username: i,
-			trumporhillary: d.trumporhillary,
 			desiredDiversity
-		}))
+		})
+	})
 }
 
 export const initializeFollowings = () => {

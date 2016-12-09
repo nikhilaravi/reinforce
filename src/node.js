@@ -2,7 +2,7 @@ import helpers from './helpers/helpers'
 const { flatten, sampleArray, createDictByProp, bindAll } = helpers
 import { values } from 'underscore'
 import { Nodes } from './nodes'
-import { beliefs, maxCyclesInMemory, minFolloweeSize } from './config'
+import { maxCyclesInMemory, minFolloweeSize } from './config'
 import messageState from './messageState'
 
 const EPS = 0.00001
@@ -10,6 +10,7 @@ const EPS = 0.00001
 export default class Node {
 	constructor(opts) {
 		this.id = opts.id
+		this.beliefs = opts.beliefs
 		this.index = opts.index
 		this.username = opts.username
 		this.belief = opts.belief
@@ -56,12 +57,12 @@ export default class Node {
 
 	get lastFollowing() { return this._lastFollowing }
 
-	getNumStates() { return beliefs.length }
+	getNumStates() { return this.beliefs.length }
 
-	getMaxNumActions() { return beliefs.length }
+	getMaxNumActions() { return this.beliefs.length }
 
 	getState() {
-		let counts = beliefs.reduce((acc, curr) => {
+		let counts = this.beliefs.reduce((acc, curr) => {
 			acc[curr] = 0
 			return acc
 		}, {})
@@ -87,7 +88,7 @@ export default class Node {
 
 	getDiversity() {
 		const mse = this.getState().reduce((acc, curr) =>
-			acc + Math.pow(((curr / Math.max(EPS, this._following.length)) - (1 / beliefs.length)), 2), 0) / beliefs.length // means squared error
+			acc + Math.pow(((curr / Math.max(EPS, this._following.length)) - (1 / this.beliefs.length)), 2), 0) / this.beliefs.length // means squared error
 
 		return 1 - (mse / this.maxMSE)
 	}
@@ -114,9 +115,9 @@ export default class Node {
 				this._following.findIndex(d => d.id === sampleArray(choppingBlock)), 1)
 		}
 
-		const otherBeliefs = beliefs.filter(b => b !== this.belief)
+		const otherBeliefs = this.beliefs.filter(b => b !== this.belief)
 		const newBelief = sampleArray(otherBeliefs)
-		const newAction = beliefs.findIndex(b => b === newBelief)
+		const newAction = this.beliefs.findIndex(b => b === newBelief)
 		const followingIDs = this._following.map(n => n.id)
 
 		const followingMyFollowees = []
@@ -131,7 +132,7 @@ export default class Node {
 		}
 		
 		const availableFollowees = Nodes.filter(n =>
-			n.belief === beliefs[newAction] && followingIDs.indexOf(n.id) === -1 && followingMyFollowees.indexOf(n.id) > -1)
+			n.belief === this.beliefs[newAction] && followingIDs.indexOf(n.id) === -1 && followingMyFollowees.indexOf(n.id) > -1)
 
 		if(availableFollowees.length) {
 			this._following.push(sampleArray(availableFollowees))
