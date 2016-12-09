@@ -9,14 +9,15 @@ import { difference } from 'underscore'
 
 export let Nodes
 
-export const initializeNodes = seedData => {
+export const initializeNodes = (seedData, desiredDiversity) => {
 	Nodes = seedData.map((d, i) =>
 		new Node({
 			belief: d.trumporhillary === 0 ? beliefs[0] : beliefs[1],
 			id: d.node_id,
 			index: i,
 			username: i,
-			trumporhillary: d.trumporhillary
+			trumporhillary: d.trumporhillary,
+			desiredDiversity
 		}))
 }
 

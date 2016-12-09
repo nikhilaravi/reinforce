@@ -13,6 +13,7 @@ import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './nodes'
 import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart } from './charts.js'
+import { desiredDiversity } from './config.js'
 
 let start, lastCycleTime = 0,
   halo = document.querySelector("#halo"),
@@ -310,6 +311,6 @@ Promise.all(['nodes_toy', 'edges_toy'].map(getData))
 
     edgeData.splice(roundDown(edgeData.length, 3))
 
-    initializeNodes(nodeData)
+    initializeNodes(nodeData, desiredDiversity)
     initialize()
   })

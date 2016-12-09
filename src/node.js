@@ -14,6 +14,7 @@ export default class Node {
 		this.username = opts.username
 		this.belief = opts.belief
 		this.trumporhillary = opts.trumporhillary
+		this.desiredDiversity = opts.desiredDiversity
 
 		this._following = []
 		this._lastFollowing = []
@@ -25,22 +26,22 @@ export default class Node {
 		this.nextAction = null
 		this.retweeted = []
 
-		this.maxMSE = beliefs.reduce((acc, curr) =>
-			acc + Math.pow(-(1 / beliefs.length), 2), 0) / beliefs.length
+		// this.maxMSE = beliefs.reduce((acc, curr) =>
+		// 	acc + Math.pow(-(1 / beliefs.length), 2), 0) / beliefs.length
 
 		this.cycleInterval = Math.round(Math.random() * maxCyclesInMemory)
 
-		this.agent = new RL.DQNAgent(this, {
-	    update: 'qlearn',
-	    gamma: 0.9, // discount factor, [0, 1)
-	    epsilon: 0.2, // initial epsilon for epsilon-greedy policy, [0, 1)
-	    alpha: 0.01, // value function learning rate
-	    experience_add_every: 10, // number of time steps before we add another experience to replay memory
-	    experience_size: 5000, // size of experience replay memory
-	    learning_steps_per_iteration: 20,
-	    tderror_clamp: 1.0, // for robustness
-	    num_hidden_units: 100 // number of neurons in hidden layer
-	  })
+		// this.agent = new RL.DQNAgent(this, {
+	 //    update: 'qlearn',
+	 //    gamma: 0.9, // discount factor, [0, 1)
+	 //    epsilon: 0.2, // initial epsilon for epsilon-greedy policy, [0, 1)
+	 //    alpha: 0.01, // value function learning rate
+	 //    experience_add_every: 10, // number of time steps before we add another experience to replay memory
+	 //    experience_size: 5000, // size of experience replay memory
+	 //    learning_steps_per_iteration: 20,
+	 //    tderror_clamp: 1.0, // for robustness
+	 //    num_hidden_units: 100 // number of neurons in hidden layer
+	 //  })
 	}
 
 	set followedBy(newFollowedBy) { this._followedBy = newFollowedBy }
@@ -200,50 +201,49 @@ export default class Node {
 	}
 
 	setNextAction() {
-		const r = this.getReward()
-		if(r !== null) {
-			const state = this.getState(),
-				action = this.agent.act(state)
+		// const r = this.getReward()
+		// if(r !== null) {
+		// 	const state = this.getState(),
+		// 		action = this.agent.act(state)
 
-			this._rewards.push(r) // save the reward to memory
+		// 	this._rewards.push(r) // save the reward to memory
 
-			this.agent.learn(r)
+		// 	this.agent.learn(r)
 
-			this.nextAction = action			
-		} else {
-			this.nextAction = null
-		}
+		// 	this.nextAction = action			
+		// } else {
+		// 	this.nextAction = null
+		// }
 	}
 
 	adjustFollowing() {
-		if(this.nextAction !== null) {
-			// follow someone from the group that the learning agent tells you
-			const followingIDs = this._following.map(n => n.id)
-			const availableFollowees = Nodes.filter(n =>
-				n.belief === beliefs[this.nextAction] && !followingIDs.includes(n.id))
-			let newFollowee
+		const newAction = Math.round(Math.random() * beliefs.length)
+		// follow someone from the group that the learning agent tells you
+		const followingIDs = this._following.map(n => n.id)
+		const availableFollowees = Nodes.filter(n =>
+			n.belief === beliefs[newAction] && !followingIDs.includes(n.id))
+		let newFollowee
 
-			if(availableFollowees.length) {
-				newFollowee = sampleArray(availableFollowees)
-			}
+		if(availableFollowees.length) {
+			newFollowee = sampleArray(availableFollowees)
+		}
 
-			// unfollow someone who never retweets you
-			const choppingBlock = []
-			for(let i=0; i<this.following.length; i++) {
-				if(!messageState.getRetweetCount(this.id, this.following[i].id)) {
-					choppingBlock.push(this.following[i].id)
-				}
-			}
-
-			this._following.splice(
-				this._following.findIndex(d => d.id === sampleArray(choppingBlock)), 1)
-
-			if(newFollowee) {
-				this._following.push(newFollowee)
+		// unfollow someone who never retweets you
+		const choppingBlock = []
+		for(let i=0; i<this.following.length; i++) {
+			if(!messageState.getRetweetCount(this.id, this.following[i].id)) {
+				choppingBlock.push(this.following[i].id)
 			}
 		}
 
-		this.setNextAction()
+		this._following.splice(
+			this._following.findIndex(d => d.id === sampleArray(choppingBlock)), 1)
+
+		if(newFollowee) {
+			this._following.push(newFollowee)
+		}
+		
+		// this.setNextAction()
 	}
 
 	init() {
