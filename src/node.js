@@ -225,13 +225,23 @@ export default class Node {
 		const newBelief = sampleArray(otherBeliefs)
 		const newAction = beliefs.findIndex(b => b === newBelief)
 		const followingIDs = this._following.map(n => n.id)
+
+		const followingMyFollowees = []
+		for(let i=0; i<this._following.length; i++) {
+			const following = this._following[i].following
+			for(let j=0; j<following.length; j++) {
+				const id = following[j].id
+				if(followingMyFollowees.indexOf(id) === -1) {
+					followingMyFollowees.push(id)
+				}
+			}
+		}
+		
 		const availableFollowees = Nodes.filter(n =>
-			n.belief === beliefs[newAction] && !followingIDs.includes(n.id))
-		let newFollowee
+			n.belief === beliefs[newAction] && followingIDs.indexOf(n.id) === -1 && followingMyFollowees.indexOf(n.id) > -1)
 
 		if(availableFollowees.length) {
-			newFollowee = sampleArray(availableFollowees)
-			this._following.push(newFollowee)
+			this._following.push(sampleArray(availableFollowees))
 		}
 	}
 
