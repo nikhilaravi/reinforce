@@ -1,0 +1,54 @@
+/*
+<div id="dataset-picker">
+  <div class="label">Pick a dataset</div>
+  <div class="select">
+    <div class="current">Terrorism</div>
+    <div class="dropdown">
+      <div class="active option">Terrorism</div>
+      <div class="option">Toy (segregated)</div>
+      <div class="option">Toy (random)</div>
+    </div>
+  </div>
+</div>
+*/
+
+#dataset-picker {
+	position: fixed;
+	left: 3rem;
+	top: 3rem;
+	font-size: 1.75rem;
+	.label, .select {
+		display: inline-block;
+	}
+	.label {
+
+	}
+	&:not(.open) {
+		.dropdown {
+			display: none;
+		}
+	}
+	.select {
+		position: relative;
+		.current {
+			cursor: pointer;
+			border-bottom: dotted 1px $border-color;
+		}
+		.dropdown {
+			@extend %material-design-shadow;
+			position: absolute;
+			top: 0;
+			left: 0;
+			background: white;
+			min-width: 14rem;
+			.option {
+				cursor: pointer;
+				line-height: 2.5;
+				padding: 0 1rem;
+				&.active, &:hover {
+					background: whitesmoke
+				}
+			}
+		}
+	}
+}

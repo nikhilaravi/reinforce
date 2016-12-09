@@ -1,9 +1,9 @@
-$dove-gray: #707070;
-$transition-duration: 250ms;
+@import "scss/variables";
 
 body {
 	margin: 0;
 	color: $dove-gray;
+	background: $background-color;
 	.link {
 		stroke: #ccc;
 	}
@@ -11,7 +11,7 @@ body {
 
 body, html {
 	font-size: 10px;
-	font-family: Helvetica;
+	font-family: 'News Cycle';
 }
 
 #popover, #halo {
@@ -39,6 +39,12 @@ body, html {
 	box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.2);
 	border-radius: 2px;
 	background: white;
+	&[data-satisfied="true"] {
+		color: green;
+	}
+	&[data-satisfied="false"] {
+		color: red;
+	}
 }
 
 #flotreward, #chart_caption {
@@ -67,4 +73,7 @@ body, html {
 .charts {
 	width: 100%;
 	display: inline-block !important;
+	display: none !important;
 }
+
+@import "scss/dataset_picker";
