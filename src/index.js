@@ -141,8 +141,8 @@ const initialize = () => {
       Nodes[i].adjustFollowing()
       setFollowedBy(Nodes[i])
     }
-    initNetworkConnectivity(Nodes)
-    initDiversityChart(Nodes)
+    // initNetworkConnectivity(Nodes)
+    // initDiversityChart(Nodes)
     links = []
     for(let i=0; i<Nodes.length; i++) {
       let n = Nodes[i]

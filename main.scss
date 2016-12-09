@@ -12,7 +12,7 @@ body {
 body, html {
 	font-size: 10px;
 	font-family: Helvetica;
-	overflow: hidden;
+	// overflow: hidden;
 }
 
 #popover, #halo {
@@ -68,4 +68,5 @@ body, html {
 .charts {
 	width: 100%;
 	display: inline-block !important;
+	display: none !important;
 }
