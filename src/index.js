@@ -114,7 +114,6 @@ const initialize = () => {
     target.following = target.following.concat(source)
   })
 
-  initializeFollowings()
   Nodes.forEach(n => n.init())
   // initFlot(Nodes[20]);
   
