@@ -42,7 +42,7 @@ export default class Node {
 
 	get lastFollowing() { return this._lastFollowing }
 
-	getState() {
+	setDiversity() {
 		let counts = this.beliefs.reduce((acc, curr) => {
 			acc[curr] = 0
 			return acc
@@ -55,9 +55,10 @@ export default class Node {
 		const sum = values(counts).reduce((acc, curr) => acc + curr, 0)
 
 		if(sum > 0) {
-			return (sum - counts[this.belief]) / sum
+			this.diversity = (sum - counts[this.belief]) / sum
+		} else {
+			this.diversity = 0
 		}
-		return 0
 	}
 
 	getReward() { // total reach
@@ -67,13 +68,6 @@ export default class Node {
 		return null
 	}
 
-	getDiversity() {
-		const mse = this.getState().reduce((acc, curr) =>
-			acc + Math.pow(((curr / Math.max(EPS, this._following.length)) - (1 / this.beliefs.length)), 2), 0) / this.beliefs.length // means squared error
-
-		return 1 - (mse / this.maxMSE)
-	}
-
 	cycle() {
 		if(this.learningMessage) {
 			this.learningMessage[1] = this.learningMessage[1] + 1
@@ -81,8 +75,8 @@ export default class Node {
 	}
 
 	adjustFollowing() {
-		const state = this.getState()
-		if(state > this.desiredDiversity) return
+		this.setDiversity()
+		if(this.diversity > this.desiredDiversity) return
 
 		if(this._following.length > minFolloweeSize) {
 			const choppingBlock = []

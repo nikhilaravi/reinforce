@@ -19,7 +19,7 @@ let start, lastCycleTime = 0, rafID = null,
   halo = document.querySelector("#halo"),
   popoverElement = document.querySelector("#popover"),
   popoverID = popoverElement.querySelector(".node_id"),
-  popoverBelief = popoverElement.querySelector('.node_belief'),
+  popoverDiversity = popoverElement.querySelector('.node_diversity'),
   quadtree = d3quadtree(),
   renderer = new THREE.WebGLRenderer({ alpha: true, canvas: document.querySelector("canvas") }),
   width = window.innerWidth, height = window.innerHeight,
@@ -265,9 +265,15 @@ document.addEventListener("mousemove", e => {
 
   match = quadtree.find(e.pageX - canvasLeft, e.pageY - canvasTop, 3)
   if(match) {
+    const diversity = match[2].diversity
     popoverElement.style.display = 'block'
     popoverID.innerHTML = match[2].id
-    popoverBelief.innerHTML = 'belief: ' + match[2].belief
+    popoverDiversity.innerHTML = 'diversity: ' + diversity.toFixed(2)
+    if(diversity > match[2].desiredDiversity) {
+      popoverElement.setAttribute("data-satisfied", true)
+    } else {
+      popoverElement.setAttribute("data-satisfied", false)
+    }
   } else {
     popoverElement.style.display = 'none'
   }
