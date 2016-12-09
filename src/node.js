@@ -2,7 +2,7 @@ import helpers from './helpers/helpers'
 const { flatten, sampleArray, createDictByProp, bindAll } = helpers
 import { values } from 'underscore'
 import { Nodes } from './nodes'
-import { beliefs, maxCyclesInMemory } from './config'
+import { beliefs, maxCyclesInMemory, minFolloweeSize } from './config'
 import messageState from './messageState'
 
 const EPS = 0.00001
@@ -70,7 +70,12 @@ export default class Node {
 			counts[this._following[i].belief]++
 		}
 
-		return values(counts)
+		const sum = values(counts).reduce((acc, curr) => acc + curr, 0)
+
+		if(sum > 0) {
+			return (sum - counts[this.belief]) / sum
+		}
+		return 0
 	}
 
 	getReward() { // total reach
@@ -200,25 +205,26 @@ export default class Node {
 		}
 	}
 
-	setNextAction() {
-		// const r = this.getReward()
-		// if(r !== null) {
-		// 	const state = this.getState(),
-		// 		action = this.agent.act(state)
-
-		// 	this._rewards.push(r) // save the reward to memory
-
-		// 	this.agent.learn(r)
-
-		// 	this.nextAction = action			
-		// } else {
-		// 	this.nextAction = null
-		// }
-	}
-
 	adjustFollowing() {
-		const newAction = Math.round(Math.random() * beliefs.length)
-		// follow someone from the group that the learning agent tells you
+		const state = this.getState()
+		if(state > this.desiredDiversity) return
+
+		if(this._following.length > minFolloweeSize) {
+			const choppingBlock = []
+			for(let i=0; i<this._following.length; i++) {
+				let followee = this._following[i]
+				if(followee.belief === this.belief) {
+					choppingBlock.push(followee)
+				}
+			}
+			this._following.splice(
+				this._following.findIndex(d => d.id === sampleArray(choppingBlock)), 1)
+
+		}
+
+		const otherBeliefs = beliefs.filter(b => b !== this.belief)
+		const newBelief = sampleArray(otherBeliefs)
+		const newAction = beliefs.findIndex(b => b === newBelief)
 		const followingIDs = this._following.map(n => n.id)
 		const availableFollowees = Nodes.filter(n =>
 			n.belief === beliefs[newAction] && !followingIDs.includes(n.id))
@@ -226,24 +232,8 @@ export default class Node {
 
 		if(availableFollowees.length) {
 			newFollowee = sampleArray(availableFollowees)
-		}
-
-		// unfollow someone who never retweets you
-		const choppingBlock = []
-		for(let i=0; i<this.following.length; i++) {
-			if(!messageState.getRetweetCount(this.id, this.following[i].id)) {
-				choppingBlock.push(this.following[i].id)
-			}
-		}
-
-		this._following.splice(
-			this._following.findIndex(d => d.id === sampleArray(choppingBlock)), 1)
-
-		if(newFollowee) {
 			this._following.push(newFollowee)
 		}
-		
-		// this.setNextAction()
 	}
 
 	init() {

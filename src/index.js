@@ -111,7 +111,7 @@ const initialize = () => {
   links.forEach(l => {
     const source = Nodes.find(n => n.id === +l.source)
     const target = Nodes.find(n => n.id === +l.target)
-    source.following = source.following.concat(target)
+    target.following = target.following.concat(source)
   })
 
   initializeFollowings()
