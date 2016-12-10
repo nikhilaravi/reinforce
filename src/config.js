@@ -7,3 +7,7 @@ export const desiredDiversity = 0.5
 export const minFolloweeSize = 5
 
 export const cycleDur = 1500
+
+export const width = window.innerWidth
+
+export const height = window.innerHeight

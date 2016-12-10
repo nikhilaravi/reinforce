@@ -11,7 +11,7 @@ import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './nodes'
 import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart } from './charts.js'
-import { desiredDiversity, cycleDur } from './config.js'
+import { desiredDiversity, cycleDur, width, height } from './config.js'
 import './datasetPicker'
 import './visualization'
 import mediator from './mediator'
@@ -23,7 +23,6 @@ let start, lastCycleTime = 0, rafID = null,
   popoverDiversity = popoverElement.querySelector('.node_diversity'),
   quadtree = d3quadtree(),
   renderer = new THREE.WebGLRenderer({ alpha: true, canvas: document.querySelector("canvas") }),
-  width = window.innerWidth, height = window.innerHeight,
   scene = new THREE.Scene(),
   camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 10000),
   nodePositions, nodeSizesColors,
