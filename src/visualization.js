@@ -14,7 +14,7 @@ const visDOM = select("#visualization")
 
 const svg = visDOM.select("svg")
 const svgWidth = Math.min(0.75 * width, 1000)
-const svgHeight = Math.min(height / 5, 200)
+const svgHeight = Math.min(height / 6, 200)
 svg.attr("width", svgWidth).attr("height", svgHeight)
 
 Object.keys(charts).forEach(c => {
