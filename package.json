@@ -70,7 +70,8 @@
     "d3-quadtree": "^1.0.1",
     "d3-random": "^1.0.1",
     "d3-scale": "^1.0.3",
-    "d3-selection": "^1.0.2",
+    "d3-selection": "^1.0.3",
+    "d3-shape": "^1.0.4",
     "d3-timer": "^1.0.3",
     "pagerank-js": "^0.3.0",
     "underscore": "^1.8.3"

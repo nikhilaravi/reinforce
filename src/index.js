@@ -13,6 +13,7 @@ import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './n
 import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart } from './charts.js'
 import { desiredDiversity } from './config.js'
 import './datasetPicker'
+import './visualization'
 import mediator from './mediator'
 
 let start, lastCycleTime = 0, rafID = null,
