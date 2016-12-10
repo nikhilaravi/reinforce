@@ -42,7 +42,8 @@ class ConvergenceTimeseries extends VisualizationBase {
 	}
 
 	update() {
-		console.log(newConnectionsCounts, brokenConnectionsCounts)
+		this.yScale.domain([0, Math.max(newConnectionsCounts[0], brokenConnectionsCounts[0])])
+
 		this.addedPath
 			.data([ newConnectionsCounts ])
 			.attr("d", this.addedLineGenerator)
