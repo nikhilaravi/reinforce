@@ -11,7 +11,7 @@ import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './nodes'
 import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart } from './charts.js'
-import { desiredDiversity } from './config.js'
+import { desiredDiversity, cycleDur } from './config.js'
 import './datasetPicker'
 import './visualization'
 import mediator from './mediator'
@@ -35,7 +35,7 @@ let start, lastCycleTime = 0, rafID = null,
   force = forceSimulation(),
   emptyNode = new THREE.Vector2(),
   links, nodeData, edgeData,
-  cycleSID = null, cycleDur = 1500,
+  cycleSID = null,
   updateLinksSID = null, updateLinksNodeIndex = 0,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
   nodeSizeScale = scaleLinear().range([5, 25]).clamp(true),

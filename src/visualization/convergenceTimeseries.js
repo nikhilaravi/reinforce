@@ -9,6 +9,10 @@ class ConvergenceTimeseries extends VisualizationBase {
 
 		console.log("constructing")
 	}
+
+	update() {
+		console.log("lol")
+	}
 }
 
 export default ConvergenceTimeseries
