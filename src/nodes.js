@@ -33,6 +33,10 @@ export const initializeNodes = (seedData, desiredDiversity, beliefs) => {
 }
 
 export const cycle = () => {
+	if(newConnectionsCounts.length > 3 && newConnectionsCounts[newConnectionsCounts.length - 1] === 0 && newConnectionsCounts[newConnectionsCounts.length - 2] === 0) {
+		mediator.publish("converged")
+	}
+
 	newConnectionsCounts.push(0)
 	brokenConnectionsCounts.push(0)
 }

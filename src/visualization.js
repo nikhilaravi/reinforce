@@ -3,10 +3,13 @@ import { line, curveCardinal } from 'd3-shape'
 import { select } from 'd3-selection'
 import { cycleDur, width, height } from './config'
 import ConvergenceTimeseries from './visualization/convergenceTimeseries'
+import mediator from './mediator'
 
 const charts = {
 	ConvergenceTimeseries
 }
+
+let updateSID = null
 
 const activeChart = 'ConvergenceTimeseries'
 
@@ -21,6 +24,12 @@ Object.keys(charts).forEach(c => {
 	charts[c] = new charts[c](svg, svgWidth, svgHeight, c)
 })
 
-setInterval(() => {
-	charts[activeChart].update()
-}, cycleDur)
+mediator.subscribe("selectDataset", () => {
+	updateSID = setInterval(() => {
+		charts[activeChart].update()
+	}, cycleDur)
+})
+
+mediator.subscribe("converged", () => {
+	window.clearInterval(updateSID)
+})
