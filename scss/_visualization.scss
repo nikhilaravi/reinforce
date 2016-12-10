@@ -10,8 +10,13 @@
 			stroke: $dove-gray;
 		}
 		path {
-			stroke: green;
 			fill: none;
+			&.added {
+				stroke: green;
+			}
+			&.removed {
+				stroke: red;
+			}
 		}
 	}
 }
