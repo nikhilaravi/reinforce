@@ -36,13 +36,25 @@ class ConvergenceTimeseries extends VisualizationBase {
 			.attr("y1", this.height * 0.5)
 			.attr("y2", this.height * 0.5)
 
+		this.xAxisLabelsGroup = this.svg.append("g").attr('class', 'x-axis-labels')
+
 		this.addedPath = this.svg.append("path").attr("class", "added")
 
 		this.removedPath = this.svg.append("path").attr("class", "removed")
 	}
 
 	update() {
-		this.yScale.domain([0, Math.max(newConnectionsCounts[0], brokenConnectionsCounts[0])])
+		const xAxisLabels = this.xAxisLabelsGroup.selectAll("text")
+			.data(newConnectionsCounts)
+
+		xAxisLabels.enter().append("text")
+		
+		xAxisLabels.text((d, i) => i + 1)
+			.attr("x", (d, i) => this.xScale(i + 1))
+			.attr("y", this.height / 2)
+
+		this.yScale.domain([0, 
+			Math.max(newConnectionsCounts[0], brokenConnectionsCounts[0])])
 
 		this.addedPath
 			.data([ newConnectionsCounts ])
