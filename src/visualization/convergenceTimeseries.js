@@ -22,8 +22,8 @@ class ConvergenceTimeseries extends VisualizationBase {
 
 		this.lineGenerator = line()
 			.curve(curveCardinal)
-			.x((d, i) => x(i))
-			.y(d => height - this.yScale(d.count))
+			.x((d, i) => this.xScale(i))
+			.y(d => this.height - this.yScale(d))
 
 		this.setup()
 	}
@@ -34,12 +34,14 @@ class ConvergenceTimeseries extends VisualizationBase {
 			.attr("x2", this.width)
 			.attr("y1", this.height * (2/3))
 			.attr("y2", this.height * (2/3))
+
+		this.addedPath = this.svg.append("path").data([Math.random() * 100]).attr("d", this.lineGenerator)
 	}
 
 	update() {
-		console.log("lol")
-
-
+		this.addedPath
+			.data([[Math.random() * 100, Math.random() * 100]])
+			.attr("d", this.lineGenerator)
 	}
 }
 
