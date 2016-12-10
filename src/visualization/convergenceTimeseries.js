@@ -25,8 +25,6 @@ class ConvergenceTimeseries extends VisualizationBase {
 		this.removedLineGenerator = line()
 			.x((d, i) => this.xScale(i))
 			.y(d => this.height / 2 + this.yScale(d))
-
-		this.setup()
 	}
 
 	setup() {
@@ -84,6 +82,10 @@ class ConvergenceTimeseries extends VisualizationBase {
 		this.removedPath
 			.data([ brokenConnectionsCounts ])
 			.attr("d", this.removedLineGenerator)
+	}
+
+	clear() {
+		this.svg.node().innerHTML = ""
 	}
 
 	converged() {
