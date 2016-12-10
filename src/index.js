@@ -294,6 +294,10 @@ document.addEventListener("click", e => {
   }
 })
 
+mediator.subscribe("converged", () => {
+  window.clearInterval(cycleSID)
+})
+
 mediator.subscribe("selectDataset", dataset => {
   window.clearInterval(cycleSID)
   window.cancelAnimationFrame(rafID)

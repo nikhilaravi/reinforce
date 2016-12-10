@@ -26,7 +26,8 @@ Object.keys(charts).forEach(c => {
 
 mediator.subscribe("selectDataset", () => {
 	window.clearInterval(updateSID)
-	
+	svg.attr("data-converged", false)
+
 	updateSID = setInterval(() => {
 		charts[activeChart].update()
 	}, cycleDur)
@@ -34,4 +35,6 @@ mediator.subscribe("selectDataset", () => {
 
 mediator.subscribe("converged", () => {
 	window.clearInterval(updateSID)
+	charts[activeChart].converged()
+	svg.attr("data-converged", true)
 })

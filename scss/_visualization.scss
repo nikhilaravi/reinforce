@@ -11,8 +11,18 @@
 			color: $dove-gray;
 		}
 		&[data-test-name="ConvergenceTimeseries"] {
+			.convergence-marker {
+				stroke: none;
+				fill: $dove-gray;
+			}
 			.y-min-label, .y-max-label {
 				text-anchor: end;
+			}
+			.x-axis-labels {
+				text {
+					text-anchor: middle;
+					font-size: 0.8rem;
+				}
 			}
 			line {
 				stroke: $dove-gray;
