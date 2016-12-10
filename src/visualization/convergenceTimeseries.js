@@ -6,11 +6,11 @@ import { newConnectionsCounts, brokenConnectionsCounts } from '../nodes'
 import VisualizationBase from './visualizationBase'
 
 class ConvergenceTimeseries extends VisualizationBase {
-	constructor(svg, width, height) {
-		super(svg, width, height)
+	constructor(svg, width, height, testName) {
+		super(svg, width, height, testName)
 
 		this.xScale = scaleLinear()
-			.domain([0, Math.round(width / 15)])
+			.domain([0, Math.round(width / 25)])
 			.range([0, width])
 
 		this.yScale = scaleLinear()

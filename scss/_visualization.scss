@@ -7,20 +7,25 @@
 	svg {
 		overflow: visible;
 		margin: 2rem auto;
-		.y-min-label, .y-max-label {
-			text-anchor: end;
+		text {
+			color: $dove-gray;
 		}
-		line {
-			stroke: $dove-gray;
-		}
-		path {
-			fill: none;
-			&.added {
-				stroke: green;
+		&[data-test-name="ConvergenceTimeseries"] {
+			.y-min-label, .y-max-label {
+				text-anchor: end;
 			}
-			&.removed {
-				stroke: red;
+			line {
+				stroke: $dove-gray;
 			}
+			path {
+				fill: none;
+				&.added {
+					stroke: green;
+				}
+				&.removed {
+					stroke: red;
+				}
+			}			
 		}
 	}
 }

@@ -18,7 +18,7 @@ const svgHeight = Math.min(height / 6, 200)
 svg.attr("width", svgWidth).attr("height", svgHeight)
 
 Object.keys(charts).forEach(c => {
-	charts[c] = new charts[c](svg, svgWidth, svgHeight)
+	charts[c] = new charts[c](svg, svgWidth, svgHeight, c)
 })
 
 setInterval(() => {
