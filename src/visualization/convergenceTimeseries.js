@@ -69,6 +69,7 @@ class ConvergenceTimeseries extends VisualizationBase {
 			.data(newConnectionsCounts)
 
 		xAxisLabels.enter().append("text")
+		xAxisLabels.exit().remove()
 		
 		xAxisLabels.text((d, i) => i + 1)
 			.attr("x", (d, i) => this.xScale(i + 1))
