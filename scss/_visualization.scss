@@ -5,7 +5,11 @@
 	right: 0;
 	text-align: center;
 	svg {
+		overflow: visible;
 		margin: 2rem auto;
+		.y-min-label, .y-max-label {
+			text-anchor: end;
+		}
 		line {
 			stroke: $dove-gray;
 		}

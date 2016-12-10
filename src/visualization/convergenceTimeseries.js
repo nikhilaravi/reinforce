@@ -36,6 +36,14 @@ class ConvergenceTimeseries extends VisualizationBase {
 			.attr("y1", this.height * 0.5)
 			.attr("y2", this.height * 0.5)
 
+		this.yAxisMax = this.svg.append("text")
+			.attr("class", "y-max-label")
+			.attr("x", 0).attr("y", 0)
+
+		this.yAxisMin = this.svg.append("text")
+			.attr("class", "y-min-label")
+			.attr("x", 0).attr("y", this.height)
+
 		this.xAxisLabelsGroup = this.svg.append("g").attr('class', 'x-axis-labels')
 
 		this.addedPath = this.svg.append("path").attr("class", "added")
@@ -44,6 +52,13 @@ class ConvergenceTimeseries extends VisualizationBase {
 	}
 
 	update() {
+		const maxVal = Math.max(newConnectionsCounts[0], brokenConnectionsCounts[0])
+
+		if(isNaN(maxVal)) return
+
+		this.yAxisMax.text(maxVal)
+		this.yAxisMin.text(maxVal)
+
 		const xAxisLabels = this.xAxisLabelsGroup.selectAll("text")
 			.data(newConnectionsCounts)
 
@@ -53,8 +68,7 @@ class ConvergenceTimeseries extends VisualizationBase {
 			.attr("x", (d, i) => this.xScale(i + 1))
 			.attr("y", this.height / 2)
 
-		this.yScale.domain([0, 
-			Math.max(newConnectionsCounts[0], brokenConnectionsCounts[0])])
+		this.yScale.domain([0, maxVal])
 
 		this.addedPath
 			.data([ newConnectionsCounts ])
