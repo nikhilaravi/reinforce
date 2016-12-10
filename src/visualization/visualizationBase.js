@@ -1,6 +1,8 @@
 class Visualization {
-  constructor() {
-
+  constructor(svg, width, height) {
+  	this.svg = svg
+  	this.width = width
+  	this.height = height
   }
 }
 

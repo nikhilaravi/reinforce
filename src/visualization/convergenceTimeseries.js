@@ -6,11 +6,7 @@ import VisualizationBase from './visualizationBase'
 
 class ConvergenceTimeseries extends VisualizationBase {
 	constructor(svg, width, height) {
-		super()
-
-		this.svg = svg
-		this.width = width
-		this.height = height
+		super(svg, width, height)
 
 		this.xScale = scaleLinear()
 			.domain([0, Math.round(width / 15)])
