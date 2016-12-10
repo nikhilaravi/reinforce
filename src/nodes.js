@@ -120,3 +120,10 @@ export const setFollowedBy = node => {
 		node.lastFollowing = node.following.slice()
 	}
 }
+
+setTimeout(() => {
+	mediator.subscribe("selectDataset", () => {
+		newConnectionsCounts = []
+		brokenConnectionsCounts = []
+	})
+}, 0)

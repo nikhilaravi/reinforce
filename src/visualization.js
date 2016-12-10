@@ -25,6 +25,8 @@ Object.keys(charts).forEach(c => {
 })
 
 mediator.subscribe("selectDataset", () => {
+	window.clearInterval(updateSID)
+	
 	updateSID = setInterval(() => {
 		charts[activeChart].update()
 	}, cycleDur)
