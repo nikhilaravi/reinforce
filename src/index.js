@@ -9,7 +9,7 @@ import { drag as d3drag } from 'd3-drag'
 import { range } from 'd3-array'
 import { getData } from './api'
 import "../main.scss"
-import { Nodes, initializeNodes, setFollowedBy, initializeFollowings } from './nodes'
+import { Nodes, initializeNodes, setFollowedBy, initializeFollowings, cycle } from './nodes'
 import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart } from './charts.js'
 import { desiredDiversity, cycleDur, width, height } from './config.js'
 import './datasetPicker'
@@ -119,6 +119,7 @@ const initialize = () => {
   
   cycleSID = setInterval(() => {
     lastCycleTime = Date.now() - start
+    cycle()
   }, cycleDur)
 
   const loop = () => {

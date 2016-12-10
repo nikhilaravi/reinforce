@@ -1,6 +1,7 @@
 import { scaleLinear } from 'd3-scale'
 import { line, curveCardinal } from 'd3-shape'
 import { select } from 'd3-selection'
+import { newConnectionsCounts, brokenConnectionsCounts } from '../nodes'
 
 import VisualizationBase from './visualizationBase'
 
@@ -17,7 +18,6 @@ class ConvergenceTimeseries extends VisualizationBase {
 			.range([0, height / 2])
 
 		this.lineGenerator = line()
-			.curve(curveCardinal)
 			.x((d, i) => this.xScale(i))
 			.y(d => this.height - this.yScale(d))
 
@@ -31,12 +31,15 @@ class ConvergenceTimeseries extends VisualizationBase {
 			.attr("y1", this.height * (2/3))
 			.attr("y2", this.height * (2/3))
 
-		this.addedPath = this.svg.append("path").data([Math.random() * 100]).attr("d", this.lineGenerator)
+		this.addedPath = this.svg.append("path")
+
+		// this.removedPath = this.svg.append("path").data
 	}
 
 	update() {
+		console.log(newConnectionsCounts, brokenConnectionsCounts)
 		this.addedPath
-			.data([[Math.random() * 100, Math.random() * 100]])
+			.data([ newConnectionsCounts ])
 			.attr("d", this.lineGenerator)
 	}
 }

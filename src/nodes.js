@@ -6,6 +6,8 @@ import { scaleLinear } from 'd3-scale'
 import mediator from './mediator'
 import { difference } from 'underscore'
 
+export let newConnectionsCounts = []
+export let brokenConnectionsCounts = []
 export let Nodes
 
 export const initializeNodes = (seedData, desiredDiversity, beliefs) => {
@@ -28,6 +30,11 @@ export const initializeNodes = (seedData, desiredDiversity, beliefs) => {
 			desiredDiversity
 		})
 	})
+}
+
+export const cycle = () => {
+	newConnectionsCounts.push(0)
+	brokenConnectionsCounts.push(0)
 }
 
 export const initializeFollowings = () => {
@@ -100,6 +107,10 @@ export const setFollowedBy = node => {
 
 	node.newlyFollowing = toAdd
 	node.newlyNotFollowing = toRemove
+	if(toAdd.length !== node.following.length) {
+		newConnectionsCounts[newConnectionsCounts.length - 1] += toAdd.length
+		brokenConnectionsCounts[brokenConnectionsCounts.length - 1] += toRemove.length
+	}
 
 	if(toAdd.length || toRemove.length) {
 		node.lastFollowing = node.following.slice()
