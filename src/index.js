@@ -75,7 +75,7 @@ const updateMinMaxFollowedBy = length => {
 }
 
 const initialize = () => {
-  const { top, left } = document.querySelector("canvas").getBoundingClientRect()
+  const { top, left } = document.querySelector("#webgl-canvas").getBoundingClientRect()
   canvasTop = top
   canvasLeft = left
 
@@ -296,6 +296,10 @@ document.addEventListener("click", e => {
 
 mediator.subscribe("converged", () => {
   window.clearInterval(cycleSID)
+  renderer.domElement.classList.add("flash")
+  setTimeout(() => {
+    renderer.domElement.classList.remove("flash")
+  }, 800)
 })
 
 mediator.subscribe("selectDataset", dataset => {

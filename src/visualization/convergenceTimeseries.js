@@ -30,12 +30,6 @@ class ConvergenceTimeseries extends VisualizationBase {
 	}
 
 	setup() {
-		this.svg.append("text").attr("class", "y-above-description")
-			.text("New connections made").attr("x", 10).attr("y", 0)
-
-		this.svg.append("text").attr("class", "y-above-description")
-			.text("Old connections lost").attr("x", 10).attr("y", this.height)
-
 		this.xAxis = this.svg.append("line")
 		this.xAxis.attr("x1", 0)
 			.attr("x2", this.width)
@@ -50,11 +44,17 @@ class ConvergenceTimeseries extends VisualizationBase {
 			.attr("class", "y-min-label")
 			.attr("x", -5).attr("y", this.height)
 
-		this.xAxisLabelsGroup = this.svg.append("g").attr('class', 'x-axis-labels')
-
 		this.addedPath = this.svg.append("path").attr("class", "added")
 
 		this.removedPath = this.svg.append("path").attr("class", "removed")
+
+		this.svg.append("text").attr("class", "y-above-description")
+			.text("New connections made").attr("x", 10).attr("y", 0)
+
+		this.svg.append("text").attr("class", "y-above-description")
+			.text("Old connections lost").attr("x", 10).attr("y", this.height)
+
+		this.xAxisLabelsGroup = this.svg.append("g").attr('class', 'x-axis-labels')
 	}
 
 	update() {
