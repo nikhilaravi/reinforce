@@ -367,7 +367,6 @@ function calculateAssortativity(Nodes) {
 
 
 export function AssortativityChart(Nodes) {
-  this.Nodes = Nodes;
   this.series = [{data: []}];
   this.history = [];
   return {
@@ -386,7 +385,7 @@ export function AssortativityChart(Nodes) {
           axisLabel: 'Assortativity',
         }
       });
-      this.history.push(calculateAssortativity(this.Nodes))
+      this.history.push(calculateAssortativity(Nodes))
       var points = this.history.map((r, i) => {
         return [i, r]
       })
