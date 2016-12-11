@@ -14,6 +14,16 @@ const datasets = {
 		nodes: 'nodes_toy',
 		edges: 'edges_toy',
 		beliefs: ["conservative", "liberal"]
+	},
+	random: {
+		nodes: 'nodes_random_network',
+		edges: 'edges_random_network',
+		beliefs: ["conservative", "liberal"]
+	},
+	scale_free: {
+		nodes: 'nodes_scale_free_network',
+		edges: 'edges_scale_free_network',
+		beliefs: ["conservative", "liberal"]
 	}
 }
 
