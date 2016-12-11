@@ -41,6 +41,8 @@ mediator.subscribe("converged", () => {
 	svg.attr("data-converged", true)
 })
 
+// dropdown stuff
+
 const buildDropdown = () => {
 	Object.keys(charts).forEach(d => {
 		let element = document.createElement("div")
@@ -95,4 +97,34 @@ document.addEventListener("click", e => {
 	} else {
 		closeDropdown()
 	}
+})
+
+// slider stuff
+
+let sliderDown = false
+
+const sliderRect = document.querySelector("#edit-diversity .slider").getBoundingClientRect()
+const sliderLeft = sliderRect.left
+const sliderWidth = sliderRect.width
+
+const circle = document.querySelector("#edit-diversity .circle")
+
+document.addEventListener("mousedown", e => {
+	if(e.target.classList.contains("circle")) {
+		sliderDown = true
+	}
+})
+
+document.addEventListener("mouseup", e => {
+	if(sliderDown) {
+		// mediator
+	}
+
+	sliderDown = false
+})
+
+document.addEventListener("mousemove", e => {
+	if(!sliderDown) return
+
+	circle.style.left = Math.max(0, Math.min(sliderWidth, e.clientX - sliderLeft)) + 'px'
 })
