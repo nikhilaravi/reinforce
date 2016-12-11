@@ -15,7 +15,7 @@ export default class Node {
 		this.username = opts.username
 		this.belief = opts.belief
 		this.trumporhillary = opts.trumporhillary
-		this.desiredDiversity = opts.desiredDiversity
+		this.desiredDiversity = opts.desiredDiversity || 0
 
 		this._newlyFollowing = []
 		this._newlyNotFollowing = []

@@ -10,7 +10,7 @@ export let newConnectionsCounts = []
 export let brokenConnectionsCounts = []
 export let Nodes
 
-export const initializeNodes = (seedData, desiredDiversity, beliefs) => {
+export const initializeNodes = (seedData, beliefs) => {
 	Nodes = seedData.map((d, i) => {
 		let belief = d.trumporhillary
 		if(belief === 0) {
@@ -26,8 +26,7 @@ export const initializeNodes = (seedData, desiredDiversity, beliefs) => {
 			beliefs,
 			id: d.node_id,
 			index: i,
-			username: i,
-			desiredDiversity
+			username: i
 		})
 	})
 }

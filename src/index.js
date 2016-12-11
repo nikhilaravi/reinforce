@@ -11,7 +11,7 @@ import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings, cycle } from './nodes'
 import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart } from './charts.js'
-import { desiredDiversity, cycleDur, width, height } from './config.js'
+import { cycleDur, width, height } from './config.js'
 import './datasetPicker'
 import './visualization'
 import mediator from './mediator'
@@ -320,7 +320,7 @@ mediator.subscribe("selectDataset", dataset => {
 
       lastCycleTime = 0
       start = Date.now()
-      initializeNodes(nodeData, desiredDiversity, dataset.beliefs)
+      initializeNodes(nodeData, dataset.beliefs)
       initialize()
     })
 })

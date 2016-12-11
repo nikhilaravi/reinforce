@@ -1,8 +1,8 @@
 import mediator from '../mediator'
+import { initialDiversity } from '../config'
 
 let sliderDown = false
 
-const initialDiversity = 0.3
 const sliderRect = document.querySelector("#edit-diversity .slider").getBoundingClientRect()
 const sliderLeft = sliderRect.left
 const sliderWidth = sliderRect.width
