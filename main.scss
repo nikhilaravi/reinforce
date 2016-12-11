@@ -27,6 +27,7 @@ $editable-parameters-width: 25rem;
 	right: 0;
 	height: 100vh;
 	background: white;
+	padding: 3rem;
 }
 
 #visualization-wrapper {
@@ -135,3 +136,4 @@ $editable-parameters-width: 25rem;
 
 @import "scss/dataset_picker";
 @import "scss/visualization";
+@import "scss/edit_diversity";

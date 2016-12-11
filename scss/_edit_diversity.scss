@@ -1,0 +1,42 @@
+#edit-diversity {
+	.label {
+		text-transform: uppercase;
+		margin-bottom: 1rem;
+		.diversity {
+			font-weight: bold;
+			color: darken($text-color, 10%);
+			display: inline-block;
+			margin-left: .25rem;
+		}
+	}
+	.slider {
+		position: relative;
+		$slider-circle-height: 2rem;
+		.bar {
+			padding-top: $slider-circle-height / 2;
+			border-bottom: solid 1px $dove-gray;
+			&:before, &:after {
+				position: absolute;
+				top: calc(#{$slider-circle-height} / 2 + 10px)
+			}
+			&:before {
+				content: "0";
+				left: 0;
+			}
+			&:after {
+				content: "1";
+				right: 0;
+			}
+		}
+		.circle {
+			width: $slider-circle-height;
+			height: $slider-circle-height;
+			border-radius: 50%;
+			background: lighten($dove-gray, 10%);
+			@extend %material-design-shadow;
+			position: absolute;
+			top: 0;
+			cursor: pointer;
+		}
+	}
+}
