@@ -27,7 +27,7 @@ Object.keys(charts).forEach(c => {
 mediator.subscribe("selectDataset", () => {
 	window.clearInterval(updateSID)
 	svg.attr("data-converged", false)
-	
+
 	charts[activeChart].clear()
 	charts[activeChart].setup()
 

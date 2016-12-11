@@ -10,7 +10,7 @@ import { range } from 'd3-array'
 import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings, cycle } from './nodes'
-import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart } from './charts.js'
+import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart, initAssortativity } from './charts.js'
 import { desiredDiversity, cycleDur, width, height } from './config.js'
 import './datasetPicker'
 import './visualization'
@@ -116,7 +116,9 @@ const initialize = () => {
 
   Nodes.forEach(n => n.init())
   // initFlot(Nodes[20]);
-  
+
+  // initAssortativity(Nodes)
+
   cycleSID = setInterval(() => {
     lastCycleTime = Date.now() - start
     cycle()
@@ -128,7 +130,7 @@ const initialize = () => {
     const shouldUpdate = Math.random() < 0.5 // perf
 
     edgeMaterial.uniforms['uTime'].value = d
-    
+
     // initNetworkConnectivity(Nodes)
     // initDiversityChart(Nodes)
     links = []
@@ -176,9 +178,9 @@ const initialize = () => {
             // source
             edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
             // target
-            edgeColorsStartTimes[i * 2 * 2 + 3] = d            
+            edgeColorsStartTimes[i * 2 * 2 + 3] = d
           }
-        }        
+        }
       }
     }
 
