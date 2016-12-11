@@ -3,7 +3,30 @@
 	bottom: 0;
 	left: 0;
 	right: 0;
-	text-align: center;
+	.select-visualization {
+		width: 15rem;
+		margin-left: 3rem;
+		padding-bottom: 2rem;
+		.option {
+			font-size: 1.25rem;
+		}
+		&:not(.open) {
+			.dropdown {
+				display: none;
+			}
+		}
+		.label {
+			text-transform: uppercase;
+		}
+		.select {
+			.current {
+				font-size: 2rem;
+			}
+		}
+	}
+	.svg-wrapper {
+		text-align: center;
+	}
 	svg {
 		overflow: visible;
 		margin: 2rem auto;
