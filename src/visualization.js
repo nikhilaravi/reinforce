@@ -9,9 +9,7 @@ const charts = {
 	ConvergenceTimeseries
 }
 
-let updateSID = null
-
-const activeChart = 'ConvergenceTimeseries'
+let updateSID = null, activeChart
 
 const visDOM = select("#visualization")
 
@@ -42,6 +40,32 @@ mediator.subscribe("converged", () => {
 	charts[activeChart].converged()
 	svg.attr("data-converged", true)
 })
+
+const buildDropdown = () => {
+	Object.keys(charts).forEach(d => {
+		let element = document.createElement("div")
+		element.classList.add("option")
+		element.setAttribute("data-chart", d)
+		element.textContent = d
+
+		document.querySelector(".select-visualization .dropdown").appendChild(element)
+	})
+}
+
+const selectOption = d => {
+	activeChart = d
+	document.querySelector(".select-visualization .current").textContent = d
+
+	Array.prototype.forEach.call(document.querySelectorAll(".select-visualization .option"), el => {
+		el.classList.remove("active")
+	})
+
+	document.querySelector(".select-visualization [data-chart=" + d + "]").classList.add("active")
+}
+
+buildDropdown()
+
+selectOption('ConvergenceTimeseries')
 
 let dropdownOpen = false
 
