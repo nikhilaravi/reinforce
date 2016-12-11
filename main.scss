@@ -14,6 +14,40 @@ body, html {
 	font-family: 'News Cycle';
 }
 
+* {
+	box-sizing: border-box;
+}
+
+$editable-parameters-width: 25rem;
+
+#editable-parameters {
+	width: $editable-parameters-width;
+	position: fixed;
+	top: 0;
+	right: 0;
+	height: 100vh;
+	background: white;
+	padding: 3rem;
+}
+
+#visualization-wrapper {
+	position: relative;
+	width: calc(100vw - #{$editable-parameters-width})
+}
+
+#webgl-canvas {
+	&.flash {
+		animation: flash 750ms forwards;
+	}
+}
+
+@keyframes flash {
+	0% { opacity: 1 }
+  40%   { opacity: 0; }
+  60% { opacity: 0 }
+  100% { opacity: 1 }
+}
+
 #popover, #halo {
 	display: none;
 	pointer-events: none;
@@ -76,4 +110,30 @@ body, html {
 	display: none !important;
 }
 
+.select {
+	position: relative;
+	.current {
+		cursor: pointer;
+		border-bottom: dotted 1px $border-color;
+	}
+	.dropdown {
+		@extend %material-design-shadow;
+		position: absolute;
+		top: 0;
+		left: 0;
+		background: white;
+		min-width: 14rem;
+		.option {
+			cursor: pointer;
+			line-height: 2.5;
+			padding: 0 1rem;
+			&.active, &:hover {
+				background: whitesmoke
+			}
+		}
+	}
+}
+
 @import "scss/dataset_picker";
+@import "scss/visualization";
+@import "scss/edit_diversity";

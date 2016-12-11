@@ -1,0 +1,64 @@
+#visualization {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	.select-visualization {
+		width: 15rem;
+		margin-left: 3rem;
+		padding-bottom: 2rem;
+		.option {
+			font-size: 1.25rem;
+		}
+		&:not(.open) {
+			.dropdown {
+				display: none;
+			}
+		}
+		.label {
+			text-transform: uppercase;
+		}
+		.select {
+			.current {
+				font-size: 2rem;
+			}
+		}
+	}
+	.svg-wrapper {
+		text-align: center;
+	}
+	svg {
+		overflow: visible;
+		margin: 2rem auto;
+		text {
+			color: $dove-gray;
+		}
+		&[data-test-name="ConvergenceTimeseries"] {
+			.convergence-marker {
+				stroke: none;
+				fill: $dove-gray;
+			}
+			.y-min-label, .y-max-label {
+				text-anchor: end;
+			}
+			.x-axis-labels {
+				text {
+					text-anchor: middle;
+					font-size: 0.8rem;
+				}
+			}
+			line {
+				stroke: $dove-gray;
+			}
+			path {
+				fill: none;
+				&.added {
+					stroke: green;
+				}
+				&.removed {
+					stroke: red;
+				}
+			}			
+		}
+	}
+}
