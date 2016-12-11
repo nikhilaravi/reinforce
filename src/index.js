@@ -13,7 +13,7 @@ import { Nodes, initializeNodes, setFollowedBy, initializeFollowings, cycle } fr
 import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart, initAssortativity } from './charts.js'
 import { desiredDiversity, cycleDur, width, height } from './config.js'
 import './datasetPicker'
-import './visualization'
+import {initVisualisations} from './visualization'
 import mediator from './mediator'
 
 let start, lastCycleTime = 0, rafID = null,
@@ -116,7 +116,7 @@ const initialize = () => {
 
   Nodes.forEach(n => n.init())
   // initFlot(Nodes[20]);
-
+  initVisualisations();
   // initAssortativity(Nodes)
 
   cycleSID = setInterval(() => {

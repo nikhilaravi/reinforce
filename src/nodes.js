@@ -5,7 +5,6 @@ import { users } from './fixedData'
 import { scaleLinear } from 'd3-scale'
 import mediator from './mediator'
 import { difference } from 'underscore'
-import uniq from 'uniq'
 
 export let newConnectionsCounts = []
 export let brokenConnectionsCounts = []

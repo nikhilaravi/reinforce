@@ -1,10 +1,12 @@
 // flot chart for plotting the reward of a single node
+import uniq from 'uniq'
 
   var nflot = 100;
   var intervalID = undefined,
   chartCaptionElement = document.querySelector("#chart_caption"),
   chartNodeID = chartCaptionElement.querySelector(".chart_node_id"),
   chartNodeBelief = chartCaptionElement.querySelector('.chart_node_belief')
+
 
   export function initFlot(node) {
     initNodeDiversityChart(node)
@@ -275,37 +277,7 @@ export function initAssortativity(Nodes) {
     var series = [{
       data: points
     }];
-    var container = $("#flotnetwork");
-    var plot = $.plot(container, series, {
-      grid: {
-        borderWidth: 1,
-        minBorderMargin: 20,
-        labelMargin: 10,
-        backgroundColor: {
-          colors: ["#FFF", "#e4f4f4"]
-        },
-        margin: {
-          top: 10,
-          bottom: 10,
-          left: 10,
-        }
-      },
-      xaxis: {
-        min: 0,
-        max: 20,
-        axisLabel: 'Number of followers',
-        axisLabelFontSizePixels: 8,
-        axisLabelPadding: 5
-      },
-      yaxis: {
-        min: 0,
-        max: 25,
-        axisLabel: 'Number of nodes',
-        axisLabelUseCanvas: true,
-        axisLabelFontSizePixels: 8,
-        axisLabelPadding: 50
-      }
-    });
+
     intervalID = setInterval(function(){
       history.push(calculateAssortativity(Nodes))
       var x = [...Array(history.length)]
@@ -391,4 +363,56 @@ function calculateAssortativity(Nodes) {
 
 		return assortativity
 		// console.log('assortativity', assortativity)
+}
+
+
+export function AssortativityChart(Nodes) {
+  this.Nodes = Nodes;
+  this.series = [{data: []}];
+  this.history = [];
+  return {
+    setup: () => {
+      this.container = $('[chart="assortativity"]');
+      document.querySelector('[chart="assortativity"]').setAttribute('style', 'width:800px; height: 300px;')
+      this.plot = $.plot(this.container, this.series, {
+        xaxis: {
+          min: 0,
+          max: 20,
+          axisLabel: 'Time',
+        },
+        yaxis: {
+          min: -0.1,
+          max: 0.1,
+          axisLabel: 'Assortativity',
+        }
+      });
+      this.history.push(calculateAssortativity(this.Nodes))
+      var points = this.history.map((r, i) => {
+        return [i, r]
+      })
+      this.series[0].data = points;
+      this.plot.setData(this.series);
+      this.plot.draw();
+    },
+
+    update: (Nodes) => {
+      this.history.push(calculateAssortativity(Nodes))
+    },
+
+    clear: () => {
+      this.series[0].data = []
+      this.plot.setData(this.series);
+      this.plot.draw();
+    },
+
+    converged: () => {
+      console.log('converged')
+      var points = this.history.map((r, i) => {
+        return [i, r]
+      });
+      this.series[0].data = points;
+      this.plot.setData(this.series);
+      this.plot.draw();
+    }
+  }
 }

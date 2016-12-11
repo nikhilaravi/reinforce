@@ -4,95 +4,109 @@ import { select } from 'd3-selection'
 import { cycleDur, width, height } from './config'
 import ConvergenceTimeseries from './visualization/convergenceTimeseries'
 import mediator from './mediator'
+import { AssortativityChart } from './charts.js'
+import { Nodes } from './nodes.js'
 
-const charts = {
-	ConvergenceTimeseries
-}
+export function initVisualisations() {
+	const charts = {
+	}
 
-let updateSID = null, activeChart
+	let updateSID = null, activeChart
 
-const visDOM = select("#visualization")
+	const visDOM = select("#visualization")
 
-const svg = visDOM.select("svg")
+	const svg = visDOM.select("svg")
 
-const svgWidth = svg.node().parentNode.getBoundingClientRect().width - 100
-const svgHeight = Math.min(height / 6, 200)
-svg.attr("width", svgWidth).attr("height", svgHeight)
+	const svgWidth = svg.node().parentNode.getBoundingClientRect().width - 100
+	const svgHeight = Math.min(height / 6, 200)
+	svg.attr("width", svgWidth).attr("height", svgHeight)
 
-Object.keys(charts).forEach(c => {
-	charts[c] = new charts[c](svg, svgWidth, svgHeight, c)
-})
+	// Object.keys(charts).forEach(c => {
+	// 	charts[c] = new charts[c](svg, svgWidth, svgHeight, c)
+	// })
 
-mediator.subscribe("selectDataset", () => {
-	window.clearInterval(updateSID)
-	svg.attr("data-converged", false)
+	charts['ConvergenceTimeseries'] = new ConvergenceTimeseries(svg, svgWidth, svgHeight, 'ConvergenceTimeseries')
+	charts['Assortativity'] = new AssortativityChart(Nodes)
 
-	charts[activeChart].clear()
-	charts[activeChart].setup()
+	mediator.subscribe("selectDataset", () => {
+		window.clearInterval(updateSID)
+		svg.attr("data-converged", false)
 
-	updateSID = setInterval(() => {
-		charts[activeChart].update()
-	}, cycleDur)
-})
+		console.log('dataset selected initing chart')
 
-mediator.subscribe("converged", () => {
-	window.clearInterval(updateSID)
-	charts[activeChart].converged()
-	svg.attr("data-converged", true)
-})
+		charts[activeChart].setup()
+		charts[activeChart].clear()
+		charts[activeChart].setup()
 
-const buildDropdown = () => {
-	Object.keys(charts).forEach(d => {
-		let element = document.createElement("div")
-		element.classList.add("option")
-		element.setAttribute("data-chart", d)
-		element.textContent = d
-
-		document.querySelector(".select-visualization .dropdown").appendChild(element)
-	})
-}
-
-const selectOption = d => {
-	activeChart = d
-	document.querySelector(".select-visualization .current").textContent = d
-
-	Array.prototype.forEach.call(document.querySelectorAll(".select-visualization .option"), el => {
-		el.classList.remove("active")
+		updateSID = setInterval(() => {
+			charts[activeChart].update(Nodes)
+		}, cycleDur)
 	})
 
-	document.querySelector(".select-visualization [data-chart=" + d + "]").classList.add("active")
-}
+	mediator.subscribe("converged", () => {
+		window.clearInterval(updateSID)
+		charts[activeChart].converged()
+		svg.attr("data-converged", true)
+	})
 
-buildDropdown()
+	const buildDropdown = () => {
+		Object.keys(charts).forEach(d => {
+			let element = document.createElement("div")
+			element.classList.add("option")
+			element.setAttribute("data-chart", d)
+			element.textContent = d
 
-selectOption('ConvergenceTimeseries')
-
-let dropdownOpen = false
-
-const toggleDropdown = () => {
-	if(dropdownOpen) {
-		closeDropdown()
-	} else {
-		openDropdown()
+			document.querySelector(".select-visualization .dropdown").appendChild(element)
+		})
 	}
-}
 
-const closeDropdown = () => {
-	dropdownOpen = false
-	document.querySelector(".select-visualization").classList.remove("open")
-}
+	const selectOption = d => {
+		console.log('selecting options', d)
+		activeChart = d
+		document.querySelector(".select-visualization .current").textContent = d
 
-const openDropdown = () => {
-	dropdownOpen = true
-	document.querySelector(".select-visualization").classList.add("open")
-}
+		Array.prototype.forEach.call(document.querySelectorAll(".select-visualization .option"), el => {
+			el.classList.remove("active")
+		});
 
-document.addEventListener("click", e => {
-	if(e.target.closest(".select-visualization")) {
-		toggleDropdown()
-		e.preventDefault()
-		e.stopPropagation()
-	} else {
-		closeDropdown()
+		document.querySelector(".select-visualization [data-chart=" + d + "]").classList.add("active")
+	};
+
+	buildDropdown()
+
+	selectOption('ConvergenceTimeseries')
+
+	let dropdownOpen = false
+
+	const toggleDropdown = () => {
+		if(dropdownOpen) {
+			closeDropdown()
+		} else {
+			openDropdown()
+		}
 	}
-})
+
+	const closeDropdown = () => {
+		dropdownOpen = false
+		document.querySelector(".select-visualization").classList.remove("open")
+	}
+
+	const openDropdown = () => {
+		dropdownOpen = true
+		document.querySelector(".select-visualization").classList.add("open")
+	}
+
+	document.addEventListener("click", e => {
+		if(e.target.closest(".select-visualization")) {
+
+			// when an item in the dropdown is selected set the item
+			selectOption(e.target.innerHTML)
+
+			toggleDropdown()
+			e.preventDefault()
+			e.stopPropagation()
+		} else {
+			closeDropdown()
+		}
+	})
+}
