@@ -25,7 +25,10 @@
 		}
 	}
 	.svg-wrapper {
-		text-align: center;
+		width: calc(100% - 6rem);
+		margin-left: auto;
+		margin-right: auto;
+		overflow: scroll;
 	}
 	svg {
 		overflow: visible;
@@ -37,9 +40,6 @@
 			.convergence-marker {
 				stroke: none;
 				fill: $dove-gray;
-			}
-			.y-min-label, .y-max-label {
-				text-anchor: end;
 			}
 			.x-axis-labels {
 				text {

@@ -15,7 +15,7 @@ const visDOM = select("#visualization")
 
 const svg = visDOM.select("svg")
 
-const svgWidth = svg.node().parentNode.getBoundingClientRect().width - 100
+const svgWidth = svg.node().parentNode.getBoundingClientRect().width
 const svgHeight = Math.min(height / 6, 200)
 svg.attr("width", svgWidth).attr("height", svgHeight)
 

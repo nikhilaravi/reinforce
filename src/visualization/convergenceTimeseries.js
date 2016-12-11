@@ -36,21 +36,21 @@ class ConvergenceTimeseries extends VisualizationBase {
 
 		this.yAxisMax = this.svg.append("text")
 			.attr("class", "y-max-label")
-			.attr("x", -5).attr("y", 0)
+			.attr("x", 0).attr("y", 0).text("0")
 
 		this.yAxisMin = this.svg.append("text")
 			.attr("class", "y-min-label")
-			.attr("x", -5).attr("y", this.height)
+			.attr("x", 0).attr("y", this.height).text("0")
 
 		this.addedPath = this.svg.append("path").attr("class", "added")
 
 		this.removedPath = this.svg.append("path").attr("class", "removed")
 
 		this.svg.append("text").attr("class", "y-above-description")
-			.text("New connections made").attr("x", 10).attr("y", 0)
+			.text("- New connections made").attr("x", 15).attr("y", 0)
 
 		this.svg.append("text").attr("class", "y-above-description")
-			.text("Old connections lost").attr("x", 10).attr("y", this.height)
+			.text("- Old connections lost").attr("x", 15).attr("y", this.height)
 
 		this.xAxisLabelsGroup = this.svg.append("g").attr('class', 'x-axis-labels')
 	}
@@ -82,6 +82,10 @@ class ConvergenceTimeseries extends VisualizationBase {
 		this.removedPath
 			.data([ brokenConnectionsCounts ])
 			.attr("d", this.removedLineGenerator)
+
+		this.svg.attr("width", Math.max(this.width, this.xScale(newConnectionsCounts.length)))
+
+		this.xAxis.attr("x2", Math.max(this.width, this.xScale(newConnectionsCounts.length)))
 	}
 
 	clear() {
