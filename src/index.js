@@ -15,6 +15,7 @@ import { desiredDiversity, cycleDur, width, height } from './config.js'
 import './datasetPicker'
 import './visualization'
 import mediator from './mediator'
+import './editableParameters/diversitySlider'
 
 let start, lastCycleTime = 0, rafID = null,
   halo = document.querySelector("#halo"),
