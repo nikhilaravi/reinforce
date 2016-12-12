@@ -4,7 +4,7 @@
 // paused (play hidden)
 
 #controls {
-	margin-bottom: 3rem;
+	margin-bottom: 4rem;
 	&:not([data-status="stopped"]) {
 		#controls-play-pause {
 			margin-right: 1rem;

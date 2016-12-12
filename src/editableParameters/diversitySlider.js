@@ -35,7 +35,7 @@ document.addEventListener("mousemove", e => {
 	updateDiversity(left)
 })
 
-mediator.subscribe("selectDataset", () => {
+mediator.subscribe("data-initialized", () => {
 	updateDiversity(currentDiversity * sliderWidth)
 })
 

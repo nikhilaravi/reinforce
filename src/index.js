@@ -17,6 +17,7 @@ import './visualization'
 import mediator from './mediator'
 import './editableParameters/diversitySlider'
 import './editableParameters/controls'
+import './editableParameters/friendsFriends'
 
 let start, lastCycleTime = 0, rafID = null,
   halo = document.querySelector("#halo"),
