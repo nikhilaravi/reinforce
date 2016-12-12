@@ -13,13 +13,13 @@ class AssortativityChart extends VisualizationBase {
 			.range([0, width])
 
 		this.yScale = scaleLinear()
-			.domain([0, 200]) // this should be some reasonable estimate, and it needs to update as the chart draws itself
-			.range([0, height / 2])
+			.domain([-1, 1]) // this should be some reasonable estimate, and it needs to update as the chart draws itself
+			.range([0, height])
 			.clamp(true)
 
 		this.addedLineGenerator = line()
 			.x((d, i) => this.xScale(i))
-			.y(d => this.height / 2 + this.yScale(d))
+			.y(d => this.height - this.yScale(d))
 	}
 
 	setup() {
@@ -31,29 +31,19 @@ class AssortativityChart extends VisualizationBase {
 
 		this.yAxisMax = this.svg.append("text")
 			.attr("class", "y-max-label")
-			.attr("x", -5).attr("y", 0)
+			.attr("x", -5).attr("y", 0).text('1')
 
 		this.yAxisMin = this.svg.append("text")
 			.attr("class", "y-min-label")
-			.attr("x", -5).attr("y", this.height)
+			.attr("x", -5).attr("y", this.height).text('-1')
 
 		this.addedPath = this.svg.append("path").attr("class", "added")
 
-		this.svg.append("text").attr("class", "y-above-description")
-			.text("Assortativity").attr("x", 10).attr("y", 0)
 		this.xAxisLabelsGroup = this.svg.append("g").attr('class', 'x-axis-labels')
 	}
 
 	update(Nodes) {
-		const maxVal = Math.max(this.history)
-		const minVal = Math.min(this.history)
-
-		console.log('history', this.history)
 		this.history.push(calculateAssortativity(Nodes))
-
-		if(isNaN(maxVal)) return
-		this.yAxisMax.text(maxVal)
-		this.yAxisMin.text(minVal)
 
 		const xAxisLabels = this.xAxisLabelsGroup.selectAll("text")
 			.data(this.history)
@@ -65,11 +55,11 @@ class AssortativityChart extends VisualizationBase {
 			.attr("x", (d, i) => this.xScale(i + 1))
 			.attr("y", this.height / 2 + 10)
 
-		this.yScale.domain([0, maxVal])
-
 		this.addedPath
-			.data(this.history)
-			.attr("d", this.addedLineGenerator)
+			.data([this.history])
+			.attr("d", (d,i) => {
+				return this.addedLineGenerator(d,i)
+			})
 	}
 
 	clear() {
@@ -118,10 +108,9 @@ function calculateAssortativity(Nodes) {
 					var followings = nodes_type_i[n].following;
 					var followings_type_j = followings.filter(n => n.belief === type_j);
 					edges_type_j += followings_type_j.length;
-
-					// save
-					e_ij[i][j] = edges_type_j/total_edges
 				}
+
+				e_ij[i][j] = edges_type_j/total_edges
 			}
 		}
 
@@ -157,10 +146,9 @@ function calculateAssortativity(Nodes) {
 			sum_prod_a_ij_b_ij += a_i[i]*b_j[i]
 		}
 
-
 		// Positive values of r indicate a correlation between nodes of similar degree, while negative values indicate relationships between nodes of different degree
 		var assortativity = (sum_e_ii - sum_prod_a_ij_b_ij)/(1-sum_prod_a_ij_b_ij)
 
-		return Math.round(assortativity*1000)
+		return assortativity
 		// console.log('assortativity', assortativity)
 }

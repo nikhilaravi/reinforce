@@ -33,32 +33,41 @@
 		text {
 			color: $dove-gray;
 		}
+		path {
+			fill: none;
+		}
+		.x-axis-labels {
+			text {
+				text-anchor: middle;
+				font-size: 0.8rem;
+			}
+		}
+		line {
+			stroke: $dove-gray;
+		}
+		.convergence-marker {
+			stroke: none;
+			fill: $dove-gray;
+		}
+		.y-min-label, .y-max-label {
+			text-anchor: end;
+		}
 		&[data-test-name="ConvergenceTimeseries"] {
-			.convergence-marker {
-				stroke: none;
-				fill: $dove-gray;
-			}
-			.y-min-label, .y-max-label {
-				text-anchor: end;
-			}
-			.x-axis-labels {
-				text {
-					text-anchor: middle;
-					font-size: 0.8rem;
-				}
-			}
-			line {
-				stroke: $dove-gray;
-			}
 			path {
-				fill: none;
 				&.added {
 					stroke: green;
 				}
 				&.removed {
 					stroke: red;
 				}
-			}			
+			}
+		}
+		&[data-test-name="Assortativity"] {
+			path {
+				&.added {
+					stroke: blue;
+				}
+			}
 		}
 	}
 }
