@@ -27,6 +27,8 @@ document.addEventListener("click", e => {
 		pause()
 	} else if(e.target.closest("#play-button")) {
 		play()
+	} else if(e.target.closest("#restart-button")) {
+		restart()
 	}
 })
 

@@ -3,6 +3,7 @@ import mediator from './mediator'
 let pickerOpen = false
 
 const initialDataset = 'downTerrorism'
+let currentDataset
 
 const datasets = {
 	downTerrorism: {
@@ -60,6 +61,8 @@ const selectDataset = (dataset) => {
 	activeNode.classList.add("active")
 	document.querySelector("#dataset-picker .current").textContent = activeNode.textContent
 	mediator.publish("selectDataset", datasets[dataset])
+
+	currentDataset = dataset
 }
 
 document.addEventListener("click", e => {
@@ -75,6 +78,10 @@ document.addEventListener("click", e => {
 	} else {
 		closePicker()
 	}
+})
+
+mediator.subscribe("restart", () => {
+	selectDataset(currentDataset)
 })
 
 setTimeout(() => { // timeout - wait for index.js to subscribe
