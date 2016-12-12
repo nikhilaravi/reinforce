@@ -41,7 +41,8 @@ let start, lastCycleTime = 0, rafID = null,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
   nodeSizeScale = scaleLinear().range([5, 25]).clamp(true),
   peakTime = 250.0, totalTime = 350.0,
-  canvasLeft = 0, canvasTop = 0, match, activeNode = null
+  canvasLeft = 0, canvasTop = 0, match, activeNode = null,
+  lineSegments, points
 
 scene.add(camera)
 camera.position.z = 1000
@@ -223,8 +224,10 @@ const initialize = () => {
   edgeGeometry.addAttribute("position", edgeVerticesBuffer)
   edgeGeometry.addAttribute("colorTime", edgeColorsStartTimesBuffer)
 
-  scene.add(new THREE.LineSegments(edgeGeometry, edgeMaterial))
-  scene.add(new THREE.Points(nodeGeometry, nodeMaterial))
+  lineSegments = new THREE.LineSegments(edgeGeometry, edgeMaterial)
+  scene.add(lineSegments)
+  points = new THREE.Points(nodeGeometry, nodeMaterial)
+  scene.add(points)
 
   force.nodes(Nodes)
     .force("link", forceLink().id(d => d.id))
@@ -327,6 +330,9 @@ mediator.subscribe("selectDataset", dataset => {
 
   Promise.all([dataset.nodes, dataset.edges].map(getData))
     .then(data => {
+      scene.remove(lineSegments)
+      scene.remove(points)
+
       nodeData = shuffle(data[0])
 
       nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
