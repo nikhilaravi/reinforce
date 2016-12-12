@@ -68,7 +68,7 @@ class ConvergenceTimeseries extends VisualizationBase {
 
 		xAxisLabels.enter().append("text")
 		xAxisLabels.exit().remove()
-		
+
 		xAxisLabels.text((d, i) => i + 1)
 			.attr("x", (d, i) => this.xScale(i + 1))
 			.attr("y", this.height / 2 + 10)

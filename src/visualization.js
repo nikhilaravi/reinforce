@@ -4,7 +4,7 @@ import { select } from 'd3-selection'
 import { cycleDur, width, height } from './config'
 import ConvergenceTimeseries from './visualization/convergenceTimeseries'
 import mediator from './mediator'
-import { AssortativityChart } from './charts.js'
+import AssortativityChart from './visualization/assortativity.js'
 import { Nodes } from './nodes.js'
 
 export function initVisualisations() {
@@ -25,8 +25,8 @@ export function initVisualisations() {
 	// 	charts[c] = new charts[c](svg, svgWidth, svgHeight, c)
 	// })
 
-	charts['ConvergenceTimeseries'] = new ConvergenceTimeseries(svg, svgWidth, svgHeight, 'ConvergenceTimeseries')
-	charts['Assortativity'] = new AssortativityChart(Nodes)
+	// charts['ConvergenceTimeseries'] = new ConvergenceTimeseries(svg, svgWidth, svgHeight, 'ConvergenceTimeseries')
+	charts['AssortativityChart'] = new AssortativityChart(svg, svgWidth, svgHeight, 'Assortativity')
 
 	mediator.subscribe("selectDataset", () => {
 		window.clearInterval(updateSID)
@@ -34,11 +34,11 @@ export function initVisualisations() {
 
 		console.log('dataset selected initing chart')
 
-		charts[activeChart].setup()
 		charts[activeChart].clear()
 		charts[activeChart].setup()
 
 		updateSID = setInterval(() => {
+			console.log('update')
 			charts[activeChart].update(Nodes)
 		}, cycleDur)
 	})
@@ -49,16 +49,6 @@ export function initVisualisations() {
 		svg.attr("data-converged", true)
 	})
 
-	const buildDropdown = () => {
-		Object.keys(charts).forEach(d => {
-			let element = document.createElement("div")
-			element.classList.add("option")
-			element.setAttribute("data-chart", d)
-			element.textContent = d
-
-			document.querySelector(".select-visualization .dropdown").appendChild(element)
-		})
-	}
 
 	const selectOption = d => {
 		console.log('selecting options', d)
@@ -72,9 +62,7 @@ export function initVisualisations() {
 		document.querySelector(".select-visualization [data-chart=" + d + "]").classList.add("active")
 	};
 
-	buildDropdown()
-
-	selectOption('ConvergenceTimeseries')
+	selectOption('AssortativityChart')
 
 	let dropdownOpen = false
 

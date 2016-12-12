@@ -380,8 +380,8 @@ export function AssortativityChart(Nodes) {
           axisLabel: 'Time',
         },
         yaxis: {
-          min: -0.1,
-          max: 0.1,
+          min: -1,
+          max: 1,
           axisLabel: 'Assortativity',
         }
       });
@@ -396,6 +396,12 @@ export function AssortativityChart(Nodes) {
 
     update: (Nodes) => {
       this.history.push(calculateAssortativity(Nodes))
+      var points = this.history.map((r, i) => {
+        return [i, r]
+      });
+      this.series[0].data = points;
+      this.plot.setData(this.series);
+      this.plot.draw();
     },
 
     clear: () => {
