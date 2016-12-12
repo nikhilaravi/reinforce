@@ -1,0 +1,47 @@
+// statuses:
+// stopped (play/pause hidden)
+// playing (play hidden)
+// paused (play hidden)
+
+#controls {
+	margin-bottom: 3rem;
+	&:not([data-status="stopped"]) {
+		#controls-play-pause {
+			margin-right: 1rem;
+		}
+	}
+	&[data-status="stopped"] {
+		#controls-play-pause {
+			display: none;
+		}
+	}
+	&[data-status="playing"] {
+		#play-button {
+			display: none;
+		}
+	}
+	&[data-status="paused"] {
+		#pause-button {
+			display: none;
+		}
+	}
+	#controls-play-pause {
+	}
+	#controls-play-pause, #controls-restart {
+		display: inline-block;
+	}
+	#play-button, #pause-button, #restart-button {
+		cursor: pointer;
+		text-align: center;
+		width: 2.5rem;
+		height: 2.5rem;
+		background: lighten($dove-gray, 10%);
+		border-radius: 50%;
+		@extend %material-design-shadow;
+		i {
+			color: white;
+			line-height: 2.6rem;
+			font-size: 1.5rem;
+		}
+	}
+}
