@@ -255,10 +255,14 @@ const play = () => {
   rafID = requestAnimationFrame(loop)
 }
 
-const stop = () => {
+const pause = () => {
   window.clearInterval(cycleSID)
-  window.cancelAnimationFrame(rafID)
+  window.cancelAnimationFrame(rafID)  
+}
 
+const stop = () => {
+  pause()
+  
   mediator.publish("stopped")
 }
 
@@ -314,6 +318,8 @@ mediator.subscribe("converged", () => {
 })
 
 mediator.subscribe("play", play)
+
+mediator.subscribe("pause", pause)
 
 mediator.subscribe("selectDataset", dataset => {
   window.clearInterval(cycleSID)

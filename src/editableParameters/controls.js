@@ -23,7 +23,11 @@ const restart = () => {
 }
 
 document.addEventListener("click", e => {
-	// if(e.target)
+	if(e.target.closest("#pause-button")) {
+		pause()
+	} else if(e.target.closest("#play-button")) {
+		play()
+	}
 })
 
 mediator.subscribe("data-initialized", play)
