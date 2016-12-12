@@ -4,13 +4,13 @@ import Node from './node'
 import { users } from './fixedData'
 import { scaleLinear } from 'd3-scale'
 import mediator from './mediator'
-import { difference } from 'underscore'
+import { difference, debounce } from 'underscore'
 
 export let newConnectionsCounts = []
 export let brokenConnectionsCounts = []
 export let Nodes
 
-export const initializeNodes = (seedData, desiredDiversity, beliefs) => {
+export const initializeNodes = (seedData, beliefs) => {
 	Nodes = seedData.map((d, i) => {
 		let belief = d.trumporhillary
 		if(belief === 0) {
@@ -26,8 +26,7 @@ export const initializeNodes = (seedData, desiredDiversity, beliefs) => {
 			beliefs,
 			id: d.node_id,
 			index: i,
-			username: i,
-			desiredDiversity
+			username: i
 		})
 	})
 }
@@ -126,7 +125,22 @@ export const setFollowedBy = node => {
 
 setTimeout(() => {
 	mediator.subscribe("selectDataset", () => {
+		Nodes = []
 		newConnectionsCounts = []
 		brokenConnectionsCounts = []
 	})
-}, 0);
+}, 0)
+
+const updateDiversity = val => {
+	Nodes.forEach(n => {
+		n.desiredDiversity = val
+	})
+}
+
+mediator.subscribe("updateDiversity", debounce(updateDiversity, 100))
+
+mediator.subscribe("editFriends", d => {
+	Nodes.forEach(n => {
+		n.allowOutsideNetwork = d
+	})
+})

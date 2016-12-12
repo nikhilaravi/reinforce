@@ -17,9 +17,9 @@ export function initVisualisations() {
 
 	const svg = visDOM.select("svg")
 
-	const svgWidth = svg.node().parentNode.getBoundingClientRect().width - 100
-	const svgHeight = Math.min(height / 6, 200)
-	svg.attr("width", svgWidth).attr("height", svgHeight)
+const svgWidth = svg.node().parentNode.getBoundingClientRect().width
+const svgHeight = Math.min(height / 6, 200)
+svg.attr("width", svgWidth).attr("height", svgHeight)
 
 	// Object.keys(charts).forEach(c => {
 	// 	charts[c] = new charts[c](svg, svgWidth, svgHeight, c)

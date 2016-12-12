@@ -15,7 +15,7 @@ export default class Node {
 		this.username = opts.username
 		this.belief = opts.belief
 		this.trumporhillary = opts.trumporhillary
-		this.desiredDiversity = opts.desiredDiversity
+		this.desiredDiversity = opts.desiredDiversity || 0
 
 		this._newlyFollowing = []
 		this._newlyNotFollowing = []
@@ -105,9 +105,11 @@ export default class Node {
 				}
 			}
 		}
-		
+
 		const availableFollowees = Nodes.filter(n =>
-			n.belief === this.beliefs[newAction] && followingIDs.indexOf(n.id) === -1 && followingMyFollowees.indexOf(n.id) > -1)
+			n.belief === this.beliefs[newAction] && 
+			followingIDs.indexOf(n.id) === -1 && 
+			(this.allowOutsideNetwork ? true : followingMyFollowees.indexOf(n.id) > -1))
 
 		if(availableFollowees.length) {
 			this._following.push(sampleArray(availableFollowees))

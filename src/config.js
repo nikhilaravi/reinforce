@@ -8,6 +8,6 @@ export const minFolloweeSize = 5
 
 export const cycleDur = 1500
 
-export const width = window.innerWidth
+export const width = document.querySelector("#visualization-wrapper").getBoundingClientRect().width
 
 export const height = window.innerHeight

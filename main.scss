@@ -18,6 +18,23 @@ body, html {
 	box-sizing: border-box;
 }
 
+$editable-parameters-width: 25rem;
+
+#editable-parameters {
+	width: $editable-parameters-width;
+	position: fixed;
+	top: 0;
+	right: 0;
+	height: 100vh;
+	background: white;
+	padding: 3rem;
+}
+
+#visualization-wrapper {
+	position: relative;
+	width: calc(100vw - #{$editable-parameters-width})
+}
+
 #webgl-canvas {
 	&.flash {
 		animation: flash 750ms forwards;
@@ -119,3 +136,6 @@ body, html {
 
 @import "scss/dataset_picker";
 @import "scss/visualization";
+@import "scss/edit_diversity";
+@import "scss/controls";
+@import "scss/edit_friends_friends";
