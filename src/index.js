@@ -28,8 +28,7 @@ let start, lastCycleTime = 0, rafID = null,
   scene = new THREE.Scene(),
   camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 10000),
   nodePositions, nodeSizesColors,
-  edgeGeometry = new THREE.BufferGeometry(),
-  nodeGeometry = new THREE.BufferGeometry(),
+  edgeGeometry, nodeGeometry,
   edgeColorsStartTimes, edgeColorsStartTimesBuffer,
   edgeVertices, lastOccupiedEdgeVertexIndex,
   nodePositionBuffer, edgeVerticesBuffer, nodeSizesColorsBuffer,
@@ -42,32 +41,11 @@ let start, lastCycleTime = 0, rafID = null,
   nodeSizeScale = scaleLinear().range([5, 25]).clamp(true),
   peakTime = 250.0, totalTime = 350.0,
   canvasLeft = 0, canvasTop = 0, match, activeNode = null,
-  lineSegments, points
+  lineSegments, points,
+  nodeMaterial, edgeMaterial
 
 scene.add(camera)
 camera.position.z = 1000
-
-const nodeMaterial = new THREE.ShaderMaterial({
-  vertexShader: document.getElementById("node-vertexshader").textContent,
-  fragmentShader: document.getElementById("node-fragmentshader").textContent,
-  transparent: true
-})
-
-const edgeMaterial = new THREE.ShaderMaterial({
-  uniforms: {
-    uTime: { value: 0.0 },
-    peakTime: { value: peakTime },
-    totalTime: { value: totalTime },
-    defaultOpacity: { value: 0.08 },
-    color: {
-      type: 'c',
-      value: new THREE.Color(0xABABBF)
-    }
-  },
-  vertexShader: document.getElementById("edge-vertexshader").textContent,
-  fragmentShader: document.getElementById("edge-fragmentshader").textContent,
-  transparent: true
-})
 
 renderer.setSize(width, height)
 renderer.setPixelRatio(window.devicePixelRatio)
@@ -208,6 +186,31 @@ const initialize = () => {
   canvasTop = top
   canvasLeft = left
 
+  edgeGeometry = new THREE.BufferGeometry()
+  nodeGeometry = new THREE.BufferGeometry()
+
+  nodeMaterial = new THREE.ShaderMaterial({
+    vertexShader: document.getElementById("node-vertexshader").textContent,
+    fragmentShader: document.getElementById("node-fragmentshader").textContent,
+    transparent: true
+  })
+
+  edgeMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0.0 },
+      peakTime: { value: peakTime },
+      totalTime: { value: totalTime },
+      defaultOpacity: { value: 0.08 },
+      color: {
+        type: 'c',
+        value: new THREE.Color(0xABABBF)
+      }
+    },
+    vertexShader: document.getElementById("edge-vertexshader").textContent,
+    fragmentShader: document.getElementById("edge-fragmentshader").textContent,
+    transparent: true
+  })
+
   nodePositions = new Float32Array(Nodes.length * 2)
   nodeSizesColors = new Float32Array(Nodes.length * 2)
   edgeVertices = new Float32Array(edgeData.length * 2 * 6)
@@ -332,6 +335,12 @@ mediator.subscribe("selectDataset", dataset => {
     .then(data => {
       scene.remove(lineSegments)
       scene.remove(points)
+      if(lineSegments) {
+        edgeGeometry.dispose()
+        nodeGeometry.dispose()
+        nodeMaterial.dispose()
+        edgeMaterial.dispose()        
+      }
 
       nodeData = shuffle(data[0])
 
