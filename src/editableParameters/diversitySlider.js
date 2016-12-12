@@ -1,7 +1,7 @@
 import mediator from '../mediator'
 import { initialDiversity } from '../config'
 
-let sliderDown = false
+let sliderDown = false, currentDiversity = initialDiversity
 
 const sliderRect = document.querySelector("#edit-diversity .slider").getBoundingClientRect()
 const sliderLeft = sliderRect.left
@@ -24,6 +24,8 @@ const updateDiversity = left => {
 	circle.style.left = left + 'px'
 	mediator.publish("updateDiversity", left / sliderWidth)
 	sliderLabel.textContent = (left / sliderWidth).toFixed(2)
+
+	currentDiversity = left / sliderWidth
 }
 
 document.addEventListener("mousemove", e => {
@@ -33,4 +35,7 @@ document.addEventListener("mousemove", e => {
 	updateDiversity(left)
 })
 
-updateDiversity(initialDiversity * sliderWidth)
+mediator.subscribe("selectDataset", () => {
+	updateDiversity(currentDiversity * sliderWidth)
+})
+

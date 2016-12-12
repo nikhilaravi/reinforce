@@ -122,6 +122,7 @@ export const setFollowedBy = node => {
 
 setTimeout(() => {
 	mediator.subscribe("selectDataset", () => {
+		Nodes = []
 		newConnectionsCounts = []
 		brokenConnectionsCounts = []
 	})
