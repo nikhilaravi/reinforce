@@ -7,7 +7,7 @@
 	margin-bottom: 3rem;
 	&:not([data-status="stopped"]) {
 		#controls-play-pause {
-			margin-right: 1.5rem;
+			margin-right: 1rem;
 		}
 	}
 	&[data-status="stopped"] {
@@ -37,6 +37,7 @@
 		height: 2.5rem;
 		background: lighten($dove-gray, 10%);
 		border-radius: 50%;
+		@extend %material-design-shadow;
 		i {
 			color: white;
 			line-height: 2.6rem;
