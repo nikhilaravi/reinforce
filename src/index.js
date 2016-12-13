@@ -65,8 +65,6 @@ const loop = () => {
 
   edgeMaterial.uniforms['uTime'].value = d
   
-  // initNetworkConnectivity(Nodes)
-  // initDiversityChart(Nodes)
   links = []
   for(let i=0; i<Nodes.length; i++) {
     let n = Nodes[i]
@@ -152,15 +150,20 @@ const loop = () => {
 
   for(let i=0; i < Nodes.length; i++) {
     let node = Nodes[i]
+    let opacity = 254
+    if(activeNode && node.id !== activeNode.id) {
+      opacity = 100
+    }
+
     nodePositions[i * 2] = node.x - width / 2
     nodePositions[i * 2 + 1] = -(node.y - height / 2)
     nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
     if(node.belief === "conservative") { // red
-      nodeSizesColors[i * 2 + 1] = decodeFloat(254, 25, 83, 254)
+      nodeSizesColors[i * 2 + 1] = decodeFloat(254, 25, 83, opacity)
     } else if(node.belief === "liberal") { // blue
-      nodeSizesColors[i * 2 + 1] = decodeFloat(0, 190, 254, 254)
+      nodeSizesColors[i * 2 + 1] = decodeFloat(0, 190, 254, opacity)
     } else { // white
-      nodeSizesColors[i * 2 + 1] = decodeFloat(254, 254, 254, 254)
+      nodeSizesColors[i * 2 + 1] = decodeFloat(254, 254, 254, opacity)
     }
 
     if(activeNode && node.id === activeNode.id) {
