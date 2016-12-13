@@ -4,12 +4,14 @@ import { select } from 'd3-selection'
 import { cycleDur, width, height } from './config'
 import ConvergenceTimeseries from './visualization/convergenceTimeseries'
 import mediator from './mediator'
+import AssortativityChart from './visualization/assortativity.js'
+import { DiversityHistogram, BeliefBarChart } from './visualization/diversityChart.js'
+import { FollowerDegrees, FollowingDegrees } from './visualization/connectionDegrees.js'
+import { Nodes } from './nodes.js'
 
-const charts = {
-	ConvergenceTimeseries
-}
+const charts = { ConvergenceTimeseries, AssortativityChart, BeliefBarChart, DiversityHistogram, FollowerDegrees, FollowingDegrees }
 
-let updateSID = null, activeChart
+let updateSID = null, activeChart = 'AssortativityChart'
 
 const visDOM = select("#visualization")
 
@@ -24,14 +26,14 @@ Object.keys(charts).forEach(c => {
 })
 
 mediator.subscribe("selectDataset", () => {
+	selectOption(activeChart)
 	window.clearInterval(updateSID)
 	svg.attr("data-converged", false)
-	
-	charts[activeChart].clear()
-	charts[activeChart].setup()
+
+	console.log('dataset selected initing chart')
 
 	updateSID = setInterval(() => {
-		charts[activeChart].update()
+		charts[activeChart].update(Nodes)
 	}, cycleDur)
 })
 
@@ -40,8 +42,6 @@ mediator.subscribe("converged", () => {
 	charts[activeChart].converged()
 	svg.attr("data-converged", true)
 })
-
-// dropdown stuff
 
 const buildDropdown = () => {
 	Object.keys(charts).forEach(d => {
@@ -55,19 +55,24 @@ const buildDropdown = () => {
 }
 
 const selectOption = d => {
+	console.log('selecting options', d)
 	activeChart = d
 	document.querySelector(".select-visualization .current").textContent = d
 
 	Array.prototype.forEach.call(document.querySelectorAll(".select-visualization .option"), el => {
 		el.classList.remove("active")
-	})
+	});
 
 	document.querySelector(".select-visualization [data-chart=" + d + "]").classList.add("active")
-}
+
+	charts[activeChart].clear()
+	charts[activeChart].setup()
+	if(Nodes) {
+		charts[activeChart].update(Nodes)
+	}
+};
 
 buildDropdown()
-
-selectOption('ConvergenceTimeseries')
 
 let dropdownOpen = false
 
@@ -91,6 +96,10 @@ const openDropdown = () => {
 
 document.addEventListener("click", e => {
 	if(e.target.closest(".select-visualization")) {
+
+		// when an item in the dropdown is selected set the item
+		selectOption(e.target.innerHTML)
+
 		toggleDropdown()
 		e.preventDefault()
 		e.stopPropagation()

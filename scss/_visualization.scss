@@ -1,45 +1,44 @@
-#visualization {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	.select-visualization {
-		width: 15rem;
-		margin-left: 3rem;
-		padding-bottom: 2rem;
-		.option {
-			font-size: 1.25rem;
-		}
-		&:not(.open) {
-			.dropdown {
-				display: none;
+#visualization-wrapper {
+	#visualization {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		.select-visualization {
+			width: 15rem;
+			margin-left: 3rem;
+			padding-bottom: 2rem;
+			.option {
+				font-size: 1.25rem;
+			}
+			&:not(.open) {
+				.dropdown {
+					display: none;
+				}
+			}
+			.label {
+				text-transform: uppercase;
+			}
+			.select {
+				.current {
+					font-size: 2rem;
+				}
 			}
 		}
-		.label {
-			text-transform: uppercase;
+		.svg-wrapper {
+			width: calc(100% - 6rem);
+			margin-left: auto;
+			margin-right: auto;
+			overflow: scroll;
 		}
-		.select {
-			.current {
-				font-size: 2rem;
+		svg {
+			overflow: visible;
+			margin: 2rem auto;
+			text {
+				color: $dove-gray;
 			}
-		}
-	}
-	.svg-wrapper {
-		width: calc(100% - 6rem);
-		margin-left: auto;
-		margin-right: auto;
-		overflow: scroll;
-	}
-	svg {
-		overflow: visible;
-		margin: 2rem auto;
-		text {
-			color: $dove-gray;
-		}
-		&[data-test-name="ConvergenceTimeseries"] {
-			.convergence-marker {
-				stroke: none;
-				fill: $dove-gray;
+			path {
+				fill: none;
 			}
 			.x-axis-labels {
 				text {
@@ -50,15 +49,27 @@
 			line {
 				stroke: $dove-gray;
 			}
-			path {
-				fill: none;
-				&.added {
-					stroke: green;
+			.convergence-marker {
+				stroke: none;
+				fill: $dove-gray;
+			}
+			&[data-test-name="ConvergenceTimeseries"] {
+				path {
+					&.added {
+						stroke: green;
+					}
+					&.removed {
+						stroke: red;
+					}
 				}
-				&.removed {
-					stroke: red;
+			}
+			&[data-test-name="AssortativityChart"] {
+				path {
+					&.added {
+						stroke: blue;
+					}
 				}
-			}			
+			}
 		}
 	}
 }

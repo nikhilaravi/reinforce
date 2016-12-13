@@ -5,9 +5,11 @@ import { users } from './fixedData'
 import { scaleLinear } from 'd3-scale'
 import mediator from './mediator'
 import { difference, debounce } from 'underscore'
+import calculateAssortativity from './calculateAssortativity'
 
 export let newConnectionsCounts = []
 export let brokenConnectionsCounts = []
+export let assortativity = []
 export let Nodes
 
 export const initializeNodes = (seedData, beliefs) => {
@@ -35,9 +37,9 @@ export const cycle = () => {
 	if(newConnectionsCounts.length > 3 && newConnectionsCounts[newConnectionsCounts.length - 1] === 0 && newConnectionsCounts[newConnectionsCounts.length - 2] === 0) {
 		mediator.publish("converged")
 	}
-
 	newConnectionsCounts.push(0)
 	brokenConnectionsCounts.push(0)
+	assortativity.push(calculateAssortativity(Nodes))
 }
 
 export const initializeFollowings = () => {
@@ -49,7 +51,7 @@ export const initializeFollowings = () => {
 		if(typeof record[node.id] === 'undefined') {
 			record[node.id] = []
 		}
-		
+
 		for(let j=0; j<node.following.length; j++) {
 			let target = node.following[j]
 			if(typeof record[target] === 'undefined') {
@@ -67,6 +69,7 @@ export const initializeFollowings = () => {
 export const setFollowedBy = node => {
 	const toRemove = [], toAdd = []
 
+	// checking if ones currently being followed were followed previously - if not then they need to be added
 	for(let i=0; i<node.following.length; i++) {
 		let wasFollowing = false
 		let thisNode = node.following[i]
@@ -82,6 +85,7 @@ export const setFollowedBy = node => {
 		}
 	}
 
+	// checking if ones followed previously are still being followed -  if not then they need to be removed
 	for(let i=0; i<node.lastFollowing.length; i++) {
 		let isFollowing = false
 		let thisNode = node.lastFollowing[i]
@@ -97,12 +101,14 @@ export const setFollowedBy = node => {
 		}
 	}
 
+	// update followedBy list for nodes no longer being followed
 	for(let i=0; i<toRemove.length; i++) {
 		let match = Nodes.find(d => d.id === toRemove[i].id)
 		let index = match.followedBy.indexOf(node.id)
 		match.followedBy = match.followedBy.slice(0, index).concat(match.followedBy.slice(index + 1))
 	}
 
+	// add to followedBy list for nodes newly followed
 	for(let i=0; i<toAdd.length; i++) {
 		let match = Nodes.find(d => d.id === toAdd[i].id)
 		match.followedBy = match.followedBy.concat(node.id)
@@ -123,6 +129,7 @@ export const setFollowedBy = node => {
 setTimeout(() => {
 	mediator.subscribe("selectDataset", () => {
 		Nodes = []
+		assortativity = []
 		newConnectionsCounts = []
 		brokenConnectionsCounts = []
 	})

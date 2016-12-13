@@ -86,4 +86,4 @@ mediator.subscribe("restart", () => {
 
 setTimeout(() => { // timeout - wait for index.js to subscribe
 	selectDataset(initialDataset)
-}, 0)
+}, 1)

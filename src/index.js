@@ -10,8 +10,8 @@ import { range } from 'd3-array'
 import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings, cycle } from './nodes'
-import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart } from './charts.js'
-import { cycleDur, width, height } from './config.js'
+import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart, initAssortativity } from './charts.js'
+import { desiredDiversity, cycleDur, width, height } from './config.js'
 import './datasetPicker'
 import './visualization'
 import mediator from './mediator'
@@ -270,6 +270,8 @@ const initialize = () => {
 
   Nodes.forEach(n => n.init())
   // initFlot(Nodes[20]);
+  // initAssortativity(Nodes)
+
 }
 
 const play = () => {
@@ -278,7 +280,6 @@ const play = () => {
     lastCycleTime = Date.now() - start
     cycle()
   }, cycleDur)
-
   rafID = requestAnimationFrame(loop)
 }
 
@@ -286,12 +287,12 @@ const pause = () => {
   animating = false
   force.stop()
   window.clearInterval(cycleSID)
-  window.cancelAnimationFrame(rafID)  
+  window.cancelAnimationFrame(rafID)
 }
 
 const stop = () => {
   pause()
-  
+
   mediator.publish("stopped")
 }
 
@@ -364,7 +365,7 @@ mediator.subscribe("selectDataset", dataset => {
         edgeGeometry.dispose()
         nodeGeometry.dispose()
         nodeMaterial.dispose()
-        edgeMaterial.dispose()        
+        edgeMaterial.dispose()
       }
 
       nodeData = shuffle(data[0])
