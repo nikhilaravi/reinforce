@@ -11,7 +11,7 @@ export class DiversityHistogram extends VisualizationBase {
   constructor(svg, width, height, testName) {
 		super(svg, width, height, testName)
 
-    this.xIncrements = 20
+    this.xIncrements = 10
 
     this.xScale = scaleLinear()
       .domain([0, 1])

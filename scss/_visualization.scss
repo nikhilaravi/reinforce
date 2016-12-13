@@ -67,6 +67,19 @@
 			}
 			&[data-test-name="AssortativityChart"] {
 			}
+			&[data-test-name="DiversityHistogram"] {
+				.convergence-marker {
+					display: none !important;
+				}
+				.x-axis-labels {
+					text:first-of-type {
+						text-anchor: start;
+					}
+					text:last-of-type {
+						text-anchor: end;
+					}
+				}
+			}
 		}
 	}
 }
