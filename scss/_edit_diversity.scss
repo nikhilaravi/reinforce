@@ -3,6 +3,8 @@
 	.label {
 		text-transform: uppercase;
 		margin-bottom: 1rem;
+		font-size: 1.1rem;
+		letter-spacing: 0.5px;
 		.diversity {
 			font-weight: bold;
 			color: darken($text-color, 10%);

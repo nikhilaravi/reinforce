@@ -1,4 +1,9 @@
 #edit-friends-friends {
+	margin-bottom: 4rem;
+}
+
+#edit-friends-friends, 
+#mutual-followers {
 	white-space: nowrap;
 	cursor: pointer;
 	.checkbox-wrapper, .label {
@@ -21,6 +26,7 @@
 		padding-left: 1rem;
 		line-height: 1.5;
 		margin-top: -0.4rem;
+		font-size: 1.1rem;
 	}
 	&[data-checked="true"] {
 
