@@ -32,6 +32,21 @@ class Visualization {
   	this.xAxisLabelsGroup = this.svg.append("g").attr('class', 'x-axis-labels')
   }
 
+  update(arr) {
+  	const xAxisLabels = this.xAxisLabelsGroup.selectAll("text")
+  		.data(arr)
+
+  	xAxisLabels.exit().remove()
+
+  	xAxisLabels.enter().append("text").text((d, i) => i + 1)
+  		.attr("x", (d, i) => this.xScale(i + 1))
+  		.attr("y", this.height / 2 + 10)
+
+  	this.svg.attr("width", Math.max(this.width, this.xScale(arr.length)))
+
+  	this.xAxis.attr("x2", Math.max(this.width, this.xScale(arr.length)))
+  }
+
   clear() {
   	this.svg.node().innerHTML = ""
   }

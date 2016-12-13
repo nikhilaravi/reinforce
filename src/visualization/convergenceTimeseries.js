@@ -39,18 +39,10 @@ class ConvergenceTimeseries extends VisualizationBase {
 
 		if(isNaN(maxVal)) return
 
+		super.update(newConnectionsCounts)
+
 		this.yAxisMax.text(maxVal + " - New connections made")
 		this.yAxisMin.text(maxVal + " - Old connections lost")
-
-		const xAxisLabels = this.xAxisLabelsGroup.selectAll("text")
-			.data(newConnectionsCounts)
-
-		xAxisLabels.enter().append("text")
-		xAxisLabels.exit().remove()
-
-		xAxisLabels.text((d, i) => i + 1)
-			.attr("x", (d, i) => this.xScale(i + 1))
-			.attr("y", this.height / 2 + 10)
 
 		this.yScale.domain([0, maxVal])
 
@@ -61,10 +53,6 @@ class ConvergenceTimeseries extends VisualizationBase {
 		this.removedPath
 			.data([ brokenConnectionsCounts ])
 			.attr("d", this.removedLineGenerator)
-
-		this.svg.attr("width", Math.max(this.width, this.xScale(newConnectionsCounts.length)))
-
-		this.xAxis.attr("x2", Math.max(this.width, this.xScale(newConnectionsCounts.length)))
 	}
 
 	converged() {
