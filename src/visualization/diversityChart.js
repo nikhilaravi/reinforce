@@ -8,16 +8,30 @@ const { dictToArray } = helpers
 export class DiversityHistogram extends VisualizationBase {
   constructor(svg, width, height, testName) {
 		super(svg, width, height, testName)
-    this.history = []
+    
+    this.start = []
+    this.current = []
   }
+
+  setup() {
+
+  }
+
   update(Nodes) {
     var diversity_distribution = dictToArray(calculateDistribution(Nodes, 'diversity'), true)
     // diversity_distribution is an array of arrays of the form: [[diversity_score, num_nodes], [diversity_score, num_nodes], [diversity_score, num_nodes]]
     // the scores are in random order i.e. not in order of increasing/decreasing scores
-    this.history.push(diversity_distribution)
+
+    if(!this.start.length) {
+      this.start = diversity_distribution
+    }
+
+    this.current = diversity_distribution
   }
+
   clear() {
-    this.history = []
+    this.start = []
+    this.current = []
   }
 }
 
