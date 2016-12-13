@@ -20,7 +20,7 @@ import './editableParameters/controls'
 import './editableParameters/friendsFriends'
 import './editableParameters/mutual'
 
-let start, lastCycleTime = 0, rafID = null,
+let start, lastCycleTime = 0, rafID = null, animating = false,
   halo = document.querySelector("#halo"),
   popoverElement = document.querySelector("#popover"),
   popoverID = popoverElement.querySelector(".node_id"),
@@ -61,27 +61,28 @@ const { top, left } = document.querySelector("#webgl-canvas").getBoundingClientR
 const loop = () => {
   const d = Date.now() - start
 
-  const shouldUpdate = Math.random() < 0.5 // perf
+  let shouldUpdate = Math.random() < 0.5 // perf
+  if(!animating) shouldUpdate = false
 
   edgeMaterial.uniforms['uTime'].value = d
   
-  // initNetworkConnectivity(Nodes)
-  // initDiversityChart(Nodes)
-  links = []
-  for(let i=0; i<Nodes.length; i++) {
-    let n = Nodes[i]
-    if(n.following.length) {
-      for(let j=0; j<n.following.length; j++) {
-        let target
-        for(let k=0; k<Nodes.length; k++) {
-          if(Nodes[k].id === n.following[j].id) {
-            target = Nodes[k]
-            break
+  if(animating) {
+    links = []
+    for(let i=0; i<Nodes.length; i++) {
+      let n = Nodes[i]
+      if(n.following.length) {
+        for(let j=0; j<n.following.length; j++) {
+          let target
+          for(let k=0; k<Nodes.length; k++) {
+            if(Nodes[k].id === n.following[j].id) {
+              target = Nodes[k]
+              break
+            }
           }
+          links.push({ source: n, target })
         }
-        links.push({ source: n, target })
       }
-    }
+    }    
   }
 
   for(let i=0; i<links.length; i++) {
@@ -104,17 +105,24 @@ const loop = () => {
       edgeVertices[i * 2 * 3 + 4] = -(target.y - height / 2)
     }
 
-    if(source.newlyFollowing && source.newlyFollowing.length !== source.following.length) {
-      const newlyFollowingIDs = source.newlyFollowing.map(d => d.id)
+    if(activeNode) {
+      if(source.id === activeNode.id) {
+        edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
+        edgeColorsStartTimes[i * 2 * 2 + 3] = d - peakTime
+      }
+    } else {
+      if(source.newlyFollowing && source.newlyFollowing.length !== source.following.length) {
+        const newlyFollowingIDs = source.newlyFollowing.map(d => d.id)
 
-      if(newlyFollowingIDs.indexOf(target.id) > -1) {
-        if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > cycleDur) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > cycleDur)) {
-          // source
-          edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
-          // target
-          edgeColorsStartTimes[i * 2 * 2 + 3] = d            
-        }
-      }        
+        if(newlyFollowingIDs.indexOf(target.id) > -1) {
+          if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > cycleDur) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > cycleDur)) {
+            // source
+            edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
+            // target
+            edgeColorsStartTimes[i * 2 * 2 + 3] = d            
+          }
+        }        
+      }      
     }
   }
 
@@ -129,18 +137,20 @@ const loop = () => {
 
   lastOccupiedEdgeVertexIndex = links.length
 
-  const diff = d - lastCycleTime
-  const targetIndex = Math.max(0, Math.min(Math.round((diff / cycleDur) * Nodes.length), Nodes.length))
+  if(animating) {
+    const diff = d - lastCycleTime
+    const targetIndex = Math.max(0, Math.min(Math.round((diff / cycleDur) * Nodes.length), Nodes.length))
 
-  if(targetIndex < updateLinksNodeIndex) { updateLinksNodeIndex = 0 } // wrap around
+    if(targetIndex < updateLinksNodeIndex) { updateLinksNodeIndex = 0 } // wrap around
 
-  for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
-    let node = Nodes[i]
-    node.adjustFollowing()
-    setFollowedBy(node)
+    for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
+      let node = Nodes[i]
+      node.adjustFollowing()
+      setFollowedBy(node)
+    }    
+
+    updateLinksNodeIndex = targetIndex
   }
-
-  updateLinksNodeIndex = targetIndex
 
   if(shouldUpdate) {
     force.force("link").links(links)
@@ -152,15 +162,21 @@ const loop = () => {
 
   for(let i=0; i < Nodes.length; i++) {
     let node = Nodes[i]
+    let opacity = 254
+    if(activeNode && node.id !== activeNode.id) {
+      let mutualFollow = node.following.map(f => f.id).indexOf(activeNode.id) > -1 && activeNode.following.map(f => f.id).indexOf(node.id) > -1
+      if(!mutualFollow) { opacity = 100 }
+    }
+
     nodePositions[i * 2] = node.x - width / 2
     nodePositions[i * 2 + 1] = -(node.y - height / 2)
     nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
     if(node.belief === "conservative") { // red
-      nodeSizesColors[i * 2 + 1] = decodeFloat(254, 25, 83, 254)
+      nodeSizesColors[i * 2 + 1] = decodeFloat(254, 25, 83, opacity)
     } else if(node.belief === "liberal") { // blue
-      nodeSizesColors[i * 2 + 1] = decodeFloat(0, 190, 254, 254)
-    } else { // purple
-      nodeSizesColors[i * 2 + 1] = decodeFloat(254, 254, 254, 254)
+      nodeSizesColors[i * 2 + 1] = decodeFloat(0, 190, 254, opacity)
+    } else { // white
+      nodeSizesColors[i * 2 + 1] = decodeFloat(254, 254, 254, opacity)
     }
 
     if(activeNode && node.id === activeNode.id) {
@@ -181,7 +197,9 @@ const loop = () => {
   nodeSizesColorsBuffer.needsUpdate = true
   renderer.render(scene, camera)
 
-  rafID = requestAnimationFrame(loop)
+  if(animating) {
+    rafID = requestAnimationFrame(loop)
+  }
 }
 
 const initialize = () => {
@@ -255,6 +273,7 @@ const initialize = () => {
 }
 
 const play = () => {
+  animating = true
   cycleSID = setInterval(() => {
     lastCycleTime = Date.now() - start
     cycle()
@@ -264,6 +283,8 @@ const play = () => {
 }
 
 const pause = () => {
+  animating = false
+  force.stop()
   window.clearInterval(cycleSID)
   window.cancelAnimationFrame(rafID)  
 }
@@ -274,7 +295,8 @@ const stop = () => {
   mediator.publish("stopped")
 }
 
-const revealHalo = () => {
+const revealHalo = (x, y) => {
+  halo.style.transform = `translate3d(${x - 6}px, ${y - 6}px, 0)`
   halo.classList.add("active")
 }
 
@@ -311,9 +333,10 @@ document.addEventListener("click", e => {
       removeHalo()
     } else {
       activeNode = match[2]
-      initFlot(activeNode)
-      revealHalo()
+      // initFlot(activeNode)
+      revealHalo(match[0], match[1])
     }
+    if(!animating) { loop() }
   }
 })
 
@@ -330,8 +353,8 @@ mediator.subscribe("play", play)
 mediator.subscribe("pause", pause)
 
 mediator.subscribe("selectDataset", dataset => {
-  window.clearInterval(cycleSID)
-  window.cancelAnimationFrame(rafID)
+  pause()
+  activeNode = null
 
   Promise.all([dataset.nodes, dataset.edges].map(getData))
     .then(data => {
