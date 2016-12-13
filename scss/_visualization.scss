@@ -52,29 +52,20 @@
 				}
 			}
 			line {
-				stroke: $dove-gray;
+				stroke: #bbb;
 			}
 			.convergence-marker {
 				display: none;
 				stroke: none;
 				fill: $dove-gray;
 			}
+			path {
+				stroke: #444;
+				stroke-linecap: round;
+			}
 			&[data-test-name="ConvergenceTimeseries"] {
-				path {
-					&.added {
-						stroke: green;
-					}
-					&.removed {
-						stroke: red;
-					}
-				}
 			}
 			&[data-test-name="AssortativityChart"] {
-				path {
-					&.added {
-						stroke: blue;
-					}
-				}
 			}
 		}
 	}
