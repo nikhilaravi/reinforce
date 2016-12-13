@@ -274,7 +274,8 @@ const stop = () => {
   mediator.publish("stopped")
 }
 
-const revealHalo = () => {
+const revealHalo = (x, y) => {
+  halo.style.transform = `translate3d(${x - 6}px, ${y - 6}px, 0)`
   halo.classList.add("active")
 }
 
@@ -312,7 +313,7 @@ document.addEventListener("click", e => {
     } else {
       activeNode = match[2]
       initFlot(activeNode)
-      revealHalo()
+      revealHalo(match[0], match[1])
     }
   }
 })
