@@ -25,7 +25,7 @@ svg.attr("width", svgWidth).attr("height", svgHeight)
 	// 	charts[c] = new charts[c](svg, svgWidth, svgHeight, c)
 	// })
 
-	// charts['ConvergenceTimeseries'] = new ConvergenceTimeseries(svg, svgWidth, svgHeight, 'ConvergenceTimeseries')
+	charts['ConvergenceTimeseries'] = new ConvergenceTimeseries(svg, svgWidth, svgHeight, 'ConvergenceTimeseries')
 	charts['AssortativityChart'] = new AssortativityChart(svg, svgWidth, svgHeight, 'Assortativity')
 
 	mediator.subscribe("selectDataset", () => {
@@ -38,7 +38,6 @@ svg.attr("width", svgWidth).attr("height", svgHeight)
 		charts[activeChart].setup()
 
 		updateSID = setInterval(() => {
-			console.log('update')
 			charts[activeChart].update(Nodes)
 		}, cycleDur)
 	})
