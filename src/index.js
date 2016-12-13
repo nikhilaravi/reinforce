@@ -333,10 +333,10 @@ document.addEventListener("click", e => {
       removeHalo()
     } else {
       activeNode = match[2]
-      initFlot(activeNode)
+      // initFlot(activeNode)
       revealHalo(match[0], match[1])
-      if(!animating) { loop() }
     }
+    if(!animating) { loop() }
   }
 })
 
