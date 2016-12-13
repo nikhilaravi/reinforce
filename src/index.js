@@ -102,17 +102,24 @@ const loop = () => {
       edgeVertices[i * 2 * 3 + 4] = -(target.y - height / 2)
     }
 
-    if(source.newlyFollowing && source.newlyFollowing.length !== source.following.length) {
-      const newlyFollowingIDs = source.newlyFollowing.map(d => d.id)
+    if(activeNode) {
+      if(source.id === activeNode.id) {
+        edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
+        edgeColorsStartTimes[i * 2 * 2 + 3] = d - peakTime
+      }
+    } else {
+      if(source.newlyFollowing && source.newlyFollowing.length !== source.following.length) {
+        const newlyFollowingIDs = source.newlyFollowing.map(d => d.id)
 
-      if(newlyFollowingIDs.indexOf(target.id) > -1) {
-        if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > cycleDur) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > cycleDur)) {
-          // source
-          edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
-          // target
-          edgeColorsStartTimes[i * 2 * 2 + 3] = d            
-        }
-      }        
+        if(newlyFollowingIDs.indexOf(target.id) > -1) {
+          if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > cycleDur) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > cycleDur)) {
+            // source
+            edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
+            // target
+            edgeColorsStartTimes[i * 2 * 2 + 3] = d            
+          }
+        }        
+      }      
     }
   }
 
@@ -152,7 +159,8 @@ const loop = () => {
     let node = Nodes[i]
     let opacity = 254
     if(activeNode && node.id !== activeNode.id) {
-      opacity = 100
+      let mutualFollow = node.following.map(f => f.id).indexOf(activeNode.id) > -1 && activeNode.following.map(f => f.id).indexOf(node.id) > -1
+      if(!mutualFollow) { opacity = 100 }
     }
 
     nodePositions[i * 2] = node.x - width / 2
