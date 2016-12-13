@@ -9,10 +9,6 @@ class ConvergenceTimeseries extends VisualizationBase {
 	constructor(svg, width, height, testName) {
 		super(svg, width, height, testName)
 
-		this.xScale = scaleLinear()
-			.domain([0, Math.round(width / 25)])
-			.range([0, width])
-
 		this.yScale = scaleLinear()
 			.domain([0, 100]) // this should be some reasonable estimate, and it needs to update as the chart draws itself
 			.range([0, height / 2])
@@ -30,25 +26,12 @@ class ConvergenceTimeseries extends VisualizationBase {
 	setup() {
 		super.setup()
 
-		this.xAxis = this.svg.append("line")
-		this.xAxis.attr("x1", 0)
-			.attr("x2", this.width)
-			.attr("y1", this.height * 0.5)
-			.attr("y2", this.height * 0.5)
-
-		this.yAxisMax = this.svg.append("text")
-			.attr("class", "y-max-label")
-			.attr("x", 0).attr("y", 0).text("0 - New connections made")
-
-		this.yAxisMin = this.svg.append("text")
-			.attr("class", "y-min-label")
-			.attr("x", 0).attr("y", this.height).text("0 - Old connections lost")
+		this.yAxisMax.text("0 - New connections made")
+		this.yAxisMin.text("0 - Old connections lost")
 
 		this.addedPath = this.svg.append("path").attr("class", "added")
 
 		this.removedPath = this.svg.append("path").attr("class", "removed")
-
-		this.xAxisLabelsGroup = this.svg.append("g").attr('class', 'x-axis-labels')
 	}
 
 	update() {
@@ -82,10 +65,6 @@ class ConvergenceTimeseries extends VisualizationBase {
 		this.svg.attr("width", Math.max(this.width, this.xScale(newConnectionsCounts.length)))
 
 		this.xAxis.attr("x2", Math.max(this.width, this.xScale(newConnectionsCounts.length)))
-	}
-
-	clear() {
-		this.svg.node().innerHTML = ""
 	}
 
 	converged() {
