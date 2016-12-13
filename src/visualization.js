@@ -46,6 +46,17 @@ mediator.subscribe("converged", () => {
 	svg.attr("data-converged", true)
 })
 
+const buildDropdown = () => {
+	Object.keys(charts).forEach(d => {
+		let element = document.createElement("div")
+		element.classList.add("option")
+		element.setAttribute("data-chart", d)
+		element.textContent = d
+
+		document.querySelector(".select-visualization .dropdown").appendChild(element)
+	})
+}
+
 const selectOption = d => {
 	console.log('selecting options', d)
 	activeChart = d
@@ -57,6 +68,8 @@ const selectOption = d => {
 
 	document.querySelector(".select-visualization [data-chart=" + d + "]").classList.add("active")
 };
+
+buildDropdown()
 
 let dropdownOpen = false
 
