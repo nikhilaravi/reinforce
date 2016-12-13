@@ -53,9 +53,6 @@
 				stroke: none;
 				fill: $dove-gray;
 			}
-			.y-min-label, .y-max-label {
-				text-anchor: end;
-			}
 			&[data-test-name="ConvergenceTimeseries"] {
 				path {
 					&.added {
@@ -66,7 +63,7 @@
 					}
 				}
 			}
-			&[data-test-name="Assortativity"] {
+			&[data-test-name="AssortativityChart"] {
 				path {
 					&.added {
 						stroke: blue;

@@ -28,6 +28,8 @@ class ConvergenceTimeseries extends VisualizationBase {
 	}
 
 	setup() {
+		super.setup()
+
 		this.xAxis = this.svg.append("line")
 		this.xAxis.attr("x1", 0)
 			.attr("x2", this.width)
@@ -36,21 +38,15 @@ class ConvergenceTimeseries extends VisualizationBase {
 
 		this.yAxisMax = this.svg.append("text")
 			.attr("class", "y-max-label")
-			.attr("x", 0).attr("y", 0).text("0")
+			.attr("x", 0).attr("y", 0).text("0 - New connections made")
 
 		this.yAxisMin = this.svg.append("text")
 			.attr("class", "y-min-label")
-			.attr("x", 0).attr("y", this.height).text("0")
+			.attr("x", 0).attr("y", this.height).text("0 - Old connections lost")
 
 		this.addedPath = this.svg.append("path").attr("class", "added")
 
 		this.removedPath = this.svg.append("path").attr("class", "removed")
-
-		this.svg.append("text").attr("class", "y-above-description")
-			.text("- New connections made").attr("x", 15).attr("y", 0)
-
-		this.svg.append("text").attr("class", "y-above-description")
-			.text("- Old connections lost").attr("x", 15).attr("y", this.height)
 
 		this.xAxisLabelsGroup = this.svg.append("g").attr('class', 'x-axis-labels')
 	}
@@ -60,8 +56,8 @@ class ConvergenceTimeseries extends VisualizationBase {
 
 		if(isNaN(maxVal)) return
 
-		this.yAxisMax.text(maxVal)
-		this.yAxisMin.text(maxVal)
+		this.yAxisMax.text(maxVal + " - New connections made")
+		this.yAxisMin.text(maxVal + " - Old connections lost")
 
 		const xAxisLabels = this.xAxisLabelsGroup.selectAll("text")
 			.data(newConnectionsCounts)

@@ -3,8 +3,11 @@ class Visualization {
   	this.svg = svg
   	this.width = width
   	this.height = height
+  	this.testName = testName
+  }
 
-  	this.svg.attr("data-test-name", testName)
+  setup() {
+  	this.svg.attr("data-test-name", this.testName)
   }
 }
 
