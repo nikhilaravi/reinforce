@@ -20,7 +20,7 @@ import './editableParameters/controls'
 import './editableParameters/friendsFriends'
 import './editableParameters/mutual'
 
-let start, lastCycleTime = 0, rafID = null,
+let start, lastCycleTime = 0, rafID = null, animating = false,
   halo = document.querySelector("#halo"),
   popoverElement = document.querySelector("#popover"),
   popoverID = popoverElement.querySelector(".node_id"),
@@ -159,7 +159,7 @@ const loop = () => {
       nodeSizesColors[i * 2 + 1] = decodeFloat(254, 25, 83, 254)
     } else if(node.belief === "liberal") { // blue
       nodeSizesColors[i * 2 + 1] = decodeFloat(0, 190, 254, 254)
-    } else { // purple
+    } else { // white
       nodeSizesColors[i * 2 + 1] = decodeFloat(254, 254, 254, 254)
     }
 
@@ -255,6 +255,7 @@ const initialize = () => {
 }
 
 const play = () => {
+  animating = true
   cycleSID = setInterval(() => {
     lastCycleTime = Date.now() - start
     cycle()
@@ -264,6 +265,7 @@ const play = () => {
 }
 
 const pause = () => {
+  animating = false
   window.clearInterval(cycleSID)
   window.cancelAnimationFrame(rafID)  
 }
