@@ -61,25 +61,28 @@ const { top, left } = document.querySelector("#webgl-canvas").getBoundingClientR
 const loop = () => {
   const d = Date.now() - start
 
-  const shouldUpdate = Math.random() < 0.5 // perf
+  let shouldUpdate = Math.random() < 0.5 // perf
+  if(!animating) shouldUpdate = false
 
   edgeMaterial.uniforms['uTime'].value = d
   
-  links = []
-  for(let i=0; i<Nodes.length; i++) {
-    let n = Nodes[i]
-    if(n.following.length) {
-      for(let j=0; j<n.following.length; j++) {
-        let target
-        for(let k=0; k<Nodes.length; k++) {
-          if(Nodes[k].id === n.following[j].id) {
-            target = Nodes[k]
-            break
+  if(animating) {
+    links = []
+    for(let i=0; i<Nodes.length; i++) {
+      let n = Nodes[i]
+      if(n.following.length) {
+        for(let j=0; j<n.following.length; j++) {
+          let target
+          for(let k=0; k<Nodes.length; k++) {
+            if(Nodes[k].id === n.following[j].id) {
+              target = Nodes[k]
+              break
+            }
           }
+          links.push({ source: n, target })
         }
-        links.push({ source: n, target })
       }
-    }
+    }    
   }
 
   for(let i=0; i<links.length; i++) {
@@ -134,18 +137,20 @@ const loop = () => {
 
   lastOccupiedEdgeVertexIndex = links.length
 
-  const diff = d - lastCycleTime
-  const targetIndex = Math.max(0, Math.min(Math.round((diff / cycleDur) * Nodes.length), Nodes.length))
+  if(animating) {
+    const diff = d - lastCycleTime
+    const targetIndex = Math.max(0, Math.min(Math.round((diff / cycleDur) * Nodes.length), Nodes.length))
 
-  if(targetIndex < updateLinksNodeIndex) { updateLinksNodeIndex = 0 } // wrap around
+    if(targetIndex < updateLinksNodeIndex) { updateLinksNodeIndex = 0 } // wrap around
 
-  for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
-    let node = Nodes[i]
-    node.adjustFollowing()
-    setFollowedBy(node)
+    for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
+      let node = Nodes[i]
+      node.adjustFollowing()
+      setFollowedBy(node)
+    }    
+
+    updateLinksNodeIndex = targetIndex
   }
-
-  updateLinksNodeIndex = targetIndex
 
   if(shouldUpdate) {
     force.force("link").links(links)
@@ -192,7 +197,9 @@ const loop = () => {
   nodeSizesColorsBuffer.needsUpdate = true
   renderer.render(scene, camera)
 
-  rafID = requestAnimationFrame(loop)
+  if(animating) {
+    rafID = requestAnimationFrame(loop)
+  }
 }
 
 const initialize = () => {
@@ -277,6 +284,7 @@ const play = () => {
 
 const pause = () => {
   animating = false
+  force.stop()
   window.clearInterval(cycleSID)
   window.cancelAnimationFrame(rafID)  
 }
@@ -327,6 +335,7 @@ document.addEventListener("click", e => {
       activeNode = match[2]
       initFlot(activeNode)
       revealHalo(match[0], match[1])
+      if(!animating) { loop() }
     }
   }
 })
@@ -344,8 +353,8 @@ mediator.subscribe("play", play)
 mediator.subscribe("pause", pause)
 
 mediator.subscribe("selectDataset", dataset => {
-  window.clearInterval(cycleSID)
-  window.cancelAnimationFrame(rafID)
+  pause()
+  activeNode = null
 
   Promise.all([dataset.nodes, dataset.edges].map(getData))
     .then(data => {
