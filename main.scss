@@ -81,12 +81,12 @@ $editable-parameters-width: 25rem;
 	}
 	&[data-satisfied="true"] {
 		.node_diversity {
-			color: green;
+			color: $green;
 		}
 	}
 	&[data-satisfied="false"] {
 		.node_diversity {
-			color: red;
+			color: $red;
 		}
 	}
 }
