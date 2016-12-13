@@ -144,3 +144,9 @@ mediator.subscribe("editFriends", d => {
 		n.allowOutsideNetwork = d
 	})
 })
+
+mediator.subscribe("mutualFollows", d => {
+	Nodes.forEach(n => {
+		n.considerFollowsMutual = d
+	})
+})
