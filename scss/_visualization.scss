@@ -35,7 +35,7 @@
 			overflow: visible;
 			margin: 2rem auto;
 			text {
-				color: $dove-gray;
+				fill: $dove-gray;
 			}
 			&[data-converged="true"] {
 				.convergence-marker {
