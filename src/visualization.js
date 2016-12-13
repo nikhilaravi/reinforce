@@ -9,7 +9,7 @@ import { Nodes } from './nodes.js'
 
 const charts = { ConvergenceTimeseries, AssortativityChart }
 
-let updateSID = null, activeChart
+let updateSID = null, activeChart = 'ConvergenceTimeseries'
 
 const visDOM = select("#visualization")
 
@@ -24,6 +24,7 @@ Object.keys(charts).forEach(c => {
 })
 
 mediator.subscribe("selectDataset", () => {
+	selectOption(activeChart)
 	window.clearInterval(updateSID)
 	svg.attr("data-converged", false)
 
@@ -54,8 +55,6 @@ const selectOption = d => {
 
 	document.querySelector(".select-visualization [data-chart=" + d + "]").classList.add("active")
 };
-
-selectOption('AssortativityChart')
 
 let dropdownOpen = false
 
