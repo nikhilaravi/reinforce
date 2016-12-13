@@ -13,7 +13,7 @@ import { Nodes, initializeNodes, setFollowedBy, initializeFollowings, cycle } fr
 import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart, initAssortativity } from './charts.js'
 import { desiredDiversity, cycleDur, width, height } from './config.js'
 import './datasetPicker'
-import {initVisualisations} from './visualization'
+import './visualization'
 import mediator from './mediator'
 import './editableParameters/diversitySlider'
 import './editableParameters/controls'
@@ -270,7 +270,6 @@ const initialize = () => {
 
   Nodes.forEach(n => n.init())
   // initFlot(Nodes[20]);
-  initVisualisations();
   // initAssortativity(Nodes)
 
 }
