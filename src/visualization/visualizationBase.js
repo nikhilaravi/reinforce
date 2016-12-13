@@ -1,4 +1,5 @@
 import { scaleLinear, scaleLog } from 'd3-scale'
+const rectSize = 15
 
 class Visualization {
   constructor(svg, width, height, testName) {
@@ -30,6 +31,12 @@ class Visualization {
   		.attr("x", 0).attr("y", this.height)
 
   	this.xAxisLabelsGroup = this.svg.append("g").attr('class', 'x-axis-labels')
+
+    this.convergenceRect = this.svg.insert("rect", ':first-child')
+      .attr("class", "convergence-marker")
+      .attr("y", this.height / 2 + rectSize)
+      .attr("width", rectSize)
+      .attr("height", 1)
   }
 
   update(arr) {
@@ -45,6 +52,8 @@ class Visualization {
   	this.svg.attr("width", Math.max(this.width, this.xScale(arr.length)))
 
   	this.xAxis.attr("x2", Math.max(this.width, this.xScale(arr.length)))
+
+    this.convergenceRect.attr("x", () => this.xScale(arr.length - 1) - rectSize / 2)
   }
 
   clear() {

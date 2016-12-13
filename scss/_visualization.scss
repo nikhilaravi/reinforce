@@ -37,6 +37,11 @@
 			text {
 				color: $dove-gray;
 			}
+			&[data-converged="true"] {
+				.convergence-marker {
+					display: block;
+				}
+			}
 			path {
 				fill: none;
 			}
@@ -50,6 +55,7 @@
 				stroke: $dove-gray;
 			}
 			.convergence-marker {
+				display: none;
 				stroke: none;
 				fill: $dove-gray;
 			}

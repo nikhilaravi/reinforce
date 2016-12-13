@@ -54,17 +54,6 @@ class ConvergenceTimeseries extends VisualizationBase {
 			.data([ brokenConnectionsCounts ])
 			.attr("d", this.removedLineGenerator)
 	}
-
-	converged() {
-		const rectSize = 15
-
-		this.svg.insert("rect", ':first-child')
-			.attr("class", "convergence-marker")
-			.attr("x", () => this.xScale(newConnectionsCounts.length - 1) - rectSize / 2)
-			.attr("y", this.height / 2 + rectSize)
-			.attr("width", rectSize)
-			.attr("height", 1)
-	}
 }
 
 export default ConvergenceTimeseries

@@ -39,7 +39,6 @@ mediator.subscribe("selectDataset", () => {
 
 mediator.subscribe("converged", () => {
 	window.clearInterval(updateSID)
-	charts[activeChart].converged()
 	svg.attr("data-converged", true)
 })
 
