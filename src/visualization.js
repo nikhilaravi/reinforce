@@ -11,7 +11,7 @@ import { Nodes } from './nodes.js'
 
 const charts = { ConvergenceTimeseries, AssortativityChart, BeliefBarChart, DiversityHistogram, FollowerDegrees, FollowingDegrees }
 
-let updateSID = null, activeChart = 'ConvergenceTimeseries'
+let updateSID = null, activeChart = 'AssortativityChart'
 
 const visDOM = select("#visualization")
 
@@ -31,9 +31,6 @@ mediator.subscribe("selectDataset", () => {
 	svg.attr("data-converged", false)
 
 	console.log('dataset selected initing chart')
-
-	charts[activeChart].clear()
-	charts[activeChart].setup()
 
 	updateSID = setInterval(() => {
 		charts[activeChart].update(Nodes)
@@ -67,6 +64,12 @@ const selectOption = d => {
 	});
 
 	document.querySelector(".select-visualization [data-chart=" + d + "]").classList.add("active")
+
+	charts[activeChart].clear()
+	charts[activeChart].setup()
+	if(Nodes) {
+		charts[activeChart].update(Nodes)
+	}
 };
 
 buildDropdown()
