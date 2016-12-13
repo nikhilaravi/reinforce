@@ -34,7 +34,7 @@ class Visualization {
 
   update(arr) {
   	const xAxisLabels = this.xAxisLabelsGroup.selectAll("text")
-  		.data(arr)
+  		.data(arr.slice(0, arr.length - 1))
 
   	xAxisLabels.exit().remove()
 
