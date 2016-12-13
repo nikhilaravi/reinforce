@@ -16,6 +16,9 @@ export class DiversityHistogram extends VisualizationBase {
     // the scores are in random order i.e. not in order of increasing/decreasing scores
     this.history.push(diversity_distribution)
   }
+  clear() {
+    this.history = []
+  }
 }
 
 export class BeliefBarChart extends VisualizationBase {
@@ -27,6 +30,9 @@ export class BeliefBarChart extends VisualizationBase {
     var diversity_counts = dictToArray(calculateDistribution(Nodes, 'belief'))
     // diversity_counts is an array of arrays of the form: [['conservative', num_nodes], ['liberal', num_nodes]] etc for the different beliefs in the network
     this.history.push(diversity_counts)
+  }
+  clear() {
+    this.history = []
   }
 }
 

@@ -24,7 +24,7 @@ class AssortativityChart extends VisualizationBase {
 
 	setup() {
 		super.setup()
-		
+
 		this.xAxis = this.svg.append("line")
 		this.xAxis.attr("x1", 0)
 			.attr("x2", this.width)
@@ -66,6 +66,7 @@ class AssortativityChart extends VisualizationBase {
 
 	clear() {
 		this.svg.node().innerHTML = ""
+		this.history = []
 	}
 
 	converged() {

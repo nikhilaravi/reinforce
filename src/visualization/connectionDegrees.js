@@ -14,6 +14,9 @@ export class FollowerDegrees extends VisualizationBase {
     var follower_counts_dict = dictToArray(create_count_dict(Nodes, 'followedBy'), true) // an array of arrays of the form [[num_followers, num_nodes], [num_followers, num_nodes]] etc
     this.history.push(follower_counts_dict)
   }
+  clear() {
+    this.history = []
+  }
 }
 
 export class FollowingDegrees extends VisualizationBase {
@@ -24,6 +27,9 @@ export class FollowingDegrees extends VisualizationBase {
   update(Nodes) {
     var following_counts_dict = dictToArray(create_count_dict(Nodes, 'following'), true) // an array of arrays of the form [[num_following, num_nodes], [num_following, num_nodes]] etc
     this.history.push(follower_counts_dict)
+  }
+  clear() {
+    this.history = []
   }
 }
 
