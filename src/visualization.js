@@ -5,6 +5,8 @@ import { cycleDur, width, height } from './config'
 import ConvergenceTimeseries from './visualization/convergenceTimeseries'
 import mediator from './mediator'
 import AssortativityChart from './visualization/assortativity.js'
+import { DiversityHistogram, BeliefBarChart } from './visualization/diversityChart.js'
+import { FollowerDegrees, FollowingDegrees } from './visualization/connectionDegrees.js'
 import { Nodes } from './nodes.js'
 
 export function initVisualisations() {
@@ -28,6 +30,12 @@ svg.attr("width", svgWidth).attr("height", svgHeight)
 	charts['ConvergenceTimeseries'] = new ConvergenceTimeseries(svg, svgWidth, svgHeight, 'ConvergenceTimeseries')
 	charts['AssortativityChart'] = new AssortativityChart(svg, svgWidth, svgHeight, 'Assortativity')
 
+	charts['BeliefBarChart'] = new BeliefBarChart(svg, svgWidth, svgHeight, 'BeliefBarChart')
+	charts['DiversityHistogram'] = new DiversityHistogram(svg, svgWidth, svgHeight, 'DiversityHistogram')
+
+	charts['FollowerDegrees'] = new FollowerDegrees(svg, svgWidth, svgHeight, 'FollowerDegrees')
+	charts['FollowingDegrees'] = new FollowingDegrees(svg, svgWidth, svgHeight, 'FollowingDegrees')
+
 	mediator.subscribe("selectDataset", () => {
 		window.clearInterval(updateSID)
 		svg.attr("data-converged", false)
@@ -39,6 +47,10 @@ svg.attr("width", svgWidth).attr("height", svgHeight)
 
 		updateSID = setInterval(() => {
 			charts[activeChart].update(Nodes)
+
+			charts['FollowerDegrees'].update(Nodes)
+			charts['FollowingDegrees'].update(Nodes)
+
 		}, cycleDur)
 	})
 
