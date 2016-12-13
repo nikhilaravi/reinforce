@@ -314,7 +314,9 @@ document.addEventListener("mousemove", e => {
   if(match) {
     const diversity = match[2].diversity
     popoverElement.style.display = 'block'
-    popoverID.innerHTML = match[2].id
+    popoverElement.querySelector(".node_followees").textContent = match[2].following.length + ' following'
+    popoverElement.querySelector(".node_followers").textContent = match[2].followedBy.length + ' followees'
+    popoverID.innerHTML = "node " + match[2].id
     popoverDiversity.innerHTML = 'diversity: ' + diversity.toFixed(2)
     if(diversity > match[2].desiredDiversity) {
       popoverElement.setAttribute("data-satisfied", true)

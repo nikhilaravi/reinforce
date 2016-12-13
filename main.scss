@@ -73,11 +73,21 @@ $editable-parameters-width: 25rem;
 	box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.2);
 	border-radius: 2px;
 	background: white;
+	.node_id {
+		font-weight: bold;
+		text-transform: uppercase;
+		color: $black;
+		margin-bottom: 0.5rem;
+	}
 	&[data-satisfied="true"] {
-		color: green;
+		.node_diversity {
+			color: green;
+		}
 	}
 	&[data-satisfied="false"] {
-		color: red;
+		.node_diversity {
+			color: red;
+		}
 	}
 }
 
