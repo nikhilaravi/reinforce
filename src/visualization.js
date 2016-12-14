@@ -26,9 +26,16 @@ Object.keys(charts).forEach(c => {
 	charts[c] = new charts[c](svg, svgWidth, svgHeight, c)
 })
 
+var beliefs = ['conservative', 'neutral', 'liberal']
+
 mediator.subscribe("data-initialized", (edges) => {
 	// update static network properties
 	var beliefDistribution = calculateDistribution(Nodes, 'belief')
+
+	beliefs.forEach((belief) => {
+		document.querySelector('.' + belief).textContent = '0'
+	})
+	console.log('beliefDistribution', beliefDistribution)
 	Object.keys(beliefDistribution).forEach((belief) => {
 		console.log('belief', belief)
 		document.querySelector('.' + belief).textContent = ' ' + beliefDistribution[belief]

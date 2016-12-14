@@ -24,7 +24,7 @@ const datasets = {
 	scale_free: {
 		nodes: 'nodes_scale_free_network',
 		edges: 'edges_scale_free_network',
-		beliefs: ["conservative", "liberal"]
+		beliefs: ["conservative", "liberal", "neutral"]
 	}
 }
 
