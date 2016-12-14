@@ -1,0 +1,30 @@
+#network_stats {
+  position: fixed;
+  left: 3rem;
+  top: 9rem;
+  font-size: 1.75rem;
+  .label, .select {
+    display: inline-block;
+  }
+  .label {
+
+  }
+  &:not(.open) {
+    .dropdown {
+      display: none;
+    }
+  }
+  font-weight: bold;
+  .connection_percent_change_visual, .number_of_nodes, .number_of_nodes, .conservative, .liberal, .neutral, .number_of_edges {
+    font-weight: normal;
+  }
+  .liberal_text {
+    color: rgb(0, 190, 254)
+  }
+  .conservative_text {
+    color: rgb(254, 25, 83)
+  }
+  .neutral_text {
+    color: rgb(145,145,145)
+  }
+}

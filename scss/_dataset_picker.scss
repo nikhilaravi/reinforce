@@ -16,21 +16,3 @@
 		}
 	}
 }
-
-#connection-percent-change {
-	position: fixed;
-	left: 3rem;
-	top: 9rem;
-	font-size: 1.75rem;
-	.label, .select {
-		display: inline-block;
-	}
-	.label {
-
-	}
-	&:not(.open) {
-		.dropdown {
-			display: none;
-		}
-	}
-}

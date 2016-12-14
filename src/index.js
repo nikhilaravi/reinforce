@@ -23,7 +23,7 @@ import './editableParameters/mutual'
 let start, lastCycleTime = 0, rafID = null, animating = false,
   halo = document.querySelector("#halo"),
   popoverElement = document.querySelector("#popover"),
-  initialConnectionsChangesElement = document.querySelector("#connection-percent-change"),
+  network_stats = document.querySelector("#network_stats"),
   popoverID = popoverElement.querySelector(".node_id"),
   popoverDiversity = popoverElement.querySelector('.node_diversity'),
   quadtree = d3quadtree(),
@@ -170,7 +170,7 @@ const loop = () => {
     minFollowedByLength = Infinity
     maxFollowedByLength = 0
     globalJaccardInitialCurrFollowing = (1 - parseFloat(jointJaccardNum) / jointJaccardDenom) * 100
-    initialConnectionsChangesElement.querySelector(".connection_percent_change_visual").textContent = globalJaccardInitialCurrFollowing.toFixed(1) + '%'
+    network_stats.querySelector(".connection_percent_change_visual").textContent = globalJaccardInitialCurrFollowing.toFixed(1) + '%'
   }
 
   for(let i=0; i < Nodes.length; i++) {
@@ -402,6 +402,6 @@ mediator.subscribe("selectDataset", dataset => {
       initializeNodes(nodeData, dataset.beliefs)
       initialize()
 
-      mediator.publish("data-initialized")
+      mediator.publish("data-initialized", edgeData)
     })
 })

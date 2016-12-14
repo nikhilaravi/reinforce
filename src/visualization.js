@@ -8,7 +8,7 @@ import AssortativityChart from './visualization/assortativity.js'
 import { DiversityHistogram, BeliefBarChart } from './visualization/diversityChart.js'
 import { FollowerDegrees, FollowingDegrees } from './visualization/connectionDegrees.js'
 import { Nodes } from './nodes.js'
-
+import calculateDistribution from './calculateDistribution'
 // const charts = { ConvergenceTimeseries, AssortativityChart, BeliefBarChart, DiversityHistogram, FollowerDegrees, FollowingDegrees } // commenting out non-plotting charts for now
 const charts = { ConvergenceTimeseries, AssortativityChart, DiversityHistogram }
 
@@ -26,7 +26,18 @@ Object.keys(charts).forEach(c => {
 	charts[c] = new charts[c](svg, svgWidth, svgHeight, c)
 })
 
-mediator.subscribe("selectDataset", () => {
+mediator.subscribe("data-initialized", (edges) => {
+	// update static network properties
+	var beliefDistribution = calculateDistribution(Nodes, 'belief')
+	Object.keys(beliefDistribution).forEach((belief) => {
+		console.log('belief', belief)
+		document.querySelector('.' + belief).textContent = ' ' + beliefDistribution[belief]
+	})
+	document.querySelector('.number_of_nodes').textContent = Nodes.length
+	document.querySelector('.number_of_edges').textContent = edges.length
+})
+
+mediator.subscribe("selectDataset", (dataset) => {
 	selectOption(activeChart)
 	window.clearInterval(updateSID)
 	svg.attr("data-converged", false)
@@ -37,6 +48,8 @@ mediator.subscribe("selectDataset", () => {
 	updateSID = setInterval(() => {
 		charts[activeChart].update(Nodes)
 	}, cycleDur)
+
+
 })
 
 mediator.subscribe("converged", () => {
