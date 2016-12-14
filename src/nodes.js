@@ -6,10 +6,13 @@ import { scaleLinear } from 'd3-scale'
 import mediator from './mediator'
 import { difference, debounce } from 'underscore'
 import calculateAssortativity from './calculateAssortativity'
+import calculateDistribution from './calculateDistribution'
 
 export let newConnectionsCounts = []
 export let brokenConnectionsCounts = []
 export let assortativity = []
+export let initialDiversity = []
+export let currentDiversity = []
 export let Nodes
 
 export const initializeNodes = (seedData, beliefs) => {
@@ -40,6 +43,15 @@ export const cycle = () => {
 	newConnectionsCounts.push(0)
 	brokenConnectionsCounts.push(0)
 	assortativity.push(calculateAssortativity(Nodes))
+
+	const diversityDistribution = calculateDistribution(Nodes, 'diversity')
+	const beliefDistribution = calculateDistribution(Nodes, 'belief')
+
+	if(!Object.keys(initialDiversity).length) {
+		initialDiversity = diversityDistribution
+	}
+
+	currentDiversity = diversityDistribution
 }
 
 export const initializeFollowings = () => {
@@ -130,6 +142,8 @@ setTimeout(() => {
 	mediator.subscribe("selectDataset", () => {
 		Nodes = []
 		assortativity = []
+		initialDiversity = []
+		currentDiversity = []
 		newConnectionsCounts = []
 		brokenConnectionsCounts = []
 	})

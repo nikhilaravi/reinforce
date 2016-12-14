@@ -11,7 +11,7 @@ import { Nodes } from './nodes.js'
 
 const charts = { ConvergenceTimeseries, AssortativityChart, BeliefBarChart, DiversityHistogram, FollowerDegrees, FollowingDegrees }
 
-let updateSID = null, activeChart = 'AssortativityChart'
+let updateSID = null, activeChart = 'DiversityHistogram'
 
 const visDOM = select("#visualization")
 

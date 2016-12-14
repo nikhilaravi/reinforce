@@ -53,8 +53,8 @@ export default {
 
   dictToArray(dict, num=false) {
     let key;
-    return Object.keys(dict).reduce((arr, elem) => {
-      key  = elem
+    return Object.keys(dict).sort().reduce((arr, elem) => {
+      key = elem
       if (num) {
         // turn key into a numeric value rounded to 4 dp
         key = Number(Number(elem).toFixed(4))
