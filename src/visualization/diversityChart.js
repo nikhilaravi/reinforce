@@ -4,6 +4,7 @@ import { select } from 'd3-selection'
 import { range } from 'd3-array'
 import VisualizationBase from './visualizationBase'
 import helpers from '../helpers/helpers'
+import mediator from '../mediator'
 const { dictToArray } = helpers
 import { initialDiversity, currentDiversity } from '../nodes'
 
@@ -26,6 +27,17 @@ export class DiversityHistogram extends VisualizationBase {
     this.lineGenerator = line()
       .x(d => this.xScale(isNaN(d[0]) ? 0 : +d[0]))
       .y(d => this.height - this.yScale(d[1]))
+
+    this.diversity = 0
+
+    mediator.subscribe('updateDiversity', d => {
+      this.diversity = d
+      if(this.diversityLine) {
+        this.diversityLine
+          .attr("x1", this.diversity * this.width)
+          .attr("x2", this.diversity * this.width)        
+      }
+    })
   }
 
   setup() {
@@ -43,6 +55,12 @@ export class DiversityHistogram extends VisualizationBase {
     this.initialDiversityPath = this.svg.append("path").attr("class", "initial")
 
     this.currentDiversityPath = this.svg.append("path").attr("class", "current")
+
+    this.diversityLine = this.svg.append("line")
+      .attr("class", "diversity-line")
+      .attr("y1", 0).attr("y2", this.height)
+      .attr("x1", this.diversity * this.width)
+      .attr("x2", this.diversity * this.width)
   }
 
   update(Nodes) {

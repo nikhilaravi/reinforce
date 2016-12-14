@@ -54,6 +54,9 @@
 			line {
 				stroke: #bbb;
 			}
+			line.diversity-line {
+				stroke: $green;
+			}
 			.convergence-marker {
 				display: none;
 				stroke: none;
