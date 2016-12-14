@@ -60,10 +60,6 @@ export class DiversityHistogram extends VisualizationBase {
     this.currentDiversityPath.data([ currentDiversityArray ])
       .attr("d", this.lineGenerator)
   }
-
-  clear() {
-
-  }
 }
 
 export class BeliefBarChart extends VisualizationBase {
