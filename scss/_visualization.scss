@@ -80,6 +80,12 @@
 					}
 				}
 			}
+			&[data-test-name="DiversityHistogram"] {
+				path.initial {
+					stroke: none;
+					fill: #ccc;
+				}
+			}
 		}
 	}
 }

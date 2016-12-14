@@ -53,7 +53,9 @@ export class DiversityHistogram extends VisualizationBase {
     this.yScale.domain([0, Math.max(...initialDiversityArray.map(d => d[1]).concat(currentDiversityArray.map(d => d[1])))])
 
     this.initialDiversityPath.data([ initialDiversityArray ])
-      .attr("d", this.lineGenerator)
+      .attr("d", d => {
+        return `${this.lineGenerator(d)} L${this.width},${this.height} L0,${this.height}Z`
+      })
 
     this.currentDiversityPath.data([ currentDiversityArray ])
       .attr("d", this.lineGenerator)
