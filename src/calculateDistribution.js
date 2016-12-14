@@ -2,6 +2,7 @@
 const calculateDistribution = (Nodes, prop) => {
   return Nodes.reduce((dict, node) => {
     var belief = node[prop];
+    if(isNaN(belief)) { belief = 0 }
     if (dict.hasOwnProperty(belief)) {
       dict[belief] += 1
     } else {

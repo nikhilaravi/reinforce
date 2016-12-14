@@ -329,7 +329,6 @@ document.addEventListener("mousemove", e => {
     const diversity = match[2].diversity
     let jaccardValues = match[2].getSimilarityOfInitialAndCurrFollowingSets()
     let jaccardChange = (1 - parseFloat(jaccardValues[0]) / jaccardValues[1]) * 100
-    console.log(jaccardChange)
     popoverElement.style.display = 'block'
     popoverElement.querySelector(".node_followees").textContent = match[2].following.length + ' following'
     popoverElement.querySelector(".node_followers").textContent = match[2].followedBy.length + ' followers'
