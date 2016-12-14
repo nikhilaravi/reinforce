@@ -49,8 +49,11 @@ export class DiversityHistogram extends VisualizationBase {
 
     const initialDiversityArray = dictToArray(initialDiversity)
     const currentDiversityArray = dictToArray(currentDiversity)
+    const yMax = Math.max(...initialDiversityArray.map(d => d[1]).concat(currentDiversityArray.map(d => d[1])))
 
-    this.yScale.domain([0, Math.max(...initialDiversityArray.map(d => d[1]).concat(currentDiversityArray.map(d => d[1])))])
+    this.yScale.domain([0, yMax])
+
+    this.yAxisMax.text(yMax)
 
     this.initialDiversityPath.data([ initialDiversityArray ])
       .attr("d", d => {
