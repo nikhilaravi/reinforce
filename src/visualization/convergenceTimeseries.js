@@ -9,10 +9,6 @@ class ConvergenceTimeseries extends VisualizationBase {
 	constructor(svg, width, height, testName) {
 		super(svg, width, height, testName)
 
-		this.xScale = scaleLinear()
-			.domain([0, Math.round(width / 25)])
-			.range([0, width])
-
 		this.yScale = scaleLinear()
 			.domain([0, 100]) // this should be some reasonable estimate, and it needs to update as the chart draws itself
 			.range([0, height / 2])
@@ -28,31 +24,14 @@ class ConvergenceTimeseries extends VisualizationBase {
 	}
 
 	setup() {
-		this.xAxis = this.svg.append("line")
-		this.xAxis.attr("x1", 0)
-			.attr("x2", this.width)
-			.attr("y1", this.height * 0.5)
-			.attr("y2", this.height * 0.5)
+		super.setup()
 
-		this.yAxisMax = this.svg.append("text")
-			.attr("class", "y-max-label")
-			.attr("x", -5).attr("y", 0)
-
-		this.yAxisMin = this.svg.append("text")
-			.attr("class", "y-min-label")
-			.attr("x", -5).attr("y", this.height)
+		this.yAxisMax.text("0 - New connections made")
+		this.yAxisMin.text("0 - Old connections lost")
 
 		this.addedPath = this.svg.append("path").attr("class", "added")
 
 		this.removedPath = this.svg.append("path").attr("class", "removed")
-
-		this.svg.append("text").attr("class", "y-above-description")
-			.text("New connections made").attr("x", 10).attr("y", 0)
-
-		this.svg.append("text").attr("class", "y-above-description")
-			.text("Old connections lost").attr("x", 10).attr("y", this.height)
-
-		this.xAxisLabelsGroup = this.svg.append("g").attr('class', 'x-axis-labels')
 	}
 
 	update() {
@@ -60,18 +39,10 @@ class ConvergenceTimeseries extends VisualizationBase {
 
 		if(isNaN(maxVal)) return
 
-		this.yAxisMax.text(maxVal)
-		this.yAxisMin.text(maxVal)
+		super.update(newConnectionsCounts)
 
-		const xAxisLabels = this.xAxisLabelsGroup.selectAll("text")
-			.data(newConnectionsCounts)
-
-		xAxisLabels.enter().append("text")
-		xAxisLabels.exit().remove()
-		
-		xAxisLabels.text((d, i) => i + 1)
-			.attr("x", (d, i) => this.xScale(i + 1))
-			.attr("y", this.height / 2 + 10)
+		this.yAxisMax.text(maxVal + " - New connections made")
+		this.yAxisMin.text(maxVal + " - Old connections lost")
 
 		this.yScale.domain([0, maxVal])
 
@@ -82,21 +53,6 @@ class ConvergenceTimeseries extends VisualizationBase {
 		this.removedPath
 			.data([ brokenConnectionsCounts ])
 			.attr("d", this.removedLineGenerator)
-	}
-
-	clear() {
-		this.svg.node().innerHTML = ""
-	}
-
-	converged() {
-		const rectSize = 15
-
-		this.svg.insert("rect", ':first-child')
-			.attr("class", "convergence-marker")
-			.attr("x", () => this.xScale(newConnectionsCounts.length - 1) - rectSize / 2)
-			.attr("y", this.height / 2 + rectSize)
-			.attr("width", rectSize)
-			.attr("height", 1)
 	}
 }
 

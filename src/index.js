@@ -15,19 +15,22 @@ import { desiredDiversity, cycleDur, width, height } from './config.js'
 import './datasetPicker'
 import './visualization'
 import mediator from './mediator'
+import './editableParameters/diversitySlider'
+import './editableParameters/controls'
+import './editableParameters/friendsFriends'
+import './editableParameters/mutual'
 
-let start, lastCycleTime = 0, rafID = null,
+let start, lastCycleTime = 0, rafID = null, animating = false,
   halo = document.querySelector("#halo"),
   popoverElement = document.querySelector("#popover"),
   popoverID = popoverElement.querySelector(".node_id"),
   popoverDiversity = popoverElement.querySelector('.node_diversity'),
   quadtree = d3quadtree(),
-  renderer = new THREE.WebGLRenderer({ alpha: true, canvas: document.querySelector("canvas") }),
+  renderer = new THREE.WebGLRenderer({ alpha: true, canvas: document.querySelector("#webgl-canvas") }),
   scene = new THREE.Scene(),
   camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 10000),
   nodePositions, nodeSizesColors,
-  edgeGeometry = new THREE.BufferGeometry(),
-  nodeGeometry = new THREE.BufferGeometry(),
+  edgeGeometry, nodeGeometry,
   edgeColorsStartTimes, edgeColorsStartTimesBuffer,
   edgeVertices, lastOccupiedEdgeVertexIndex,
   nodePositionBuffer, edgeVerticesBuffer, nodeSizesColorsBuffer,
@@ -39,32 +42,12 @@ let start, lastCycleTime = 0, rafID = null,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
   nodeSizeScale = scaleLinear().range([5, 25]).clamp(true),
   peakTime = 250.0, totalTime = 350.0,
-  canvasLeft = 0, canvasTop = 0, match, activeNode = null
+  canvasLeft = 0, canvasTop = 0, match, activeNode = null,
+  lineSegments, points,
+  nodeMaterial, edgeMaterial
 
 scene.add(camera)
 camera.position.z = 1000
-
-const nodeMaterial = new THREE.ShaderMaterial({
-  vertexShader: document.getElementById("node-vertexshader").textContent,
-  fragmentShader: document.getElementById("node-fragmentshader").textContent,
-  transparent: true
-})
-
-const edgeMaterial = new THREE.ShaderMaterial({
-  uniforms: {
-    uTime: { value: 0.0 },
-    peakTime: { value: peakTime },
-    totalTime: { value: totalTime },
-    defaultOpacity: { value: 0.08 },
-    color: {
-      type: 'c',
-      value: new THREE.Color(0xABABBF)
-    }
-  },
-  vertexShader: document.getElementById("edge-vertexshader").textContent,
-  fragmentShader: document.getElementById("edge-fragmentshader").textContent,
-  transparent: true
-})
 
 renderer.setSize(width, height)
 renderer.setPixelRatio(window.devicePixelRatio)
@@ -73,11 +56,180 @@ const updateMinMaxFollowedBy = length => {
   if(length > maxFollowedByLength) maxFollowedByLength = length
   if(length < minFollowedByLength) minFollowedByLength = length
 }
+const { top, left } = document.querySelector("#webgl-canvas").getBoundingClientRect()
+
+const loop = () => {
+  const d = Date.now() - start
+
+  let shouldUpdate = Math.random() < 0.5 // perf
+  if(!animating) shouldUpdate = false
+
+  edgeMaterial.uniforms['uTime'].value = d
+
+  if(animating) {
+    links = []
+    for(let i=0; i<Nodes.length; i++) {
+      let n = Nodes[i]
+      if(n.following.length) {
+        for(let j=0; j<n.following.length; j++) {
+          let target
+          for(let k=0; k<Nodes.length; k++) {
+            if(Nodes[k].id === n.following[j].id) {
+              target = Nodes[k]
+              break
+            }
+          }
+          links.push({ source: n, target })
+        }
+      }
+    }
+  }
+
+  for(let i=0; i<links.length; i++) {
+    const link = links[i]
+    let source, target
+    if(link) {
+      source = link.source
+      target = link.target
+    } else {
+      source = emptyNode
+      target = emptyNode
+    }
+
+    // wrap the below in conditional, e.g. source.index === 0, to highlight only one node
+
+    if(i < lastOccupiedEdgeVertexIndex) {
+      edgeVertices[i * 2 * 3] = source.x - width / 2
+      edgeVertices[i * 2 * 3 + 1] = -(source.y - height / 2)
+      edgeVertices[i * 2 * 3 + 3] = target.x - width / 2
+      edgeVertices[i * 2 * 3 + 4] = -(target.y - height / 2)
+    }
+
+    if(activeNode) {
+      if(source.id === activeNode.id) {
+        edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
+        edgeColorsStartTimes[i * 2 * 2 + 3] = d - peakTime
+      }
+    } else {
+      if(source.newlyFollowing && source.newlyFollowing.length !== source.following.length) {
+        const newlyFollowingIDs = source.newlyFollowing.map(d => d.id)
+
+        if(newlyFollowingIDs.indexOf(target.id) > -1) {
+          if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > cycleDur) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > cycleDur)) {
+            // source
+            edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
+            // target
+            edgeColorsStartTimes[i * 2 * 2 + 3] = d
+          }
+        }
+      }
+    }
+  }
+
+  if(lastOccupiedEdgeVertexIndex > links.length) {
+    for(let i=links.length; i<lastOccupiedEdgeVertexIndex; i++) {
+      edgeVertices[i * 2 * 3] = 0
+      edgeVertices[i * 2 * 3 + 1] = 0
+      edgeVertices[i * 2 * 3 + 3] = 0
+      edgeVertices[i * 2 * 3 + 4] = 0
+    }
+  }
+
+  lastOccupiedEdgeVertexIndex = links.length
+
+  if(animating) {
+    const diff = d - lastCycleTime
+    const targetIndex = Math.max(0, Math.min(Math.round((diff / cycleDur) * Nodes.length), Nodes.length))
+
+    if(targetIndex < updateLinksNodeIndex) { updateLinksNodeIndex = 0 } // wrap around
+
+    for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
+      let node = Nodes[i]
+      node.adjustFollowing()
+      setFollowedBy(node)
+    }
+
+    updateLinksNodeIndex = targetIndex
+  }
+
+  if(shouldUpdate) {
+    force.force("link").links(links)
+    force.alphaTarget(0.1).restart()
+    quadtree = d3quadtree().extent([[-1, -1], [width, height]])
+    minFollowedByLength = Infinity
+    maxFollowedByLength = 0
+  }
+
+  for(let i=0; i < Nodes.length; i++) {
+    let node = Nodes[i]
+    let opacity = 254
+    if(activeNode && node.id !== activeNode.id) {
+      let mutualFollow = node.following.map(f => f.id).indexOf(activeNode.id) > -1 && activeNode.following.map(f => f.id).indexOf(node.id) > -1
+      if(!mutualFollow) { opacity = 100 }
+    }
+
+    nodePositions[i * 2] = node.x - width / 2
+    nodePositions[i * 2 + 1] = -(node.y - height / 2)
+    nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
+    if(node.belief === "conservative") { // red
+      nodeSizesColors[i * 2 + 1] = decodeFloat(254, 25, 83, opacity)
+    } else if(node.belief === "liberal") { // blue
+      nodeSizesColors[i * 2 + 1] = decodeFloat(0, 190, 254, opacity)
+    } else { // white
+      nodeSizesColors[i * 2 + 1] = decodeFloat(254, 254, 254, opacity)
+    }
+
+    if(activeNode && node.id === activeNode.id) {
+      halo.style.transform = `translate3d(${canvasLeft + node.x - 6}px, ${canvasTop + node.y - 6}px, 0)`
+    }
+
+    if(shouldUpdate) {
+      quadtree.add([node.x, node.y, node])
+      // initNetworkConnectivity(Nodes)
+      updateMinMaxFollowedBy(node.followedBy.length)
+    }
+  }
+
+  nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
+  edgeVerticesBuffer.needsUpdate = true
+  edgeColorsStartTimesBuffer.needsUpdate = true
+  nodePositionBuffer.needsUpdate = true
+  nodeSizesColorsBuffer.needsUpdate = true
+  renderer.render(scene, camera)
+
+  if(animating) {
+    rafID = requestAnimationFrame(loop)
+  }
+}
 
 const initialize = () => {
-  const { top, left } = document.querySelector("#webgl-canvas").getBoundingClientRect()
   canvasTop = top
   canvasLeft = left
+
+  edgeGeometry = new THREE.BufferGeometry()
+  nodeGeometry = new THREE.BufferGeometry()
+
+  nodeMaterial = new THREE.ShaderMaterial({
+    vertexShader: document.getElementById("node-vertexshader").textContent,
+    fragmentShader: document.getElementById("node-fragmentshader").textContent,
+    transparent: true
+  })
+
+  edgeMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0.0 },
+      peakTime: { value: peakTime },
+      totalTime: { value: totalTime },
+      defaultOpacity: { value: 0.08 },
+      color: {
+        type: 'c',
+        value: new THREE.Color(0xABABBF)
+      }
+    },
+    vertexShader: document.getElementById("edge-vertexshader").textContent,
+    fragmentShader: document.getElementById("edge-fragmentshader").textContent,
+    transparent: true
+  })
 
   nodePositions = new Float32Array(Nodes.length * 2)
   nodeSizesColors = new Float32Array(Nodes.length * 2)
@@ -95,8 +247,10 @@ const initialize = () => {
   edgeGeometry.addAttribute("position", edgeVerticesBuffer)
   edgeGeometry.addAttribute("colorTime", edgeColorsStartTimesBuffer)
 
-  scene.add(new THREE.LineSegments(edgeGeometry, edgeMaterial))
-  scene.add(new THREE.Points(nodeGeometry, nodeMaterial))
+  lineSegments = new THREE.LineSegments(edgeGeometry, edgeMaterial)
+  scene.add(lineSegments)
+  points = new THREE.Points(nodeGeometry, nodeMaterial)
+  scene.add(points)
 
   force.nodes(Nodes)
     .force("link", forceLink().id(d => d.id))
@@ -116,144 +270,34 @@ const initialize = () => {
 
   Nodes.forEach(n => n.init())
   // initFlot(Nodes[20]);
-
   // initAssortativity(Nodes)
 
+}
+
+const play = () => {
+  animating = true
   cycleSID = setInterval(() => {
     lastCycleTime = Date.now() - start
     cycle()
   }, cycleDur)
-
-  const loop = () => {
-    const d = Date.now() - start
-
-    const shouldUpdate = Math.random() < 0.5 // perf
-
-    edgeMaterial.uniforms['uTime'].value = d
-
-    // initNetworkConnectivity(Nodes)
-    // initDiversityChart(Nodes)
-    links = []
-    for(let i=0; i<Nodes.length; i++) {
-      let n = Nodes[i]
-      if(n.following.length) {
-        for(let j=0; j<n.following.length; j++) {
-          let target
-          for(let k=0; k<Nodes.length; k++) {
-            if(Nodes[k].id === n.following[j].id) {
-              target = Nodes[k]
-              break
-            }
-          }
-          links.push({ source: n, target })
-        }
-      }
-    }
-
-    for(let i=0; i<links.length; i++) {
-      const link = links[i]
-      let source, target
-      if(link) {
-        source = link.source
-        target = link.target
-      } else {
-        source = emptyNode
-        target = emptyNode
-      }
-
-      // wrap the below in conditional, e.g. source.index === 0, to highlight only one node
-
-      if(i < lastOccupiedEdgeVertexIndex) {
-        edgeVertices[i * 2 * 3] = source.x - width / 2
-        edgeVertices[i * 2 * 3 + 1] = -(source.y - height / 2)
-        edgeVertices[i * 2 * 3 + 3] = target.x - width / 2
-        edgeVertices[i * 2 * 3 + 4] = -(target.y - height / 2)
-      }
-
-      if(source.newlyFollowing && source.newlyFollowing.length !== source.following.length) {
-        const newlyFollowingIDs = source.newlyFollowing.map(d => d.id)
-
-        if(newlyFollowingIDs.indexOf(target.id) > -1) {
-          if((d - edgeColorsStartTimes[i * 2 * 2 + 1] > cycleDur) && (d - edgeColorsStartTimes[i * 2 * 2 + 3] > cycleDur)) {
-            // source
-            edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
-            // target
-            edgeColorsStartTimes[i * 2 * 2 + 3] = d
-          }
-        }
-      }
-    }
-
-    if(lastOccupiedEdgeVertexIndex > links.length) {
-      for(let i=links.length; i<lastOccupiedEdgeVertexIndex; i++) {
-        edgeVertices[i * 2 * 3] = 0
-        edgeVertices[i * 2 * 3 + 1] = 0
-        edgeVertices[i * 2 * 3 + 3] = 0
-        edgeVertices[i * 2 * 3 + 4] = 0
-      }
-    }
-
-    lastOccupiedEdgeVertexIndex = links.length
-
-    const diff = d - lastCycleTime
-    const targetIndex = Math.max(0, Math.min(Math.round((diff / cycleDur) * Nodes.length), Nodes.length))
-
-    if(targetIndex < updateLinksNodeIndex) { updateLinksNodeIndex = 0 } // wrap around
-
-    for(let i=updateLinksNodeIndex; i<targetIndex; i++) {
-      let node = Nodes[i]
-      node.adjustFollowing()
-      setFollowedBy(node)
-    }
-
-    updateLinksNodeIndex = targetIndex
-
-    if(shouldUpdate) {
-      force.force("link").links(links)
-      force.alphaTarget(0.1).restart()
-      quadtree = d3quadtree().extent([[-1, -1], [width, height]])
-      minFollowedByLength = Infinity
-      maxFollowedByLength = 0
-    }
-
-    for(let i=0; i < Nodes.length; i++) {
-      let node = Nodes[i]
-      nodePositions[i * 2] = node.x - width / 2
-      nodePositions[i * 2 + 1] = -(node.y - height / 2)
-      nodeSizesColors[i * 2] = nodeSizeScale(node.followedBy.length)
-      if(node.belief === "conservative") { // red
-        nodeSizesColors[i * 2 + 1] = decodeFloat(254, 25, 83, 254)
-      } else if(node.belief === "liberal") { // blue
-        nodeSizesColors[i * 2 + 1] = decodeFloat(0, 190, 254, 254)
-      } else { // purple
-        nodeSizesColors[i * 2 + 1] = decodeFloat(254, 254, 254, 254)
-      }
-
-      if(activeNode && node.id === activeNode.id) {
-        halo.style.transform = `translate3d(${canvasLeft + node.x - 6}px, ${canvasTop + node.y - 6}px, 0)`
-      }
-
-      if(shouldUpdate) {
-        quadtree.add([node.x, node.y, node])
-        // initNetworkConnectivity(Nodes)
-        updateMinMaxFollowedBy(node.followedBy.length)
-      }
-    }
-
-    nodeSizeScale.domain([minFollowedByLength, maxFollowedByLength])
-    edgeVerticesBuffer.needsUpdate = true
-    edgeColorsStartTimesBuffer.needsUpdate = true
-    nodePositionBuffer.needsUpdate = true
-    nodeSizesColorsBuffer.needsUpdate = true
-    renderer.render(scene, camera)
-
-    rafID = requestAnimationFrame(loop)
-  }
-
   rafID = requestAnimationFrame(loop)
 }
 
-const revealHalo = () => {
+const pause = () => {
+  animating = false
+  force.stop()
+  window.clearInterval(cycleSID)
+  window.cancelAnimationFrame(rafID)
+}
+
+const stop = () => {
+  pause()
+
+  mediator.publish("stopped")
+}
+
+const revealHalo = (x, y) => {
+  halo.style.transform = `translate3d(${x - 6}px, ${y - 6}px, 0)`
   halo.classList.add("active")
 }
 
@@ -270,7 +314,9 @@ document.addEventListener("mousemove", e => {
   if(match) {
     const diversity = match[2].diversity
     popoverElement.style.display = 'block'
-    popoverID.innerHTML = match[2].id
+    popoverElement.querySelector(".node_followees").textContent = match[2].following.length + ' following'
+    popoverElement.querySelector(".node_followers").textContent = match[2].followedBy.length + ' followees'
+    popoverID.innerHTML = "node " + match[2].id
     popoverDiversity.innerHTML = 'diversity: ' + diversity.toFixed(2)
     if(diversity > match[2].desiredDiversity) {
       popoverElement.setAttribute("data-satisfied", true)
@@ -290,26 +336,40 @@ document.addEventListener("click", e => {
       removeHalo()
     } else {
       activeNode = match[2]
-      initFlot(activeNode)
-      revealHalo()
+      // initFlot(activeNode)
+      revealHalo(match[0], match[1])
     }
+    if(!animating) { loop() }
   }
 })
 
 mediator.subscribe("converged", () => {
-  window.clearInterval(cycleSID)
+  stop()
   renderer.domElement.classList.add("flash")
   setTimeout(() => {
     renderer.domElement.classList.remove("flash")
   }, 800)
 })
 
+mediator.subscribe("play", play)
+
+mediator.subscribe("pause", pause)
+
 mediator.subscribe("selectDataset", dataset => {
-  window.clearInterval(cycleSID)
-  window.cancelAnimationFrame(rafID)
+  pause()
+  activeNode = null
 
   Promise.all([dataset.nodes, dataset.edges].map(getData))
     .then(data => {
+      scene.remove(lineSegments)
+      scene.remove(points)
+      if(lineSegments) {
+        edgeGeometry.dispose()
+        nodeGeometry.dispose()
+        nodeMaterial.dispose()
+        edgeMaterial.dispose()
+      }
+
       nodeData = shuffle(data[0])
 
       nodeData.splice(roundDown(nodeData.length, 3)) // nodes length must be multiple of 3
@@ -321,7 +381,9 @@ mediator.subscribe("selectDataset", dataset => {
 
       lastCycleTime = 0
       start = Date.now()
-      initializeNodes(nodeData, desiredDiversity, dataset.beliefs)
+      initializeNodes(nodeData, dataset.beliefs)
       initialize()
+
+      mediator.publish("data-initialized")
     })
 })

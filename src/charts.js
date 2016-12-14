@@ -1,10 +1,12 @@
 // flot chart for plotting the reward of a single node
+import uniq from 'uniq'
 
   var nflot = 100;
   var intervalID = undefined,
   chartCaptionElement = document.querySelector("#chart_caption"),
   chartNodeID = chartCaptionElement.querySelector(".chart_node_id"),
   chartNodeBelief = chartCaptionElement.querySelector('.chart_node_belief')
+
 
   export function initFlot(node) {
     initNodeDiversityChart(node)
@@ -391,4 +393,60 @@ function calculateAssortativity(Nodes) {
 
 		return assortativity
 		// console.log('assortativity', assortativity)
+}
+
+export function AssortativityChart(Nodes) {
+  this.series = [{data: []}];
+  this.history = [];
+  return {
+    setup: () => {
+      this.container = $('[chart="assortativity"]');
+      document.querySelector('[chart="assortativity"]').setAttribute('style', 'width:800px; height: 300px;')
+      this.plot = $.plot(this.container, this.series, {
+        xaxis: {
+          min: 0,
+          max: 20,
+          axisLabel: 'Time',
+        },
+        yaxis: {
+          min: -1,
+          max: 1,
+          axisLabel: 'Assortativity',
+        }
+      });
+      this.history.push(calculateAssortativity(Nodes))
+      var points = this.history.map((r, i) => {
+        return [i, r]
+      })
+      this.series[0].data = points;
+      this.plot.setData(this.series);
+      this.plot.draw();
+    },
+
+    update: (Nodes) => {
+      this.history.push(calculateAssortativity(Nodes))
+      var points = this.history.map((r, i) => {
+        return [i, r]
+      });
+      this.series[0].data = points;
+      this.plot.setData(this.series);
+      this.plot.draw();
+    },
+
+    clear: () => {
+      this.series[0].data = []
+      this.plot.setData(this.series);
+      this.plot.draw();
+    },
+
+    converged: () => {
+      console.log('converged')
+      var points = this.history.map((r, i) => {
+        return [i, r]
+      });
+      this.series[0].data = points;
+      this.plot.setData(this.series);
+      this.plot.draw();
+    }
+  }
 }

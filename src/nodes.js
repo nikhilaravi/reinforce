@@ -4,14 +4,19 @@ import Node from './node'
 import { users } from './fixedData'
 import { scaleLinear } from 'd3-scale'
 import mediator from './mediator'
-import { difference } from 'underscore'
 import uniq from 'uniq'
+import { difference, debounce } from 'underscore'
+import calculateAssortativity from './calculateAssortativity'
+import calculateDistribution from './calculateDistribution'
 
 export let newConnectionsCounts = []
 export let brokenConnectionsCounts = []
+export let assortativity = []
+export let initialDiversity = []
+export let currentDiversity = []
 export let Nodes
 
-export const initializeNodes = (seedData, desiredDiversity, beliefs) => {
+export const initializeNodes = (seedData, beliefs) => {
 	Nodes = seedData.map((d, i) => {
 		let belief = d.trumporhillary
 		if(belief === 0) {
@@ -27,8 +32,7 @@ export const initializeNodes = (seedData, desiredDiversity, beliefs) => {
 			beliefs,
 			id: d.node_id,
 			index: i,
-			username: i,
-			desiredDiversity
+			username: i
 		})
 	})
 }
@@ -39,6 +43,16 @@ export const cycle = () => {
 	}
 	newConnectionsCounts.push(0)
 	brokenConnectionsCounts.push(0)
+	assortativity.push(calculateAssortativity(Nodes))
+
+	const diversityDistribution = calculateDistribution(Nodes, 'diversity')
+	const beliefDistribution = calculateDistribution(Nodes, 'belief')
+
+	if(!Object.keys(initialDiversity).length) {
+		initialDiversity = diversityDistribution
+	}
+
+	currentDiversity = diversityDistribution
 }
 
 export const initializeFollowings = () => {
@@ -127,7 +141,31 @@ export const setFollowedBy = node => {
 
 setTimeout(() => {
 	mediator.subscribe("selectDataset", () => {
+		Nodes = []
+		assortativity = []
+		initialDiversity = []
+		currentDiversity = []
 		newConnectionsCounts = []
 		brokenConnectionsCounts = []
 	})
-}, 0);
+}, 0)
+
+const updateDiversity = val => {
+	Nodes.forEach(n => {
+		n.desiredDiversity = val
+	})
+}
+
+mediator.subscribe("updateDiversity", debounce(updateDiversity, 100))
+
+mediator.subscribe("editFriends", d => {
+	Nodes.forEach(n => {
+		n.allowOutsideNetwork = d
+	})
+})
+
+mediator.subscribe("mutualFollows", d => {
+	Nodes.forEach(n => {
+		n.considerFollowsMutual = d
+	})
+})

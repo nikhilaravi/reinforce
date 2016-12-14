@@ -1,0 +1,39 @@
+#edit-friends-friends {
+	margin-bottom: 4rem;
+}
+
+#edit-friends-friends, 
+#mutual-followers {
+	white-space: nowrap;
+	cursor: pointer;
+	.checkbox-wrapper, .label {
+		display: inline-block;
+		vertical-align: top;
+	}
+	.checkbox-wrapper {
+		width: 1.75rem;
+		height: 1.75rem;
+		border: solid 1px $dove-gray;
+		text-align: center;
+		i {
+			line-height: 1.65rem;
+			font-size: 1.25rem;
+		}
+	}
+	.label {
+		white-space: normal;
+		width: calc(100% - 1.75rem);
+		padding-left: 1rem;
+		line-height: 1.5;
+		margin-top: -0.4rem;
+		font-size: 1.1rem;
+	}
+	&[data-checked="true"] {
+
+	}
+	&[data-checked="false"] {
+		i {
+			display: none;
+		}
+	}
+}

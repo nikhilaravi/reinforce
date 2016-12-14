@@ -18,6 +18,23 @@ body, html {
 	box-sizing: border-box;
 }
 
+$editable-parameters-width: 25rem;
+
+#editable-parameters {
+	width: $editable-parameters-width;
+	position: fixed;
+	top: 0;
+	right: 0;
+	height: 100vh;
+	background: white;
+	padding: 3rem;
+}
+
+#visualization-wrapper {
+	position: relative;
+	width: calc(100vw - #{$editable-parameters-width})
+}
+
 #webgl-canvas {
 	&.flash {
 		animation: flash 750ms forwards;
@@ -47,8 +64,8 @@ body, html {
 	display: block;
 	border: solid 1px black;
 	border-radius: 50%;
-	width: 1rem;
-	height: 1rem;
+	width: 12px;
+	height: 12px;
 }
 
 #popover {
@@ -56,11 +73,21 @@ body, html {
 	box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.2);
 	border-radius: 2px;
 	background: white;
+	.node_id {
+		font-weight: bold;
+		text-transform: uppercase;
+		color: $black;
+		margin-bottom: 0.5rem;
+	}
 	&[data-satisfied="true"] {
-		color: green;
+		.node_diversity {
+			color: $green;
+		}
 	}
 	&[data-satisfied="false"] {
-		color: red;
+		.node_diversity {
+			color: $red;
+		}
 	}
 }
 
@@ -119,3 +146,6 @@ body, html {
 
 @import "scss/dataset_picker";
 @import "scss/visualization";
+@import "scss/edit_diversity";
+@import "scss/controls";
+@import "scss/edit_friends_friends";

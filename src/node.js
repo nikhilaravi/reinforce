@@ -15,7 +15,7 @@ export default class Node {
 		this.username = opts.username
 		this.belief = opts.belief
 		this.trumporhillary = opts.trumporhillary
-		this.desiredDiversity = opts.desiredDiversity
+		this.desiredDiversity = opts.desiredDiversity || 0
 
 		this._newlyFollowing = []
 		this._newlyNotFollowing = []
@@ -86,8 +86,25 @@ export default class Node {
 					choppingBlock.push(followee.id)
 				}
 			}
-			this._following.splice(
-				this._following.findIndex(d => d.id === sampleArray(choppingBlock)), 1)
+
+			const unfollowIndex = this._following.findIndex(d => d.id === sampleArray(choppingBlock))
+
+			if(unfollowIndex > -1) {
+				if(this.considerFollowsMutual) {
+					for(let i=0; i<Nodes.length; i++) {
+						let node = Nodes[i]
+						if(node.id === this.following[unfollowIndex].id) {
+							let matchingIndex = node.following.map(f => f.id).indexOf(this.id)
+							if(matchingIndex > -1) {
+								node.following.splice(matchingIndex, 1)
+							}
+							break
+						}
+					}					
+				}
+
+				this._following.splice(unfollowIndex, 1)				
+			}
 		}
 
 		const otherBeliefs = this.beliefs.filter(b => b !== this.belief)
@@ -105,12 +122,21 @@ export default class Node {
 				}
 			}
 		}
-		
+
 		const availableFollowees = Nodes.filter(n =>
-			n.belief === this.beliefs[newAction] && followingIDs.indexOf(n.id) === -1 && followingMyFollowees.indexOf(n.id) > -1)
+			n.belief === this.beliefs[newAction] && 
+			followingIDs.indexOf(n.id) === -1 && 
+			(this.allowOutsideNetwork ? true : followingMyFollowees.indexOf(n.id) > -1))
 
 		if(availableFollowees.length) {
-			this._following.push(sampleArray(availableFollowees))
+			const newFollowee = sampleArray(availableFollowees)
+			this._following.push(newFollowee)
+
+			if(this.considerFollowsMutual) {
+				if(newFollowee.following.map(n => n.id).indexOf(this.id) === -1) {
+					newFollowee.following = newFollowee.following.concat(this)
+				}				
+			}
 		}
 	}
 
