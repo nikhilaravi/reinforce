@@ -20,6 +20,7 @@ export default class Node {
 		this._newlyFollowing = []
 		this._newlyNotFollowing = []
 		this._following = []
+		this._initialFollowing = []
 		this._lastFollowing = []
 		this._followedBy = []
 		this.lastReceivedMessages = []
@@ -41,6 +42,24 @@ export default class Node {
 	set lastFollowing(newLastFollowing) { this._lastFollowing = newLastFollowing }
 
 	get lastFollowing() { return this._lastFollowing }
+
+	getSimilarityOfInitialAndCurrFollowingSets(){
+
+		let intersectionSet = new Set()
+	    let unionSet = new Set()
+	    for(let i = 0; i < this.initialFollowing.length; i++){
+	    	unionSet.add(this.initialFollowing[i].id)
+	      if(this.lastFollowing.indexOf(this.initialFollowing[i]) > -1){
+	        intersectionSet.add(this.initialFollowing[i].id)
+	      }
+	    }
+
+	    for(let i = 0; i < this.lastFollowing.length; i++){
+	    	unionSet.add(this.lastFollowing[i].id)
+	    }
+
+	    return [intersectionSet.size, unionSet.size]
+	}
 
 	setDiversity() {
 		let counts = this.beliefs.reduce((acc, curr) => {
@@ -86,25 +105,8 @@ export default class Node {
 					choppingBlock.push(followee.id)
 				}
 			}
-
-			const unfollowIndex = this._following.findIndex(d => d.id === sampleArray(choppingBlock))
-
-			if(unfollowIndex > -1) {
-				if(this.considerFollowsMutual) {
-					for(let i=0; i<Nodes.length; i++) {
-						let node = Nodes[i]
-						if(node.id === this.following[unfollowIndex].id) {
-							let matchingIndex = node.following.map(f => f.id).indexOf(this.id)
-							if(matchingIndex > -1) {
-								node.following.splice(matchingIndex, 1)
-							}
-							break
-						}
-					}					
-				}
-
-				this._following.splice(unfollowIndex, 1)				
-			}
+			this._following.splice(
+				this._following.findIndex(d => d.id === sampleArray(choppingBlock)), 1)
 		}
 
 		const otherBeliefs = this.beliefs.filter(b => b !== this.belief)
@@ -129,14 +131,7 @@ export default class Node {
 			(this.allowOutsideNetwork ? true : followingMyFollowees.indexOf(n.id) > -1))
 
 		if(availableFollowees.length) {
-			const newFollowee = sampleArray(availableFollowees)
-			this._following.push(newFollowee)
-
-			if(this.considerFollowsMutual) {
-				if(newFollowee.following.map(n => n.id).indexOf(this.id) === -1) {
-					newFollowee.following = newFollowee.following.concat(this)
-				}				
-			}
+			this._following.push(sampleArray(availableFollowees))
 		}
 	}
 
