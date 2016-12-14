@@ -21,9 +21,10 @@ export class DiversityHistogram extends VisualizationBase {
     this.xScale = scaleLinear()
       .domain([0, 1])
       .range([0, width])
+      .clamp(true)
 
     this.lineGenerator = line()
-      .x(d => this.xScale(+d[0]))
+      .x(d => this.xScale(isNaN(d[0]) ? 0 : +d[0]))
       .y(d => this.height - this.yScale(d[1]))
   }
 
