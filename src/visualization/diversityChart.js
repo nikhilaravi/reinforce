@@ -13,9 +13,18 @@ export class DiversityHistogram extends VisualizationBase {
 
     this.xIncrements = 10
 
+    this.yScale = scaleLinear()
+      .domain([0, 100]) // should dynamically update
+      .range([0, height])
+      .clamp(true)
+
     this.xScale = scaleLinear()
       .domain([0, 1])
       .range([0, width])
+
+    this.lineGenerator = line()
+      .x(d => this.xScale(+d[0]))
+      .y(d => this.height - this.yScale(d[1]))
   }
 
   setup() {
@@ -29,13 +38,25 @@ export class DiversityHistogram extends VisualizationBase {
     xAxisLabels.enter().append("text").text(d => d.toFixed(2))
       .attr("x", this.xScale)
       .attr("y", this.height + 10)
+
+    this.initialDiversityPath = this.svg.append("path").attr("class", "initial")
+
+    this.currentDiversityPath = this.svg.append("path").attr("class", "current")
   }
 
   update(Nodes) {
     // diversity_distribution is an array of arrays of the form: [[diversity_score, num_nodes], [diversity_score, num_nodes], [diversity_score, num_nodes]]
-    // the scores are in random order i.e. not in order of increasing/decreasing scores
 
-    console.log(initialDiversity, currentDiversity)
+    const initialDiversityArray = dictToArray(initialDiversity)
+    const currentDiversityArray = dictToArray(currentDiversity)
+
+    this.yScale.domain([0, Math.max(...initialDiversityArray.map(d => d[1]).concat(currentDiversityArray.map(d => d[1])))])
+
+    this.initialDiversityPath.data([ initialDiversityArray ])
+      .attr("d", this.lineGenerator)
+
+    this.currentDiversityPath.data([ currentDiversityArray ])
+      .attr("d", this.lineGenerator)
   }
 
   clear() {
