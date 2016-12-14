@@ -9,7 +9,7 @@ import { drag as d3drag } from 'd3-drag'
 import { range } from 'd3-array'
 import { getData } from './api'
 import "../main.scss"
-import { Nodes, initializeNodes, setFollowedBy, initializeFollowings, cycle } from './nodes'
+import { Nodes, initializeNodes, setFollowedBy, initializeFollowings, saveInitialNodeFollowings, cycle } from './nodes'
 import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart, initAssortativity } from './charts.js'
 import { desiredDiversity, cycleDur, width, height } from './config.js'
 import './datasetPicker'
@@ -23,6 +23,7 @@ import './editableParameters/mutual'
 let start, lastCycleTime = 0, rafID = null, animating = false,
   halo = document.querySelector("#halo"),
   popoverElement = document.querySelector("#popover"),
+  initialConnectionsChangesElement = document.querySelector("#connection-percent-change"),
   popoverID = popoverElement.querySelector(".node_id"),
   popoverDiversity = popoverElement.querySelector('.node_diversity'),
   quadtree = d3quadtree(),
@@ -37,6 +38,7 @@ let start, lastCycleTime = 0, rafID = null, animating = false,
   force = forceSimulation(),
   emptyNode = new THREE.Vector2(),
   links, nodeData, edgeData,
+  globalJaccardInitialCurrFollowing = 0,
   cycleSID = null,
   updateLinksSID = null, updateLinksNodeIndex = 0,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
@@ -126,6 +128,15 @@ const loop = () => {
     }
   }
 
+  // Compute % of initial following connections that still remain
+  let jointJaccardNum = 0
+  let jointJaccardDenom = 0
+  Nodes.forEach(n => {
+    let jaccardValues = n.getSimilarityOfInitialAndCurrFollowingSets()
+    jointJaccardNum += jaccardValues[0]
+    jointJaccardDenom += jaccardValues[1]
+  })
+
   if(lastOccupiedEdgeVertexIndex > links.length) {
     for(let i=links.length; i<lastOccupiedEdgeVertexIndex; i++) {
       edgeVertices[i * 2 * 3] = 0
@@ -158,6 +169,8 @@ const loop = () => {
     quadtree = d3quadtree().extent([[-1, -1], [width, height]])
     minFollowedByLength = Infinity
     maxFollowedByLength = 0
+    globalJaccardInitialCurrFollowing = (1 - parseFloat(jointJaccardNum) / jointJaccardDenom) * 100
+    initialConnectionsChangesElement.querySelector(".connection_percent_change_visual").textContent = globalJaccardInitialCurrFollowing.toFixed(1) + '%'
   }
 
   for(let i=0; i < Nodes.length; i++) {
@@ -269,6 +282,7 @@ const initialize = () => {
   })
 
   Nodes.forEach(n => n.init())
+  Nodes.forEach(n => saveInitialNodeFollowings(n))
   // initFlot(Nodes[20]);
   // initAssortativity(Nodes)
 
@@ -313,11 +327,15 @@ document.addEventListener("mousemove", e => {
   match = quadtree.find(e.pageX - canvasLeft, e.pageY - canvasTop, 3)
   if(match) {
     const diversity = match[2].diversity
+    let jaccardValues = match[2].getSimilarityOfInitialAndCurrFollowingSets()
+    let jaccardChange = (1 - parseFloat(jaccardValues[0]) / jaccardValues[1]) * 100
+    console.log(jaccardChange)
     popoverElement.style.display = 'block'
     popoverElement.querySelector(".node_followees").textContent = match[2].following.length + ' following'
-    popoverElement.querySelector(".node_followers").textContent = match[2].followedBy.length + ' followees'
+    popoverElement.querySelector(".node_followers").textContent = match[2].followedBy.length + ' followers'
     popoverID.innerHTML = "node " + match[2].id
     popoverDiversity.innerHTML = 'diversity: ' + diversity.toFixed(2)
+    popoverElement.querySelector(".node_initial_connections").textContent = 'Change in followees: ' + jaccardChange.toFixed(1) + '%'
     if(diversity > match[2].desiredDiversity) {
       popoverElement.setAttribute("data-satisfied", true)
     } else {

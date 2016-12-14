@@ -79,6 +79,13 @@ export const initializeFollowings = () => {
 	}
 }
 
+export const saveInitialNodeFollowings = node => {
+	node.initialFollowing = []
+	for (let i=0; i<node.following.length; i++){
+		node.initialFollowing.push(node.following[i])
+	}
+}
+
 export const setFollowedBy = node => {
 	const toRemove = [], toAdd = []
 
