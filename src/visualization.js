@@ -9,7 +9,8 @@ import { DiversityHistogram, BeliefBarChart } from './visualization/diversityCha
 import { FollowerDegrees, FollowingDegrees } from './visualization/connectionDegrees.js'
 import { Nodes } from './nodes.js'
 
-const charts = { ConvergenceTimeseries, AssortativityChart, BeliefBarChart, DiversityHistogram, FollowerDegrees, FollowingDegrees }
+// const charts = { ConvergenceTimeseries, AssortativityChart, BeliefBarChart, DiversityHistogram, FollowerDegrees, FollowingDegrees } // commenting out non-plotting charts for now
+const charts = { ConvergenceTimeseries, AssortativityChart, DiversityHistogram }
 
 let updateSID = null, activeChart = 'ConvergenceTimeseries'
 
