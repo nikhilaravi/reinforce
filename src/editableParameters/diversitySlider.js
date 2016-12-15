@@ -8,7 +8,7 @@ const sliderLeft = sliderRect.left
 const sliderWidth = sliderRect.width
 
 const circle = document.querySelector("#edit-diversity .circle")
-const sliderLabel = document.querySelector("#edit-diversity .label .diversity")
+const sliderLabel = document.querySelector("#edit-diversity .circle")
 
 document.addEventListener("mousedown", e => {
 	if(e.target.classList.contains("circle")) {
@@ -23,7 +23,7 @@ document.addEventListener("mouseup", e => {
 const updateDiversity = left => {
 	circle.style.left = left + 'px'
 	mediator.publish("updateDiversity", left / sliderWidth)
-	sliderLabel.textContent = (left / sliderWidth).toFixed(2)
+	sliderLabel.textContent = (left / sliderWidth).toFixed(1)
 
 	currentDiversity = left / sliderWidth
 }

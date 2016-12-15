@@ -1,7 +1,7 @@
 #visualization-wrapper {
 	#visualization {
 		position: absolute;
-		bottom: 0;
+		bottom: 1rem;
 		left: 0;
 		right: 0;
 		.select-visualization {
@@ -18,10 +18,14 @@
 			}
 			.label {
 				text-transform: uppercase;
+				font-size: 1.1rem;
+				letter-spacing: 0.5px;
+				margin-bottom: 0.3rem;
 			}
 			.select {
 				.current {
 					font-size: 2rem;
+					color: $black;
 				}
 			}
 		}
@@ -55,7 +59,8 @@
 				stroke: #bbb;
 			}
 			line.diversity-line {
-				stroke: $green;
+				stroke: $black;
+				stroke-dasharray: 1 2;
 			}
 			.convergence-marker {
 				display: none;

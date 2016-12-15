@@ -1,3 +1,14 @@
+#determine-degrees {
+	margin-bottom: 4rem;
+}
+
+#determine-degrees .section-label, .random-label {
+	text-transform: uppercase;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;	
+}
+
 #second-degrees,
 #third-degrees {
 	margin-bottom: 2rem;
@@ -29,7 +40,7 @@
 
 #mutual-followers,
 #whether-to-unfollow {
-	margin-bottom: 4rem;
+	margin-bottom: 2rem;
 }
 
 #edit-friends-friends, 

@@ -26,7 +26,10 @@ let start, lastCycleTime = 0, rafID = null, animating = false,
   popoverElement = document.querySelector("#popover"),
   network_stats = document.querySelector("#network_stats"),
   popoverID = popoverElement.querySelector(".node_id"),
-  popoverDiversity = popoverElement.querySelector('.node_diversity'),
+  popoverDiversity = popoverElement.querySelector('.node_diversity .count'),
+  popoverFollowees = popoverElement.querySelector('.node_followees .count'),
+  popoverFollowers = popoverElement.querySelector('.node_followers .count'),
+  popoverInitialConnections = popoverElement.querySelector('.node_initial_connections .count'),
   quadtree = d3quadtree(),
   renderer = new THREE.WebGLRenderer({ alpha: true, canvas: document.querySelector("#webgl-canvas") }),
   scene = new THREE.Scene(),
@@ -331,11 +334,11 @@ document.addEventListener("mousemove", e => {
     let jaccardValues = match[2].getSimilarityOfInitialAndCurrFollowingSets()
     let jaccardChange = (1 - parseFloat(jaccardValues[0]) / jaccardValues[1]) * 100
     popoverElement.style.display = 'block'
-    popoverElement.querySelector(".node_followees").textContent = match[2].following.length + ' following'
-    popoverElement.querySelector(".node_followers").textContent = match[2].followedBy.length + ' followers'
+    popoverFollowees.innerHTML = match[2].following.length
+    popoverFollowers.innerHTML = match[2].followedBy.length
     popoverID.innerHTML = "node " + match[2].id
-    popoverDiversity.innerHTML = 'diversity: ' + diversity.toFixed(2)
-    popoverElement.querySelector(".node_initial_connections").textContent = 'Change in followees: ' + jaccardChange.toFixed(1) + '%'
+    popoverDiversity.innerHTML = diversity.toFixed(2)
+    popoverInitialConnections.innerHTML = jaccardChange.toFixed(1) + '%'
     if(diversity > match[2].desiredDiversity) {
       popoverElement.setAttribute("data-satisfied", true)
     } else {
