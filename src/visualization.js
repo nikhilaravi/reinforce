@@ -35,9 +35,7 @@ mediator.subscribe("data-initialized", (edges) => {
 	beliefs.forEach((belief) => {
 		document.querySelector('.' + belief).textContent = '0'
 	})
-	console.log('beliefDistribution', beliefDistribution)
 	Object.keys(beliefDistribution).forEach((belief) => {
-		console.log('belief', belief)
 		document.querySelector('.' + belief).textContent = ' ' + beliefDistribution[belief]
 	})
 	document.querySelector('.number_of_nodes').textContent = Nodes.length
@@ -116,8 +114,7 @@ const openDropdown = () => {
 }
 
 document.addEventListener("click", e => {
-	if(e.target.closest(".select-visualization")) {
-
+	if(e.target.closest(".select-visualization .select")) {
 		// when an item in the dropdown is selected set the item
 		selectOption(e.target.innerHTML)
 
