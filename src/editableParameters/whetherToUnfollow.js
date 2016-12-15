@@ -1,6 +1,6 @@
 import mediator from '../mediator'
 
-let checked = false
+let checked = true
 
 const update = status => {
 	checked = status
