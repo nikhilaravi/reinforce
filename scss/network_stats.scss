@@ -1,19 +1,27 @@
 #network_stats {
   position: fixed;
   left: 3rem;
-  top: 9.5rem;
+  top: 10.5rem;
   font-size: 1.2rem;
+  .group, .node_beliefs {
+    display: inline-block;
+  }
+  .group {
+    border-right: solid 1px lighten($border-color, 10%);
+    margin-right: 1rem;
+    line-height: 1;
+    span {
+      color: $black;
+    }
+  }
   p {
     display: inline-block;
-    margin-right: 1rem;
+    margin: 0 1rem 0 0;
   }
-  .conservative, .liberal, .neutral {
-    font-weight: bold !important;
+  .conservative, .liberal, .neutral, .group span {
+    font-weight: bold;
     display: inline-block;
     margin-left: .25rem;
-  }
-  .connection_percent_change_visual, .number_of_nodes, .number_of_nodes, .conservative, .liberal, .neutral, .number_of_edges {
-    font-weight: normal;
   }
   .liberal {
     color: rgb(0, 190, 254)
