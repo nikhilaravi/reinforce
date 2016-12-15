@@ -7,7 +7,7 @@ export const initialDiversity = 0.3
 
 export const minFolloweeSize = 5
 
-export const cycleDur = 1500
+export const cycleDur = 1000
 
 export const width = document.querySelector("#visualization-wrapper").getBoundingClientRect().width
 
