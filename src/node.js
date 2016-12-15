@@ -122,13 +122,6 @@ export default class Node {
 				if(followingMyFollowees.indexOf(id) === -1) {
 					followingMyFollowees.push(id)
 				}
-				const nestedFollowing = following[j].following
-				for(let k=0; k<nestedFollowing.length; k++) {
-					const nestedID = nestedFollowing[k].id
-					if(followingMyFollowees.indexOf(nestedID) === -1) {
-						followingMyFollowees.push(nestedID)
-					}
-				}
 			}
 		}
 
