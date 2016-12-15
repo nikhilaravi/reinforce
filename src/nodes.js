@@ -167,7 +167,8 @@ mediator.subscribe("updateDiversity", debounce(updateDiversity, 100))
 
 mediator.subscribe("editFriends", d => {
 	Nodes.forEach(n => {
-		n.allowOutsideNetwork = d
+		n.allowThirdDegree = d === 'third-degrees'
+		n.allowOutsideNetwork = d === 'edit-friends-friends'
 	})
 })
 

@@ -1,8 +1,39 @@
-#edit-friends-friends {
+#second-degrees,
+#third-degrees {
+	margin-bottom: 2rem;
+}
+
+#edit-friends-friends,
+#second-degrees,
+#third-degrees {
+	.checkbox-wrapper {
+		border-radius: 50%;
+	}
+	.circle {
+		width: 5px;
+		height: 5px;
+		background: $dove-gray;
+		border-radius: 50%;
+		top: 50%;
+		margin-left: auto;
+		margin-right: auto;
+		position: relative;
+		transform: translateY(-50%);
+	}
+	&[data-checked="false"] {
+		.circle {
+			display: none;
+		}
+	}
+}
+
+#mutual-followers {
 	margin-bottom: 4rem;
 }
 
 #edit-friends-friends, 
+#second-degrees,
+#third-degrees,
 #mutual-followers {
 	white-space: nowrap;
 	cursor: pointer;
