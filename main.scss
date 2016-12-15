@@ -79,15 +79,22 @@ $editable-parameters-width: 25rem;
 		font-weight: bold;
 		text-transform: uppercase;
 		color: $black;
-		margin-bottom: 0.5rem;
+		font-size: 1.2rem;
+		margin-bottom: 1rem;
+	}
+	span {
+		font-weight: bold;
+		display: inline-block;
+		margin-left: 0.2rem;
+		color: $black;
 	}
 	&[data-satisfied="true"] {
-		.node_diversity {
+		.node_diversity span {
 			color: $green;
 		}
 	}
 	&[data-satisfied="false"] {
-		.node_diversity {
+		.node_diversity span {
 			color: $red;
 		}
 	}
