@@ -4,11 +4,14 @@
 	top: 3rem;
 	font-size: 1.75rem;
 	z-index: 1;
-	.label, .select {
-		display: inline-block;
+	&:before {
+		content: "Dataset";
+		display: block;
+		text-transform: uppercase;
+		font-size: 1rem;
 	}
-	.label {
-
+	.current {
+		font-size: 3rem;
 	}
 	&:not(.open) {
 		.dropdown {

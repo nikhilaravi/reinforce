@@ -12,6 +12,7 @@ body {
 body, html {
 	font-size: 10px;
 	font-family: 'News Cycle';
+	overflow: hidden;
 }
 
 * {
@@ -31,7 +32,8 @@ $editable-parameters-width: 25rem;
 }
 
 #visualization-wrapper {
-	position: relative;
+	position: absolute;
+	top: 0;
 	width: calc(100vw - #{$editable-parameters-width})
 }
 

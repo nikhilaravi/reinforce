@@ -10,7 +10,7 @@ import { range } from 'd3-array'
 import { getData } from './api'
 import "../main.scss"
 import { Nodes, initializeNodes, setFollowedBy, initializeFollowings, saveInitialNodeFollowings, cycle } from './nodes'
-import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart, initAssortativity } from './charts.js'
+// import { initFlot, initNetworkConnectivity, initDiversityChart, initNodeDiversityChart, initAssortativity } from './charts.js'
 import { desiredDiversity, cycleDur, width, height } from './config.js'
 import './datasetPicker'
 import './visualization'
