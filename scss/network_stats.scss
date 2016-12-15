@@ -4,12 +4,15 @@
   top: 10.5rem;
   font-size: 1.2rem;
   .group, .node_beliefs {
+    border-right: solid 1px lighten($border-color, 15%);
+    margin-right: 0.9rem;
+    line-height: 1;
+    padding-right: .25rem;
+  }
+  .group, .node_beliefs, .change_in_followee_wrapper {
     display: inline-block;
   }
   .group {
-    border-right: solid 1px lighten($border-color, 10%);
-    margin-right: 1rem;
-    line-height: 1;
     span {
       color: $black;
     }
@@ -18,7 +21,7 @@
     display: inline-block;
     margin: 0 1rem 0 0;
   }
-  .conservative, .liberal, .neutral, .group span {
+  .conservative, .liberal, .neutral, .group span, .connection_percent_change_visual {
     font-weight: bold;
     display: inline-block;
     margin-left: .25rem;
@@ -29,7 +32,7 @@
   .conservative {
     color: rgb(254, 25, 83)
   }
-  .neutral {
+  .neutral, .connection_percent_change_visual {
     color: $black
   }
 }
