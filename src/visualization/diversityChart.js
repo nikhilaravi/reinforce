@@ -48,7 +48,7 @@ export class DiversityHistogram extends VisualizationBase {
     const xAxisLabels = this.xAxisLabelsGroup.selectAll("text")
       .data(range(this.xIncrements).map((d, i) => i * (1/this.xIncrements)).concat(1))
 
-    xAxisLabels.enter().append("text").text(d => d.toFixed(2))
+    xAxisLabels.enter().append("text").text(d => d.toFixed(1))
       .attr("x", this.xScale)
       .attr("y", this.height + 10)
 
