@@ -9,7 +9,7 @@ class Visualization {
   	this.testName = testName
 
   	this.xScale = scaleLinear()
-  		.domain([0, Math.round(width / 25)])
+  		.domain([0, Math.round(width / 40)])
   		.range([0, width])
   }
 
