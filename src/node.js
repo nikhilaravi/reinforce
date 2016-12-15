@@ -97,7 +97,7 @@ export default class Node {
 		this.setDiversity()
 		if(this.diversity > this.desiredDiversity) return
 
-		if(this._following.length > minFolloweeSize) {
+		if(this._following.length > minFolloweeSize && this.maintainConnectionsNumber !== false) {
 			const choppingBlock = []
 			for(let i=0; i<this._following.length; i++) {
 				let followee = this._following[i]

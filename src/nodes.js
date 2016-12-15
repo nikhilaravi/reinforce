@@ -177,3 +177,9 @@ mediator.subscribe("mutualFollows", d => {
 		n.considerFollowsMutual = d
 	})
 })
+
+mediator.subscribe("whetherToUnfollow", d => {
+	Nodes.forEach(n => {
+		n.maintainConnectionsNumber = d
+	})
+})

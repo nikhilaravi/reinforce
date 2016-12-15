@@ -19,6 +19,7 @@ import './editableParameters/diversitySlider'
 import './editableParameters/controls'
 import './editableParameters/friendsFriends'
 import './editableParameters/mutual'
+import './editableParameters/whetherToUnfollow'
 
 let start, lastCycleTime = 0, rafID = null, animating = false,
   halo = document.querySelector("#halo"),

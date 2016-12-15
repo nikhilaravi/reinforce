@@ -27,14 +27,16 @@
 	}
 }
 
-#mutual-followers {
+#mutual-followers,
+#whether-to-unfollow {
 	margin-bottom: 4rem;
 }
 
 #edit-friends-friends, 
 #second-degrees,
 #third-degrees,
-#mutual-followers {
+#mutual-followers,
+#whether-to-unfollow {
 	white-space: nowrap;
 	cursor: pointer;
 	.checkbox-wrapper, .label {
@@ -62,7 +64,7 @@
 	&[data-checked="true"] {
 
 	}
-	&[data-checked="false"] {
+	&:not([data-checked="true"]) {
 		i {
 			display: none;
 		}
