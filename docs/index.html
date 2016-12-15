@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>lol</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=News+Cycle:400,700" rel="stylesheet">
+  <link href="bundle.css" rel="stylesheet">
+</head>
+<body>
+  <div id="root" style="height: 100%">
+    <div id="dataset-picker">
+      <div class="select">
+        <div class="current">Terrorism</div>
+        <div class="dropdown">
+          <div data-dataset="downTerrorism" class="active option">Terrorism</div>
+          <div data-dataset="toy" class="option">Toy (segregated)</div>
+          <div data-dataset="random" class="option">Toy (random)</div>
+          <div data-dataset="scale_free" class="option">Toy (scale free)</div>
+        </div>
+      </div>
+    </div>
+    <div id="network_stats">
+      <div class="group">
+        <p>Edges <span class="number_of_edges"></span></p>
+        <p>Nodes <span class="number_of_nodes"></span></p>        
+      </div>
+      <div class='node_beliefs'>
+        <p class='conservative_text'>C <span class='conservative'></span></p>
+        <p class='liberal_text'>L <span class='liberal'></span></p>
+        <p class='neutral_text'>N <span class='neutral'></span></p>
+      </div>
+      <div class="change_in_followee_wrapper">Followee network change <span class="connection_percent_change_visual"></span></div>
+    </div>
+    <div id="visualization-wrapper">
+      <canvas id="webgl-canvas"></canvas>
+      <div id="visualization">
+        <div class="select-visualization">
+          <div class="label">Visualizing</div>
+          <div class="select">
+            <div class="current">ConvergenceTimeseries</div>
+            <div class="dropdown">
+            </div>
+          </div>
+        </div>
+        <div class="svg-wrapper">
+          <svg></svg>
+        </div>
+      </div>
+    </div>
+    <div id="editable-parameters">
+      <div id="controls" data-status="stopped">
+        <div id="controls-play-pause">
+          <div id="play-button">
+            <i class="material-icons">play_arrow</i>
+          </div>
+          <div id="pause-button">
+            <i class="material-icons">pause</i>
+          </div>
+        </div>
+        <div id="controls-restart">
+          <div id="restart-button">
+            <i class="material-icons">refresh</i>
+          </div>
+        </div>
+      </div>
+      <div id="edit-diversity">
+        <div class="label">Diversity</div>
+        <div class="slider">
+          <div class="bar"></div>
+          <div class="circle"></div>
+        </div>
+      </div>
+      <div id="determine-degrees">
+        <div class="section-label">Finding friends</div>
+        <div class="degrees-option" id="second-degrees">
+          <div class="checkbox-wrapper">
+            <div class="circle"></div>
+          </div>
+          <div class="label">Find new nodes to follow from up to 2nd degree connections</div>
+        </div> 
+        <div class="degrees-option" id="third-degrees">
+          <div class="checkbox-wrapper">
+            <div class="circle"></div>
+          </div>
+          <div class="label">Find new nodes to follow from up to 3rd degree connections</div>
+        </div>      
+        <div class="degrees-option" id="edit-friends-friends">
+          <div class="checkbox-wrapper">
+            <div class="circle"></div>
+          </div>
+          <div class="label">Find new nodes to follow from anywhere in the network</div>
+        </div>
+      </div>
+      <div class="random-label">Settings</div>
+      <div id="mutual-followers">
+        <div class="checkbox-wrapper">
+          <i class="material-icons">check</i>
+        </div>
+        <div class="label">Consider follows to be mutual</div>
+      </div>
+      <div id="whether-to-unfollow">
+        <div class="checkbox-wrapper">
+          <i class="material-icons">check</i>
+        </div>
+        <div class="label">Maintain the same number of connections</div>
+      </div>
+    </div>
+    <div id="halo"></div>
+    <div id="popover">
+      <div class="node_id"></div>
+      <div class="node_followees">Following <span class="count"></span></div>
+      <div class="node_followers">Followed by <span class="count"></span></div>
+      <div class="node_diversity">Diversity <span class="count"></span></div>
+      <div class="node_initial_connections">Change in following <span class="count"></span></div>
+    </div>
+  </div>
+  <script type="x-shader/x-vertex" id="node-vertexshader">
+    precision highp float;
+
+    lowp vec4 encode_float(highp float v) {
+      highp float av = abs(v);
+
+      highp vec4 c = vec4(0,0,0,0);
+
+      //Compute exponent and mantissa
+      highp float e = floor(log2(av));
+      highp float m = av * pow(2.0, -e) - 1.0;
+
+      //Unpack mantissa
+      c[1] = floor(128.0 * m);
+      m -= c[1] / 128.0;
+      c[2] = floor(32768.0 * m);
+      m -= c[2] / 32768.0;
+      c[3] = floor(8388608.0 * m);
+
+      //Unpack exponent
+      highp float ebias = e + 127.0;
+      c[0] = floor(ebias / 2.0);
+      ebias -= c[0] * 2.0;
+      c[1] += floor(ebias) * 128.0;
+
+      //Unpack sign bit
+      c[0] += 128.0 * step(0.0, -v);
+
+      //Scale back to range
+      return c / 255.0;
+    }
+
+    attribute vec2 sizeColor;
+    uniform float alpha;
+    varying vec4 vColor;
+    varying float mySize;
+
+    void main() {
+      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+      gl_PointSize = sizeColor.x;
+      mySize = sizeColor.x;
+      gl_Position = projectionMatrix * mvPosition;
+      vColor = encode_float(sizeColor.y);
+    }
+  </script>
+  <script type="x-shader/x-fragment" id="node-fragmentshader">
+    varying vec4 vColor;
+    varying float mySize;
+
+    void main() {
+      float f = 0.5;
+      float d = abs(distance(gl_PointCoord - f, vec2(0.0, 0.0)));
+      float pixelD = (d + 0.5) * mySize;
+      if(pixelD < mySize) {
+        gl_FragColor = vec4(vColor);
+      } else {
+        discard;
+      }
+    }
+  </script>
+  <script type="x-shader/x-vertex" id="edge-vertexshader">
+    precision highp float;
+
+    lowp vec4 encode_float(highp float v) {
+      highp float av = abs(v);
+
+      highp vec4 c = vec4(0,0,0,0);
+
+      //Compute exponent and mantissa
+      highp float e = floor(log2(av));
+      highp float m = av * pow(2.0, -e) - 1.0;
+
+      //Unpack mantissa
+      c[1] = floor(128.0 * m);
+      m -= c[1] / 128.0;
+      c[2] = floor(32768.0 * m);
+      m -= c[2] / 32768.0;
+      c[3] = floor(8388608.0 * m);
+
+      //Unpack exponent
+      highp float ebias = e + 127.0;
+      c[0] = floor(ebias / 2.0);
+      ebias -= c[0] * 2.0;
+      c[1] += floor(ebias) * 128.0;
+
+      //Unpack sign bit
+      c[0] += 128.0 * step(0.0, -v);
+
+      //Scale back to range
+      return c / 255.0;
+    }
+
+    uniform vec3 color;
+    uniform float uTime;
+    attribute vec2 colorTime;
+    varying vec4 vColor;
+    uniform float defaultOpacity;
+    uniform float peakTime;
+    uniform float totalTime;
+
+    void main() {
+      // vColor = encode_float(color.x);
+      float diff = uTime - colorTime.y;
+      float opacity = defaultOpacity;
+
+      if(diff < peakTime) {
+        opacity = defaultOpacity + (diff / peakTime) * (1. - defaultOpacity);
+      } else if(diff < totalTime) {
+        opacity = defaultOpacity + (1. - (diff - peakTime) / (totalTime - peakTime)) * (1. - defaultOpacity);
+      }
+
+      vColor = vec4(color, opacity);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  </script>
+  <script type="x-shader/x-fragment" id="edge-fragmentshader">
+    varying vec4 vColor;
+
+    void main() {
+      gl_FragColor = vColor;
+    }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/node-uuid/1.4.7/uuid.min.js"></script>
+  <script src="/vendor/rl.js"></script>
+  <script src="/dist/main.js"></script>
+</body>
+</html>
