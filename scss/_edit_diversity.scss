@@ -5,16 +5,10 @@
 		margin-bottom: 1rem;
 		font-size: 1.1rem;
 		letter-spacing: 0.5px;
-		.diversity {
-			font-weight: bold;
-			color: darken($text-color, 10%);
-			display: inline-block;
-			margin-left: .25rem;
-		}
 	}
 	.slider {
 		position: relative;
-		$slider-circle-height: 2rem;
+		$slider-circle-height: 3rem;
 		.bar {
 			padding-top: $slider-circle-height / 2;
 			border-bottom: solid 1px $dove-gray;
@@ -32,6 +26,9 @@
 			}
 		}
 		.circle {
+			color: white;
+			text-align: center;
+			line-height: 3rem;
 			width: $slider-circle-height;
 			height: $slider-circle-height;
 			border-radius: 50%;
