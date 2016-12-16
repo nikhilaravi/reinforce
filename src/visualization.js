@@ -6,11 +6,11 @@ import ConvergenceTimeseries from './visualization/convergenceTimeseries'
 import mediator from './mediator'
 import AssortativityChart from './visualization/assortativity.js'
 import { DiversityHistogram, BeliefBarChart } from './visualization/diversityChart.js'
-import { FollowerDegrees, FollowingDegrees } from './visualization/connectionDegrees.js'
+import { FollowerDegrees } from './visualization/connectionDegrees.js'
 import { Nodes } from './nodes.js'
-import calculateDistribution from './calculateDistribution'
+import { calculateDistribution } from './calculateDistribution'
 // const charts = { ConvergenceTimeseries, AssortativityChart, BeliefBarChart, DiversityHistogram, FollowerDegrees, FollowingDegrees } // commenting out non-plotting charts for now
-const charts = { ConvergenceTimeseries, AssortativityChart, DiversityHistogram }
+const charts = { ConvergenceTimeseries, AssortativityChart, DiversityHistogram, FollowerDegrees }
 
 let updateSID = null, activeChart = 'ConvergenceTimeseries'
 

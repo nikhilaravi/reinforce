@@ -1,5 +1,5 @@
 // create dict based on a property of the node
-const calculateDistribution = (Nodes, prop) => {
+export const calculateDistribution = (Nodes, prop) => {
   return Nodes.reduce((dict, node) => {
     var belief = node[prop];
     if (prop === 'diversity' && isNaN(belief)) {
@@ -14,4 +14,14 @@ const calculateDistribution = (Nodes, prop) => {
   }, {})
 }
 
-export default calculateDistribution
+export const create_count_dict = (Nodes, prop) => {
+  return Nodes.reduce((dict, node) => {
+    var followers = node[prop].length;
+    if (dict.hasOwnProperty(followers)) {
+      dict[followers] += 1
+    } else {
+      dict[followers] = 1
+    }
+    return dict
+  }, {})
+}

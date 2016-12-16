@@ -7,13 +7,15 @@ import mediator from './mediator'
 import uniq from 'uniq'
 import { difference, debounce } from 'underscore'
 import calculateAssortativity from './calculateAssortativity'
-import calculateDistribution from './calculateDistribution'
+import { calculateDistribution, create_count_dict } from './calculateDistribution'
 
 export let newConnectionsCounts = []
 export let brokenConnectionsCounts = []
 export let assortativity = []
 export let initialDiversity = []
 export let currentDiversity = []
+export let initialFollowerDegrees = []
+export let currentFollowerDegrees = []
 export let Nodes
 
 export const initializeNodes = (seedData, beliefs) => {
@@ -46,13 +48,20 @@ export const cycle = () => {
 	assortativity.push(calculateAssortativity(Nodes))
 
 	const diversityDistribution = calculateDistribution(Nodes, 'diversity')
-	const beliefDistribution = calculateDistribution(Nodes, 'belief')
 
 	if(!Object.keys(initialDiversity).length) {
 		initialDiversity = diversityDistribution
 	}
 
 	currentDiversity = diversityDistribution
+
+	const degreesDistribution = create_count_dict(Nodes, 'followedBy')
+
+	if(!Object.keys(initialFollowerDegrees).length) {
+		initialFollowerDegrees = degreesDistribution
+	}
+
+	currentFollowerDegrees = degreesDistribution
 }
 
 export const initializeFollowings = () => {
@@ -152,6 +161,8 @@ setTimeout(() => {
 		assortativity = []
 		initialDiversity = []
 		currentDiversity = []
+		initialFollowerDegrees = []
+		currentFollowerDegrees = []
 		newConnectionsCounts = []
 		brokenConnectionsCounts = []
 	})

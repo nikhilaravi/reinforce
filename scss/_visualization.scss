@@ -75,7 +75,8 @@
 			}
 			&[data-test-name="AssortativityChart"] {
 			}
-			&[data-test-name="DiversityHistogram"] {
+			&[data-test-name="DiversityHistogram"],
+			&[data-test-name="FollowerDegrees"] {
 				.convergence-marker {
 					display: none !important;
 				}
@@ -88,7 +89,8 @@
 					}
 				}
 			}
-			&[data-test-name="DiversityHistogram"] {
+			&[data-test-name="DiversityHistogram"],
+			&[data-test-name="FollowerDegrees"] {
 				path.initial {
 					stroke: none;
 					fill: #ccc;
