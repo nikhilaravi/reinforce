@@ -34,13 +34,6 @@ export class FollowerDegrees extends VisualizationBase {
 
     this.xAxis.attr("y1", this.height).attr("y2", this.height)
 
-    const xAxisLabels = this.xAxisLabelsGroup.selectAll("text")
-      .data(range(this.xIncrements).map((d, i) => i * (1/this.xIncrements)).concat(1))
-
-    xAxisLabels.enter().append("text").text(d => d.toFixed(1))
-      .attr("x", this.xScale)
-      .attr("y", this.height + 10)
-
     this.initialFollowerDegreesPath = this.svg.append("path").attr("class", "initial")
 
     this.currentFollowerDegreesPath = this.svg.append("path").attr("class", "current")
@@ -66,6 +59,17 @@ export class FollowerDegrees extends VisualizationBase {
 
     this.currentFollowerDegreesPath.data([ currentFollowerDegreesArray ])
       .attr("d", this.lineGenerator)
+
+    const xAxisLabels = this.xAxisLabelsGroup.selectAll("text")
+      .data(currentFollowerDegreesArray)
+
+    xAxisLabels.exit().remove()
+
+    xAxisLabels.enter().append("text")
+    
+    xAxisLabels.text(d => d[0])
+      .attr("x", d => this.xScale(d[0]))
+      .attr("y", this.height + 10)
   }
 }
 
