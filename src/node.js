@@ -16,6 +16,7 @@ export default class Node {
 		this.belief = opts.belief
 		this.trumporhillary = opts.trumporhillary
 		this.desiredDiversity = opts.desiredDiversity || 0
+		this.diversityOverride = null
 
 		this._newlyFollowing = []
 		this._newlyNotFollowing = []
@@ -95,7 +96,9 @@ export default class Node {
 
 	adjustFollowing() {
 		this.setDiversity()
-		if(this.diversity > this.desiredDiversity) return
+		const target = this.diversityOverride === null ? this.desiredDiversity : this.diversityOverride
+
+		if(this.diversity > target) return
 
 		if(this._following.length > minFolloweeSize && this.maintainConnectionsNumber !== false) {
 			const choppingBlock = []

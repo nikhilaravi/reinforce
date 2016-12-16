@@ -169,9 +169,20 @@ setTimeout(() => {
 }, 0)
 
 const updateDiversity = val => {
-	Nodes.forEach(n => {
-		n.desiredDiversity = val
-	})
+	if(window.activeNode) {
+		const target = window.activeNode.id
+		for(let i=0, n=Nodes.length; i<n; i++) {
+			let node = Nodes[i]
+			if(node.id === target) {
+				node.diversityOverride = val
+				break
+			}
+		}
+	} else {
+		Nodes.forEach(n => {
+			n.desiredDiversity = val
+		})		
+	}
 }
 
 mediator.subscribe("updateDiversity", debounce(updateDiversity, 100))

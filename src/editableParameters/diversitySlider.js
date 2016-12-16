@@ -20,12 +20,18 @@ document.addEventListener("mouseup", e => {
 	sliderDown = false
 })
 
-const updateDiversity = left => {
+const updateDiversity = (left, silent) => {
 	circle.style.left = left + 'px'
-	mediator.publish("updateDiversity", left / sliderWidth)
+	
+	if(!silent) {
+		mediator.publish("updateDiversity", left / sliderWidth)
+	}
+
 	sliderLabel.textContent = (left / sliderWidth).toFixed(1)
 
-	currentDiversity = left / sliderWidth
+	if(window.activeNode === null) {
+		currentDiversity = left / sliderWidth
+	}
 }
 
 document.addEventListener("mousemove", e => {
@@ -37,5 +43,9 @@ document.addEventListener("mousemove", e => {
 
 mediator.subscribe("data-initialized", () => {
 	updateDiversity(currentDiversity * sliderWidth)
+})
+
+mediator.subscribe("deactivateNode", () => {
+	updateDiversity(currentDiversity * sliderWidth, true)
 })
 

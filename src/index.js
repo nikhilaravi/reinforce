@@ -26,6 +26,7 @@ let start, lastCycleTime = 0, rafID = null, animating = false,
   popoverElement = document.querySelector("#popover"),
   network_stats = document.querySelector("#network_stats"),
   popoverID = popoverElement.querySelector(".node_id"),
+  popoverDiversityOverride = popoverElement.querySelector('.node_diversity_override .count'),
   popoverDiversity = popoverElement.querySelector('.node_diversity .count'),
   popoverFollowees = popoverElement.querySelector('.node_followees .count'),
   popoverFollowers = popoverElement.querySelector('.node_followers .count'),
@@ -48,9 +49,11 @@ let start, lastCycleTime = 0, rafID = null, animating = false,
   maxFollowedByLength = 0, minFollowedByLength = Infinity,
   nodeSizeScale = scaleLinear().range([5, 25]).clamp(true),
   peakTime = 250.0, totalTime = 350.0,
-  canvasLeft = 0, canvasTop = 0, match, activeNode = null,
+  canvasLeft = 0, canvasTop = 0, match,
   lineSegments, points,
   nodeMaterial, edgeMaterial
+
+window.activeNode = null
 
 scene.add(camera)
 camera.position.z = 1000
@@ -111,8 +114,8 @@ const loop = () => {
       edgeVertices[i * 2 * 3 + 4] = -(target.y - height / 2)
     }
 
-    if(activeNode) {
-      if(source.id === activeNode.id) {
+    if(window.activeNode) {
+      if(source.id === window.activeNode.id) {
         edgeColorsStartTimes[i * 2 * 2 + 1] = d - peakTime
         edgeColorsStartTimes[i * 2 * 2 + 3] = d - peakTime
       }
@@ -180,8 +183,8 @@ const loop = () => {
   for(let i=0; i < Nodes.length; i++) {
     let node = Nodes[i]
     let opacity = 254
-    if(activeNode && node.id !== activeNode.id) {
-      let mutualFollow = node.following.map(f => f.id).indexOf(activeNode.id) > -1 && activeNode.following.map(f => f.id).indexOf(node.id) > -1
+    if(window.activeNode && node.id !== window.activeNode.id) {
+      let mutualFollow = node.following.map(f => f.id).indexOf(window.activeNode.id) > -1 && window.activeNode.following.map(f => f.id).indexOf(node.id) > -1
       if(!mutualFollow) { opacity = 100 }
     }
 
@@ -196,7 +199,7 @@ const loop = () => {
       nodeSizesColors[i * 2 + 1] = decodeFloat(254, 254, 254, opacity)
     }
 
-    if(activeNode && node.id === activeNode.id) {
+    if(window.activeNode && node.id === window.activeNode.id) {
       halo.style.transform = `translate3d(${canvasLeft + node.x - 6}px, ${canvasTop + node.y - 6}px, 0)`
     }
 
@@ -330,16 +333,20 @@ document.addEventListener("mousemove", e => {
 
   match = quadtree.find(e.pageX - canvasLeft, e.pageY - canvasTop, 3)
   if(match) {
-    const diversity = match[2].diversity
-    let jaccardValues = match[2].getSimilarityOfInitialAndCurrFollowingSets()
+    let node = match[2]
+    const diversity = node.diversity
+    const target = node.diversityOverride === null ? node.desiredDiversity : node.diversityOverride
+    let jaccardValues = node.getSimilarityOfInitialAndCurrFollowingSets()
     let jaccardChange = (1 - parseFloat(jaccardValues[0]) / jaccardValues[1]) * 100
     popoverElement.style.display = 'block'
-    popoverFollowees.innerHTML = match[2].following.length
-    popoverFollowers.innerHTML = match[2].followedBy.length
-    popoverID.innerHTML = "node " + match[2].id
+    popoverFollowees.innerHTML = node.following.length
+    popoverFollowers.innerHTML = node.followedBy.length
+    popoverID.innerHTML = "node " + node.id
     popoverDiversity.innerHTML = diversity.toFixed(2)
     popoverInitialConnections.innerHTML = jaccardChange.toFixed(1) + '%'
-    if(diversity > match[2].desiredDiversity) {
+    popoverDiversityOverride.innerHTML = target.toFixed(2)
+
+    if(diversity > target) {
       popoverElement.setAttribute("data-satisfied", true)
     } else {
       popoverElement.setAttribute("data-satisfied", false)
@@ -352,12 +359,12 @@ document.addEventListener("mousemove", e => {
 document.addEventListener("click", e => {
   e.preventDefault()
   if(match) {
-    if(activeNode && activeNode.id === match[2].id) {
-      activeNode = null
+    if(window.activeNode && window.activeNode.id === match[2].id) {
+      window.activeNode = null
       removeHalo()
+      mediator.publish("deactivateNode", match)
     } else {
-      activeNode = match[2]
-      // initFlot(activeNode)
+      window.activeNode = match[2]
       revealHalo(match[0], match[1])
     }
     if(!animating) { loop() }
@@ -378,7 +385,7 @@ mediator.subscribe("pause", pause)
 
 mediator.subscribe("selectDataset", dataset => {
   pause()
-  activeNode = null
+  window.activeNode = null
 
   Promise.all([dataset.nodes, dataset.edges].map(getData))
     .then(data => {
