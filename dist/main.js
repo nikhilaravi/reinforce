@@ -6835,6 +6835,19 @@ var getData = function getData(url) {
   });
 };
 
+// export const getData = url => {
+//   const myInit = {
+//     method: 'get',
+//     mode: 'no-cors',
+//     headers: new Headers(
+//       {'Content-Type': 'application/json',
+//         'Accept': 'application/json'
+//       })
+//     }
+//   return fetch(`https://raw.github.com/nikhilaravi/reinforce/master/src/data/${url}.json`, myInit).then(data=>data.json())
+//
+// }
+
 var maxCyclesInMemory = 5;
 
 
@@ -7743,20 +7756,17 @@ setTimeout(function () {
 	});
 }, 0);
 
-var updateDiversity = function updateDiversity(val) {
-	if (window.activeNode) {
-		var target = window.activeNode.id;
-		for (var i = 0, n = Nodes.length; i < n; i++) {
-			var node = Nodes[i];
-			if (node.id === target) {
-				node.diversityOverride = val;
-				break;
-			}
+var updateDiversity = function updateDiversity(_ref) {
+	var val = _ref.val,
+	    overrides = _ref.overrides;
+
+	for (var i = 0, n = Nodes.length; i < n; i++) {
+		var node = Nodes[i];
+		if (typeof overrides[node.id] !== 'undefined') {
+			node.diversityOverride = overrides[node.id];
+		} else {
+			node.desiredDiversity = val;
 		}
-	} else {
-		Nodes.forEach(function (n) {
-			n.desiredDiversity = val;
-		});
 	}
 };
 
@@ -9487,9 +9497,20 @@ var currentDiversity$1 = initialDiversity$1;
 var sliderRect = document.querySelector("#edit-diversity .slider").getBoundingClientRect();
 var sliderLeft = sliderRect.left;
 var sliderWidth = sliderRect.width;
+var overridesDOM = document.querySelector("#edit-diversity .overrides");
 
 var circle$1 = document.querySelector("#edit-diversity .circle");
 var sliderLabel = document.querySelector("#edit-diversity .circle");
+
+var overrides = {};
+
+overridesDOM.addEventListener('click', function (e) {
+	if (e.target.classList.contains("close")) {
+		delete overrides[+e.target.closest(".pill").getAttribute("data-id")];
+		mediator.publish("delete-pill");
+		updateDiversity$1(currentDiversity$1 * sliderWidth);
+	}
+});
 
 document.addEventListener("mousedown", function (e) {
 	if (e.target.classList.contains("circle")) {
@@ -9504,15 +9525,27 @@ document.addEventListener("mouseup", function (e) {
 var updateDiversity$1 = function updateDiversity$1(left, silent) {
 	circle$1.style.left = left + 'px';
 
-	if (!silent) {
-		mediator.publish("updateDiversity", left / sliderWidth);
-	}
+	mediator.publish("updateDiversity", {
+		val: left / sliderWidth,
+		overrides: overrides
+	});
 
 	sliderLabel.textContent = (left / sliderWidth).toFixed(1);
 
 	if (window.activeNode === null) {
 		currentDiversity$1 = left / sliderWidth;
+	} else {
+		overrides[window.activeNode.id] = left / sliderWidth;
 	}
+
+	// do some innerhtml
+	var innerHTML = '';
+
+	Object.keys(overrides).forEach(function (k) {
+		innerHTML += '<div data-id=\'' + k + '\' class=\'pill\'>Node ' + k + ' <span>' + overrides[k].toFixed(2) + '</span><i class=\'material-icons close\'>close</i></div>';
+	});
+
+	overridesDOM.innerHTML = innerHTML;
 };
 
 document.addEventListener("mousemove", function (e) {
@@ -9527,7 +9560,7 @@ mediator.subscribe("data-initialized", function () {
 });
 
 mediator.subscribe("deactivateNode", function () {
-	updateDiversity$1(currentDiversity$1 * sliderWidth, true);
+	updateDiversity$1(currentDiversity$1 * sliderWidth);
 });
 
 var controls = document.querySelector("#controls");

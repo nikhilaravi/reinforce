@@ -356,11 +356,6 @@ document.addEventListener("mousemove", e => {
   }
 })
 
-mediator.subscribe("delete-pill", () => {
-  window.activeNode = null
-  removeHalo()
-})
-
 document.addEventListener("click", e => {
   e.preventDefault()
   if(match) {
