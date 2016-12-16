@@ -359,6 +359,7 @@ document.addEventListener("mousemove", e => {
 mediator.subscribe("delete-pill", () => {
   window.activeNode = null
   removeHalo()
+  if(!animating) { loop() }
 })
 
 document.addEventListener("click", e => {
@@ -371,6 +372,7 @@ document.addEventListener("click", e => {
     } else {
       window.activeNode = match[2]
       revealHalo(match[0], match[1])
+      mediator.publish("activateNode")
     }
     if(!animating) { loop() }
   }
@@ -416,7 +418,7 @@ mediator.subscribe("selectDataset", dataset => {
       start = Date.now()
       initializeNodes(nodeData, dataset.beliefs)
       initialize()
-
+      removeHalo()
       mediator.publish("data-initialized", edgeData)
     })
 })
