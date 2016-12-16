@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=News+Cycle:400,700" rel="stylesheet">
-  <link href="bundle.css" rel="stylesheet">
+  <link href="./bundle.css" rel="stylesheet">
 </head>
 <body>
   <div id="root" style="height: 100%">
@@ -24,7 +24,7 @@
     <div id="network_stats">
       <div class="group">
         <p>Edges <span class="number_of_edges"></span></p>
-        <p>Nodes <span class="number_of_nodes"></span></p>        
+        <p>Nodes <span class="number_of_nodes"></span></p>
       </div>
       <div class='node_beliefs'>
         <p class='conservative_text'>C <span class='conservative'></span></p>
@@ -71,6 +71,7 @@
           <div class="bar"></div>
           <div class="circle"></div>
         </div>
+        <div class="overrides"></div>
       </div>
       <div id="determine-degrees">
         <div class="section-label">Finding friends</div>
@@ -79,13 +80,13 @@
             <div class="circle"></div>
           </div>
           <div class="label">Find new nodes to follow from up to 2nd degree connections</div>
-        </div> 
+        </div>
         <div class="degrees-option" id="third-degrees">
           <div class="checkbox-wrapper">
             <div class="circle"></div>
           </div>
           <div class="label">Find new nodes to follow from up to 3rd degree connections</div>
-        </div>      
+        </div>
         <div class="degrees-option" id="edit-friends-friends">
           <div class="checkbox-wrapper">
             <div class="circle"></div>
@@ -113,6 +114,7 @@
       <div class="node_followees">Following <span class="count"></span></div>
       <div class="node_followers">Followed by <span class="count"></span></div>
       <div class="node_diversity">Diversity <span class="count"></span></div>
+      <div class="node_diversity_override">Diversity <span class="count"></span></div>
       <div class="node_initial_connections">Change in following <span class="count"></span></div>
     </div>
   </div>
@@ -240,6 +242,7 @@
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/node-uuid/1.4.7/uuid.min.js"></script>
-  <script src="dist/main.js"></script>
+  <!-- <script src="/vendor/rl.js"></script> -->
+  <script src="./dist/main.js"></script>
 </body>
 </html>
