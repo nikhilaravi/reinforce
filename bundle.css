@@ -1,0 +1,411 @@
+.select .dropdown, #edit-diversity .slider .circle, #controls #play-button, #controls #pause-button, #controls #restart-button {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.2); }
+
+body {
+  margin: 0;
+  color: #707070;
+  background: #f0f0f1; }
+  body .link {
+    stroke: #ccc; }
+
+body, html {
+  font-size: 10px;
+  font-family: 'News Cycle';
+  overflow: hidden; }
+
+* {
+  box-sizing: border-box; }
+
+#editable-parameters {
+  overflow: scroll;
+  width: 25rem;
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  background: white;
+  padding: 3rem; }
+
+#visualization-wrapper {
+  position: absolute;
+  top: 0;
+  width: calc(100vw - 25rem); }
+
+#webgl-canvas.flash {
+  animation: flash 750ms forwards; }
+
+@keyframes flash {
+  0% {
+    opacity: 1; }
+  40% {
+    opacity: 0; }
+  60% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+#popover, #halo {
+  display: none;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1; }
+
+#halo {
+  top: 0;
+  left: 0; }
+
+#halo.active {
+  display: block;
+  border: solid 1px black;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px; }
+
+#popover {
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  background: white; }
+  #popover .node_id {
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #474747;
+    font-size: 1.2rem;
+    margin-bottom: 1rem; }
+  #popover span {
+    font-weight: bold;
+    display: inline-block;
+    margin-left: 0.2rem;
+    color: #474747; }
+  #popover[data-satisfied="true"] .node_diversity span {
+    color: #00B219; }
+  #popover[data-satisfied="false"] .node_diversity span {
+    color: #ff1953; }
+
+#flotreward, #chart_caption {
+  display: inline-block;
+  width: 10rem;
+  vertical-align: middle; }
+
+.chart_node_id, .chart_node_belief {
+  display: block; }
+
+#chart_title {
+  font-size: 1.1rem;
+  margin-left: 15em;
+  margin-top: 1em;
+  width: 50%; }
+
+.charts .chart {
+  width: 50%;
+  display: inline-block !important;
+  float: left; }
+
+.charts {
+  width: 100%;
+  display: inline-block !important;
+  display: none !important; }
+
+.select {
+  position: relative; }
+  .select .current {
+    cursor: pointer;
+    border-bottom: dotted 1px #707070; }
+  .select .dropdown {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: white;
+    min-width: 14rem; }
+    .select .dropdown .option {
+      cursor: pointer;
+      line-height: 2.5;
+      padding: 0 1rem; }
+      .select .dropdown .option.active, .select .dropdown .option:hover {
+        background: whitesmoke; }
+
+#dataset-picker {
+  position: fixed;
+  left: 3rem;
+  top: 3rem;
+  font-size: 1.75rem;
+  z-index: 1; }
+  #dataset-picker:before {
+    content: "Dataset";
+    display: block;
+    text-transform: uppercase;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px; }
+  #dataset-picker .current {
+    font-size: 3rem;
+    line-height: 1.3;
+    padding-top: 0.5rem;
+    color: #474747; }
+  #dataset-picker:not(.open) .dropdown {
+    display: none; }
+
+#visualization-wrapper #visualization {
+  position: absolute;
+  bottom: 1rem;
+  left: 0;
+  right: 0; }
+  #visualization-wrapper #visualization .select-visualization {
+    width: 15rem;
+    margin-left: 3rem;
+    padding-bottom: 2rem; }
+    #visualization-wrapper #visualization .select-visualization .option {
+      font-size: 1.25rem; }
+    #visualization-wrapper #visualization .select-visualization:not(.open) .dropdown {
+      display: none; }
+    #visualization-wrapper #visualization .select-visualization .label {
+      text-transform: uppercase;
+      font-size: 1.1rem;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.3rem; }
+    #visualization-wrapper #visualization .select-visualization .select .current {
+      font-size: 2rem;
+      color: #474747; }
+  #visualization-wrapper #visualization .svg-wrapper {
+    width: calc(100% - 6rem);
+    margin-left: auto;
+    margin-right: auto;
+    overflow: scroll; }
+  #visualization-wrapper #visualization svg {
+    overflow: visible;
+    margin: 2rem auto; }
+    #visualization-wrapper #visualization svg text {
+      fill: #707070; }
+    #visualization-wrapper #visualization svg[data-converged="true"] .convergence-marker {
+      display: block; }
+    #visualization-wrapper #visualization svg path {
+      fill: none; }
+    #visualization-wrapper #visualization svg .x-axis-labels text {
+      text-anchor: middle;
+      font-size: 0.8rem; }
+    #visualization-wrapper #visualization svg line {
+      stroke: #bbb; }
+    #visualization-wrapper #visualization svg line.diversity-line {
+      stroke: #474747;
+      stroke-dasharray: 1 2; }
+    #visualization-wrapper #visualization svg .convergence-marker {
+      display: none;
+      stroke: none;
+      fill: #707070; }
+    #visualization-wrapper #visualization svg path {
+      stroke: #444;
+      stroke-linecap: round; }
+    #visualization-wrapper #visualization svg[data-test-name="DiversityHistogram"] .convergence-marker, #visualization-wrapper #visualization svg[data-test-name="FollowerDegrees"] .convergence-marker {
+      display: none !important; }
+    #visualization-wrapper #visualization svg[data-test-name="DiversityHistogram"] .x-axis-labels text:first-of-type, #visualization-wrapper #visualization svg[data-test-name="FollowerDegrees"] .x-axis-labels text:first-of-type {
+      text-anchor: start; }
+    #visualization-wrapper #visualization svg[data-test-name="DiversityHistogram"] .x-axis-labels text:last-of-type, #visualization-wrapper #visualization svg[data-test-name="FollowerDegrees"] .x-axis-labels text:last-of-type {
+      text-anchor: end; }
+    #visualization-wrapper #visualization svg[data-test-name="DiversityHistogram"] path.initial, #visualization-wrapper #visualization svg[data-test-name="FollowerDegrees"] path.initial {
+      stroke: none;
+      fill: #ccc; }
+
+#edit-diversity {
+  margin-bottom: 5rem; }
+  #edit-diversity .label {
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px; }
+  #edit-diversity .slider {
+    height: 4rem;
+    position: relative; }
+    #edit-diversity .slider .bar {
+      padding-top: 1.5rem;
+      border-bottom: solid 1px #707070; }
+      #edit-diversity .slider .bar:before, #edit-diversity .slider .bar:after {
+        position: absolute;
+        top: calc(3rem / 2 + 10px); }
+      #edit-diversity .slider .bar:before {
+        content: "0";
+        left: 0; }
+      #edit-diversity .slider .bar:after {
+        content: "1";
+        right: 0; }
+    #edit-diversity .slider .circle {
+      color: white;
+      text-align: center;
+      line-height: 3rem;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background: #8a8a8a;
+      position: absolute;
+      top: 0;
+      cursor: pointer;
+      transform: translateX(-50%); }
+  #edit-diversity .overrides:not(:empty) {
+    margin-top: 4rem; }
+    #edit-diversity .overrides:not(:empty):before {
+      display: block;
+      content: "Overrides";
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+      letter-spacing: 0.5px; }
+    #edit-diversity .overrides:not(:empty) .pill {
+      display: inline-block;
+      border-radius: 3px;
+      border: solid 1px #707070;
+      padding: 3px 7px 5px 7px;
+      margin-right: 1rem; }
+      #edit-diversity .overrides:not(:empty) .pill:not(:last-of-type) {
+        margin-bottom: 1rem; }
+      #edit-diversity .overrides:not(:empty) .pill span {
+        font-weight: bold;
+        display: inline-block;
+        margin-left: .25rem; }
+      #edit-diversity .overrides:not(:empty) .pill i {
+        cursor: pointer;
+        font-size: 1.1rem;
+        margin-left: .5rem;
+        vertical-align: top;
+        padding-top: 4px; }
+
+#controls {
+  margin-bottom: 4rem; }
+  #controls:not([data-status="stopped"]) #controls-play-pause {
+    margin-right: 1rem; }
+  #controls[data-status="stopped"] #controls-play-pause {
+    display: none; }
+  #controls[data-status="playing"] #play-button {
+    display: none; }
+  #controls[data-status="paused"] #pause-button {
+    display: none; }
+  #controls #controls-play-pause, #controls #controls-restart {
+    display: inline-block; }
+  #controls #play-button, #controls #pause-button, #controls #restart-button {
+    cursor: pointer;
+    text-align: center;
+    width: 3rem;
+    height: 3rem;
+    background: #8a8a8a;
+    border-radius: 50%; }
+    #controls #play-button i, #controls #pause-button i, #controls #restart-button i {
+      color: white;
+      line-height: 3.1rem;
+      font-size: 1.5rem; }
+
+#determine-degrees {
+  margin-bottom: 4rem; }
+
+#determine-degrees .section-label, .random-label {
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px; }
+
+#second-degrees,
+#third-degrees {
+  margin-bottom: 2rem; }
+
+#edit-friends-friends .checkbox-wrapper,
+#second-degrees .checkbox-wrapper,
+#third-degrees .checkbox-wrapper {
+  border-radius: 50%; }
+
+#edit-friends-friends .circle,
+#second-degrees .circle,
+#third-degrees .circle {
+  width: 5px;
+  height: 5px;
+  background: #707070;
+  border-radius: 50%;
+  top: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  transform: translateY(-50%); }
+
+#edit-friends-friends[data-checked="false"] .circle,
+#second-degrees[data-checked="false"] .circle,
+#third-degrees[data-checked="false"] .circle {
+  display: none; }
+
+#mutual-followers,
+#whether-to-unfollow {
+  margin-bottom: 2rem; }
+
+#edit-friends-friends,
+#second-degrees,
+#third-degrees,
+#mutual-followers,
+#whether-to-unfollow {
+  white-space: nowrap;
+  cursor: pointer; }
+  #edit-friends-friends .checkbox-wrapper, #edit-friends-friends .label,
+  #second-degrees .checkbox-wrapper,
+  #second-degrees .label,
+  #third-degrees .checkbox-wrapper,
+  #third-degrees .label,
+  #mutual-followers .checkbox-wrapper,
+  #mutual-followers .label,
+  #whether-to-unfollow .checkbox-wrapper,
+  #whether-to-unfollow .label {
+    display: inline-block;
+    vertical-align: top; }
+  #edit-friends-friends .checkbox-wrapper,
+  #second-degrees .checkbox-wrapper,
+  #third-degrees .checkbox-wrapper,
+  #mutual-followers .checkbox-wrapper,
+  #whether-to-unfollow .checkbox-wrapper {
+    width: 1.75rem;
+    height: 1.75rem;
+    border: solid 1px #707070;
+    text-align: center; }
+    #edit-friends-friends .checkbox-wrapper i,
+    #second-degrees .checkbox-wrapper i,
+    #third-degrees .checkbox-wrapper i,
+    #mutual-followers .checkbox-wrapper i,
+    #whether-to-unfollow .checkbox-wrapper i {
+      line-height: 1.65rem;
+      font-size: 1.25rem; }
+  #edit-friends-friends .label,
+  #second-degrees .label,
+  #third-degrees .label,
+  #mutual-followers .label,
+  #whether-to-unfollow .label {
+    white-space: normal;
+    width: calc(100% - 1.75rem);
+    padding-left: 1rem;
+    line-height: 1.5;
+    margin-top: -0.4rem;
+    font-size: 1.1rem; }
+  #edit-friends-friends:not([data-checked="true"]) i,
+  #second-degrees:not([data-checked="true"]) i,
+  #third-degrees:not([data-checked="true"]) i,
+  #mutual-followers:not([data-checked="true"]) i,
+  #whether-to-unfollow:not([data-checked="true"]) i {
+    display: none; }
+
+#network_stats {
+  position: fixed;
+  left: 3rem;
+  top: 11rem;
+  font-size: 1.2rem; }
+  #network_stats .group, #network_stats .node_beliefs {
+    border-right: solid 1px #969696;
+    margin-right: 0.9rem;
+    line-height: 1;
+    padding-right: .25rem; }
+  #network_stats .group, #network_stats .node_beliefs, #network_stats .change_in_followee_wrapper {
+    display: inline-block; }
+  #network_stats .group span {
+    color: #474747; }
+  #network_stats p {
+    display: inline-block;
+    margin: 0 1rem 0 0; }
+  #network_stats .conservative, #network_stats .liberal, #network_stats .neutral, #network_stats .group span, #network_stats .connection_percent_change_visual {
+    font-weight: bold;
+    display: inline-block;
+    margin-left: .25rem; }
+  #network_stats .liberal {
+    color: #00befe; }
+  #network_stats .conservative {
+    color: #fe1953; }
+  #network_stats .neutral, #network_stats .connection_percent_change_visual {
+    color: #474747; }
