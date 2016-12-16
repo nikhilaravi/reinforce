@@ -6853,8 +6853,8 @@ var memory = {};
 var current = [];
 
 var updateMessagePassingRecord = function updateMessagePassingRecord(_ref) {
-	var user = _ref.user,
-	    retweet = _ref.retweet;
+	var user = _ref.user;
+	var retweet = _ref.retweet;
 
 	if (!retweet) {
 		return;
@@ -7743,20 +7743,17 @@ setTimeout(function () {
 	});
 }, 0);
 
-var updateDiversity = function updateDiversity(val) {
-	if (window.activeNode) {
-		var target = window.activeNode.id;
-		for (var i = 0, n = Nodes.length; i < n; i++) {
-			var node = Nodes[i];
-			if (node.id === target) {
-				node.diversityOverride = val;
-				break;
-			}
+var updateDiversity = function updateDiversity(_ref) {
+	var val = _ref.val;
+	var overrides = _ref.overrides;
+
+	for (var i = 0, n = Nodes.length; i < n; i++) {
+		var node = Nodes[i];
+		if (typeof overrides[node.id] !== 'undefined') {
+			node.diversityOverride = overrides[node.id];
+		} else {
+			node.desiredDiversity = val;
 		}
-	} else {
-		Nodes.forEach(function (n) {
-			n.desiredDiversity = val;
-		});
 	}
 };
 
@@ -9177,8 +9174,10 @@ var DiversityHistogram = function (_VisualizationBase) {
 
     _this.diversity = 0;
 
-    mediator.subscribe('updateDiversity', function (d) {
-      _this.diversity = d;
+    mediator.subscribe('updateDiversity', function (_ref) {
+      var val = _ref.val;
+
+      _this.diversity = val;
       if (_this.diversityLine) {
         _this.diversityLine.attr("x1", _this.diversity * _this.width).attr("x2", _this.diversity * _this.width);
       }
@@ -9487,9 +9486,20 @@ var currentDiversity$1 = initialDiversity$1;
 var sliderRect = document.querySelector("#edit-diversity .slider").getBoundingClientRect();
 var sliderLeft = sliderRect.left;
 var sliderWidth = sliderRect.width;
+var overridesDOM = document.querySelector("#edit-diversity .overrides");
 
 var circle$1 = document.querySelector("#edit-diversity .circle");
 var sliderLabel = document.querySelector("#edit-diversity .circle");
+
+var overrides = {};
+
+overridesDOM.addEventListener('click', function (e) {
+	if (e.target.classList.contains("close")) {
+		delete overrides[+e.target.closest(".pill").getAttribute("data-id")];
+		mediator.publish("delete-pill");
+		updateDiversity$1(currentDiversity$1 * sliderWidth);
+	}
+});
 
 document.addEventListener("mousedown", function (e) {
 	if (e.target.classList.contains("circle")) {
@@ -9503,16 +9513,27 @@ document.addEventListener("mouseup", function (e) {
 
 var updateDiversity$1 = function updateDiversity$1(left, silent) {
 	circle$1.style.left = left + 'px';
-
-	if (!silent) {
-		mediator.publish("updateDiversity", left / sliderWidth);
-	}
-
 	sliderLabel.textContent = (left / sliderWidth).toFixed(1);
 
 	if (window.activeNode === null) {
 		currentDiversity$1 = left / sliderWidth;
+	} else {
+		overrides[window.activeNode.id] = left / sliderWidth;
 	}
+
+	mediator.publish("updateDiversity", {
+		val: currentDiversity$1,
+		overrides: overrides
+	});
+
+	// do some innerhtml
+	var innerHTML = '';
+
+	Object.keys(overrides).forEach(function (k) {
+		innerHTML += '<div data-id=\'' + k + '\' class=\'pill\'>Node ' + k + ' <span>' + overrides[k].toFixed(2) + '</span><i class=\'material-icons close\'>close</i></div>';
+	});
+
+	overridesDOM.innerHTML = innerHTML;
 };
 
 document.addEventListener("mousemove", function (e) {
@@ -9527,7 +9548,13 @@ mediator.subscribe("data-initialized", function () {
 });
 
 mediator.subscribe("deactivateNode", function () {
-	updateDiversity$1(currentDiversity$1 * sliderWidth, true);
+	updateDiversity$1(currentDiversity$1 * sliderWidth);
+});
+
+mediator.subscribe("activateNode", function () {
+	var left = currentDiversity$1 * sliderWidth;
+	circle$1.style.left = left + 'px';
+	sliderLabel.textContent = (left / sliderWidth).toFixed(1);
 });
 
 var controls = document.querySelector("#controls");
@@ -9710,8 +9737,10 @@ var updateMinMaxFollowedBy = function updateMinMaxFollowedBy(length) {
 };
 
 var _document$querySelect = document.querySelector("#webgl-canvas").getBoundingClientRect();
+
 var top = _document$querySelect.top;
 var left = _document$querySelect.left;
+
 
 var loop = function loop() {
   var d = Date.now() - start;
@@ -10019,6 +10048,14 @@ document.addEventListener("mousemove", function (e) {
   }
 });
 
+mediator.subscribe("delete-pill", function () {
+  window.activeNode = null;
+  removeHalo();
+  if (!animating) {
+    loop();
+  }
+});
+
 document.addEventListener("click", function (e) {
   e.preventDefault();
   if (match) {
@@ -10029,6 +10066,7 @@ document.addEventListener("click", function (e) {
     } else {
       window.activeNode = match[2];
       revealHalo(match[0], match[1]);
+      mediator.publish("activateNode");
     }
     if (!animating) {
       loop();
@@ -10080,7 +10118,7 @@ mediator.subscribe("selectDataset", function (dataset) {
     start = Date.now();
     initializeNodes(nodeData, dataset.beliefs);
     initialize();
-
+    removeHalo();
     mediator.publish("data-initialized", edgeData);
   });
 });
