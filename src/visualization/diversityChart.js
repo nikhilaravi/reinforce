@@ -30,8 +30,8 @@ export class DiversityHistogram extends VisualizationBase {
 
     this.diversity = 0
 
-    mediator.subscribe('updateDiversity', d => {
-      this.diversity = d
+    mediator.subscribe('updateDiversity', ({ val }) => {
+      this.diversity = val
       if(this.diversityLine) {
         this.diversityLine
           .attr("x1", this.diversity * this.width)

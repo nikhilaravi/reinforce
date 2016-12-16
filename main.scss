@@ -22,6 +22,7 @@ body, html {
 $editable-parameters-width: 25rem;
 
 #editable-parameters {
+	overflow: scroll;
 	width: $editable-parameters-width;
 	position: fixed;
 	top: 0;

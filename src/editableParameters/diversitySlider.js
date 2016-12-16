@@ -33,19 +33,18 @@ document.addEventListener("mouseup", e => {
 
 const updateDiversity = (left, silent) => {
 	circle.style.left = left + 'px'
-	
-	mediator.publish("updateDiversity", {
-		val: left / sliderWidth,
-		overrides
-	})
-
 	sliderLabel.textContent = (left / sliderWidth).toFixed(1)
-
+	
 	if(window.activeNode === null) {
 		currentDiversity = left / sliderWidth
 	} else {
 		overrides[window.activeNode.id] = left / sliderWidth
 	}
+
+	mediator.publish("updateDiversity", {
+		val: currentDiversity,
+		overrides
+	})
 
 	// do some innerhtml
 	let innerHTML = ''
@@ -70,5 +69,11 @@ mediator.subscribe("data-initialized", () => {
 
 mediator.subscribe("deactivateNode", () => {
 	updateDiversity(currentDiversity * sliderWidth)
+})
+
+mediator.subscribe("activateNode", () => {
+	const left = currentDiversity * sliderWidth
+	circle.style.left = left + 'px'
+	sliderLabel.textContent = (left / sliderWidth).toFixed(1)
 })
 
