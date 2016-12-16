@@ -21,6 +21,18 @@
         </div>
       </div>
     </div>
+    <div id="network_stats">
+      <div class="group">
+        <p>Edges <span class="number_of_edges"></span></p>
+        <p>Nodes <span class="number_of_nodes"></span></p>
+      </div>
+      <div class='node_beliefs'>
+        <p class='conservative_text'>C <span class='conservative'></span></p>
+        <p class='liberal_text'>L <span class='liberal'></span></p>
+        <p class='neutral_text'>N <span class='neutral'></span></p>
+      </div>
+      <div class="change_in_followee_wrapper">Followee network change <span class="connection_percent_change_visual"></span></div>
+    </div>
     <div id="visualization-wrapper">
       <canvas id="webgl-canvas"></canvas>
       <div id="visualization">
@@ -36,18 +48,6 @@
           <svg></svg>
         </div>
       </div>
-    </div>
-    <div id="network_stats">
-      <div class="group">
-        <p>Edges <span class="number_of_edges"></span></p>
-        <p>Nodes <span class="number_of_nodes"></span></p>        
-      </div>
-      <div class='node_beliefs'>
-        <p class='conservative_text'>C <span class='conservative'></span></p>
-        <p class='liberal_text'>L <span class='liberal'></span></p>
-        <p class='neutral_text'>N <span class='neutral'></span></p>
-      </div>
-      <div class="change_in_followee_wrapper">Followee network change <span class="connection_percent_change_visual"></span></div>
     </div>
     <div id="editable-parameters">
       <div id="controls" data-status="stopped">
@@ -79,13 +79,13 @@
             <div class="circle"></div>
           </div>
           <div class="label">Find new nodes to follow from up to 2nd degree connections</div>
-        </div> 
+        </div>
         <div class="degrees-option" id="third-degrees">
           <div class="checkbox-wrapper">
             <div class="circle"></div>
           </div>
           <div class="label">Find new nodes to follow from up to 3rd degree connections</div>
-        </div>      
+        </div>
         <div class="degrees-option" id="edit-friends-friends">
           <div class="checkbox-wrapper">
             <div class="circle"></div>
@@ -112,9 +112,8 @@
       <div class="node_id"></div>
       <div class="node_followees">Following <span class="count"></span></div>
       <div class="node_followers">Followed by <span class="count"></span></div>
-      <div class="node_initial_connections">Change in following <span class="count"></span></div>
       <div class="node_diversity">Diversity <span class="count"></span></div>
-      <div class="node_diversity_override">Target diversity <span class="count"></span></div>
+      <div class="node_initial_connections">Change in following <span class="count"></span></div>
     </div>
   </div>
   <script type="x-shader/x-vertex" id="node-vertexshader">
@@ -241,7 +240,7 @@
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/node-uuid/1.4.7/uuid.min.js"></script>
-  <script src="/vendor/rl.js"></script>
+  <!-- <script src="/vendor/rl.js"></script> -->
   <script src="/dist/main.js"></script>
 </body>
 </html>
