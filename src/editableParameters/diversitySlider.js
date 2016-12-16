@@ -6,9 +6,20 @@ let sliderDown = false, currentDiversity = initialDiversity
 const sliderRect = document.querySelector("#edit-diversity .slider").getBoundingClientRect()
 const sliderLeft = sliderRect.left
 const sliderWidth = sliderRect.width
+const overridesDOM = document.querySelector("#edit-diversity .overrides")
 
 const circle = document.querySelector("#edit-diversity .circle")
 const sliderLabel = document.querySelector("#edit-diversity .circle")
+
+let overrides = {}
+
+overridesDOM.addEventListener('click', e => {
+	if(e.target.classList.contains("close")) {
+		delete overrides[+e.target.closest(".pill").getAttribute("data-id")]
+		mediator.publish("delete-pill")
+		updateDiversity(currentDiversity * sliderWidth)
+	}
+})
 
 document.addEventListener("mousedown", e => {
 	if(e.target.classList.contains("circle")) {
@@ -23,15 +34,27 @@ document.addEventListener("mouseup", e => {
 const updateDiversity = (left, silent) => {
 	circle.style.left = left + 'px'
 	
-	if(!silent) {
-		mediator.publish("updateDiversity", left / sliderWidth)
-	}
+	mediator.publish("updateDiversity", {
+		val: left / sliderWidth,
+		overrides
+	})
 
 	sliderLabel.textContent = (left / sliderWidth).toFixed(1)
 
 	if(window.activeNode === null) {
 		currentDiversity = left / sliderWidth
+	} else {
+		overrides[window.activeNode.id] = left / sliderWidth
 	}
+
+	// do some innerhtml
+	let innerHTML = ''
+
+	Object.keys(overrides).forEach(k => {
+		innerHTML += `<div data-id='${k}' class='pill'>Node ${k} <span>${overrides[k].toFixed(2)}</span><i class='material-icons close'>close</i></div>`
+	})
+
+	overridesDOM.innerHTML = innerHTML
 }
 
 document.addEventListener("mousemove", e => {
@@ -46,6 +69,6 @@ mediator.subscribe("data-initialized", () => {
 })
 
 mediator.subscribe("deactivateNode", () => {
-	updateDiversity(currentDiversity * sliderWidth, true)
+	updateDiversity(currentDiversity * sliderWidth)
 })
 
