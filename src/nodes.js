@@ -168,20 +168,14 @@ setTimeout(() => {
 	})
 }, 0)
 
-const updateDiversity = val => {
-	if(window.activeNode) {
-		const target = window.activeNode.id
-		for(let i=0, n=Nodes.length; i<n; i++) {
-			let node = Nodes[i]
-			if(node.id === target) {
-				node.diversityOverride = val
-				break
-			}
+const updateDiversity = ({ val, overrides }) => {
+	for(let i=0, n=Nodes.length; i<n; i++) {
+		let node = Nodes[i]
+		if(typeof overrides[node.id] !== 'undefined') {
+			node.diversityOverride = overrides[node.id]
+		} else {
+			node.desiredDiversity = val
 		}
-	} else {
-		Nodes.forEach(n => {
-			n.desiredDiversity = val
-		})		
 	}
 }
 
